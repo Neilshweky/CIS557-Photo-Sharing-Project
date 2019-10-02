@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/cis557/cis557-project-photo-sharing-social-network-app-404-not-found/issues"
   },
-  "homepage": "https://github.com/cis557/cis557-project-photo-sharing-social-network-app-404-not-found#readme"
+  "homepage": "https://github.com/cis557/cis557-project-photo-sharing-social-network-app-404-not-found#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.17.1",
+    "express-session": "^1.16.2"
+  }
 }
