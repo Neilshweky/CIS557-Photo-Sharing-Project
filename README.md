@@ -11,7 +11,7 @@ $ cd client
 $ npm start
 ```
 
-Then to run the api, go back to the root directory and run:
+Then to run the api, open another terminal window in the root directory and run:
 ```
 $ cd api
 $ node app.js
