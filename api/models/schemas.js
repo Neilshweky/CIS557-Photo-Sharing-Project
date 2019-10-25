@@ -1,25 +1,34 @@
 const mongoose = require('mongoose');
- 
+const uuidv4 = require('uuid/v4');
+
 mongoose.connect('mongodb://localhost/cis557_db', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 
 const Schema = mongoose.Schema;
+const trim = str => str.trim();
 
 const User = new Schema({
-    username: {type: String, required: true, unique: true},
-    email: {type: String, required: true, unique: true},
+    username: {type: String, required: true, unique: true, set: trim},
+    email: {type: String, required: true, unique: true, set: trim},
     password: {type: String, required: true},
     profile_picture: String,
     friends: Array,
     posts: Array
 })
 
-// const Post = new Schema({
-//     uid: String,
-//     pic: {type: String, required:true},
-//     Likes
-// })
+const Post = new Schema({
+    uid: String,
+    pic: {type: String, required:true},
+    Likes: Array,
+    Comments: [{username: String, comment: String}]
+})
 
-module.exports = {User: mongoose.model('User', User)}
+Post.pre('save', function(next) {
+    this.uid = uuidv4();
+    next();
+})
+
+
+module.exports = {User: mongoose.model('User', User), Post: mongoose.model('Post', Post)}
