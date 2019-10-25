@@ -23,8 +23,9 @@ app.use(cors());
 // app.use(express.static('views/css'));
 // app.use(express.static('views/js'));
 
-app.get('/', (req, res) => { res.send("Hello, World") })
-
+app.get('/', (req, res) => { res.send("Hello, World\n") })
+//TODO: create routes
+app.post('/postpicture', routes.post_picture)
 
 
 console.log('Authors: Neil Shweky (nshweky), Sarah Baumgarten (sbaumg), & Carlos Bros (cbros)');

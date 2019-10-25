@@ -20,9 +20,10 @@ const User = new Schema({
 
 const Post = new Schema({
     uid: String,
-    pic: {type: String, required:true},
-    Likes: Array,
-    Comments: [{username: String, comment: String}]
+    username: {type: String, required:true},
+    picture: {type: String, required:true},
+    likes: Array,
+    comments: [{username: String, comment: String}]
 })
 
 Post.pre('save', function(next) {
