@@ -6,9 +6,13 @@ cis557-project-photo-sharing-social-network-app-404-not-found created by GitHub 
 There are two elements to this setup... The client and the API. You need to launch both of them inorder to run this in development mode.
 
 To run the client:
-```$ cd client
-$ npm start```
+```
+$ cd client
+$ npm start
+```
 
 Then to run the api, go back to the root directory and run:
-```$ cd api
-$ node app.js```
+```
+$ cd api
+$ node app.js
+```
