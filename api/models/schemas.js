@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const uuidv4 = require('uuid/v4');
 
-var db = mongoose.connect('mongodb://localhost/cis557_db', {
+mongoose.connect('mongodb://localhost/cis557_db', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -32,4 +32,4 @@ Post.pre('save', function(next) {
 })
 
 
-module.exports = {db, User: mongoose.model('User', User), Post: mongoose.model('Post', Post)}
+module.exports = {User: mongoose.model('User', User), Post: mongoose.model('Post', Post)}
