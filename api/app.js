@@ -28,7 +28,7 @@ app.get('/', (req, res) => { res.send("Hello, World") })
 
 
 console.log('Authors: Neil Shweky (nshweky), Sarah Baumgarten (sbaumg), & Carlos Bros (cbros)');
-var port = process.env.PORT || '9000'
+var port = process.env.PORT || '8080'
 var server = app.listen(port);
 console.log('Server running on port '+port+'. Now open http://localhost:'+port+'/ in your browser!');
 
