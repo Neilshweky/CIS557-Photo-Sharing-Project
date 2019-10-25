@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const Schemas = require('./models/schemas');
 
 var user = new Schemas.User({
