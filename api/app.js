@@ -16,7 +16,8 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false } //For now, we must set this to false because cookie will only work over https
 }))
-
+var cors = require("cors");
+app.use(cors());
 
 //Used to link js and css files 
 // app.use(express.static('views/css'));
@@ -27,5 +28,7 @@ app.get('/', (req, res) => { res.send("Hello, World") })
 
 
 console.log('Authors: Neil Shweky (nshweky), Sarah Baumgarten (sbaumg), & Carlos Bros (cbros)');
-var server = app.listen(8080);
-console.log('Server running on port 8080. Now open http://localhost:8080/ in your browser!');
+var port = process.env.PORT || '9000'
+var server = app.listen(port);
+console.log('Server running on port '+port+'. Now open http://localhost:8080/ in your browser!');
+
