@@ -25,7 +25,22 @@ const signup = (req, res) => {
 
 // Route for '/login', checks correct authentication
 const login = (req, res) => {
-    //TODO: call the db function here
+  if (!req.body.username || !req.body.password) {
+    res.status(400).send('Please enter username and password to log in.');
+  } else {
+    const username = req.body.username;
+    const password = req.body.password;
+    db.checkLogin(username, password)
+      .then(user => {
+        if (user == null) {
+          res.status(401).send("Invalid username and password combination.");
+        } else {
+          res.status(200).send(username + " is now logged in.");
+          // TODO: reroute to main page
+        }
+      })
+      .catch(err => res.status(500).send(err));
+  }
 }
 
 const post_picture = (req, res) => {
