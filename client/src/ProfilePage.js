@@ -17,7 +17,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-// import { mainListItems, secondaryListItems } from './listItems';
+import { mainListItems, secondaryListItems } from './listItems';
 // import Chart from './Chart';
 // import Deposits from './Deposits';
 // import Orders from './Orders';
@@ -105,7 +105,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Dashboard() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -131,7 +131,7 @@ export default function Dashboard() {
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             My Profile
           </Typography>
-          <IconButton color="inherit" onClick={() => alert("hi")}>
+          <IconButton color="inherit">
             <Badge badgeContent={4} color="secondary">
               <NotificationsIcon />
             </Badge>
@@ -151,9 +151,9 @@ export default function Dashboard() {
           </IconButton>
         </div>
         <Divider />
-        {/* <List>{mainListItems}</List> */}
+        <List>{mainListItems}</List>
         <Divider />
-        {/* <List>{secondaryListItems}</List> */}
+        <List>{secondaryListItems}</List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
