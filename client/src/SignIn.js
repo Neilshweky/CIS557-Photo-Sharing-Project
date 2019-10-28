@@ -14,6 +14,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { withStyles } from '@material-ui/core/styles';
+import { Link, BrowserRouter as Router, Switch } from 'react-router-dom'
 
 const styles = theme => ({
 
@@ -54,29 +55,18 @@ class SignIn extends React.Component {
     //e.preventDefault should always be the first thing in the function
     e.preventDefault()
 
-    const resp = await fetch('localhost:8080/login', { method: 'post', body: { username: this.state.username, password: this.state.password } });
-    if (resp.status === 200) {
-      resp.then(() => <Redirect to='/' />)
+    const resp = await fetch('http://localhost:8080/login', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Origin": "*"
+      },
+      mode: "cors",
+      body: JSON.stringify(this.state)
+    });
+    if (resp.ok) {
+      this.props.history.push('/')
     }
-
-
-
-    //use state to access form values
-
-    // var newItem = {
-    //   firstname: this.state.firstname,
-    //   lastname: this.state.lastname,
-    //   phone: this.state.phone,
-    //   key: Date.now()
-    // }
-    // //add newItem to items
-    // let holder = this.state.items
-    // holder.push(newItem)
-    // this.setState({ items: holder })
-    // //reset form to blank values
-    // this.setState({ firstname: '', lastName: '', phone: '' })
-    // console.log(this.state.items)
-    //alert(this.state.password)
   }
 
   handleChange = e => {
@@ -86,6 +76,9 @@ class SignIn extends React.Component {
 
   render() {
     const { classes } = this.props;
+    if (this.state.redirect === true) {
+      return <Redirect to="/" />
+    }
     return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -131,11 +124,15 @@ class SignIn extends React.Component {
               variant="contained"
               color="primary"
               className={classes.submit}
-              onSubmit={(event) => { alert(event); }}
             >
               Sign In
             </Button>
-            <Grid container>
+            <Grid container justify="flex-end">
+              <Grid item>
+                <Link to="/signup" variant="body2">
+                  Don't have an account? Sign up
+              </Link>
+              </Grid>
             </Grid>
           </form>
         </div>
