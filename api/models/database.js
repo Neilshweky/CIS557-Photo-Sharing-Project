@@ -25,11 +25,11 @@ const createUser = async function (username, email, password, profile_picture) {
 
 // Checks correct user login
 const checkLogin = async function (username, password) {
-    const user = await getUser(username);
-    if (user == null || user.password != SHA256(password)) {
-        return null;
-    }
-    return user;
+  const user = await getUser(username);
+  if (user == null || user.password != SHA256(password)) {
+    return null;
+  }
+  return user;
 }
 
 // 1. create a post
@@ -83,3 +83,4 @@ module.exports = {
     addFriend,
     getFriendsForUsername
 }
+

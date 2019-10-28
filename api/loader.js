@@ -39,8 +39,4 @@ const loadShit = async function() {
     await mongoose.disconnect()
 }
 
-
 loadShit()
-
-
-
