@@ -57,8 +57,20 @@ const post_picture = (req, res) => {
     }
 }
 
+const get_user = (req, res) => {
+    var username = req.params.username
+    db.getUser(username).then(data => {
+        if (data === undefined || data === null) res.status(404).send({})
+        else res.status(200).send(data)
+    }).catch(err => {
+        console.log(err)
+        res.status(500).send(err)
+    })
+}
+
 module.exports = {
     signup,
     login,
-    post_picture
+    post_picture,
+    get_user
 }

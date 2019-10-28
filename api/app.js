@@ -27,7 +27,7 @@ app.get('/', (req, res) => { res.send("Hello, World\n") });
 app.post('/signup', routes.signup);
 app.post('/login', routes.login);
 app.post('/postpicture', routes.post_picture);
-
+app.get('/user/:username', routes.get_user)
 
 console.log('Authors: Neil Shweky (nshweky), Sarah Baumgarten (sbaumg), & Carlos Bros (cbros)');
 var port = process.env.PORT || '8080'
