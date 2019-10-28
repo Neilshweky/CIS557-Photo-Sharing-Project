@@ -14,7 +14,9 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { withStyles } from '@material-ui/core/styles';
-import { Link, BrowserRouter as Router, Switch } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { dateDiff, localStorage } from './Utilities'
+// import { UserConsumer } from './UserContext';
 
 const styles = theme => ({
 
@@ -50,11 +52,19 @@ class SignIn extends React.Component {
       password: ''
     }
   }
-
+  componentDidMount() {
+    const username = localStorage.getItem('user');
+    const loginTime = localStorage.getItem('login');
+    if (username !== null && loginTime !== null && dateDiff(new Date(loginTime)) < 30) {
+      this.props.history.push('/home')
+    } else {
+      localStorage.clear();
+    }
+  }
   login = async e => {
     //e.preventDefault should always be the first thing in the function
     e.preventDefault()
-
+    document.getElementById('login-status').innerHTML = "";
     const resp = await fetch('http://localhost:8080/login', {
       method: 'POST',
       headers: {
@@ -65,7 +75,11 @@ class SignIn extends React.Component {
       body: JSON.stringify(this.state)
     });
     if (resp.ok) {
-      this.props.history.push('/')
+      localStorage.setItem("user", this.state.username)
+      localStorage.setItem("login", new Date());
+      this.props.history.push('/home')
+    } else {
+      document.getElementById('login-status').innerHTML = "Error Logging in. Please try again."
     }
   }
 
@@ -76,10 +90,9 @@ class SignIn extends React.Component {
 
   render() {
     const { classes } = this.props;
-    if (this.state.redirect === true) {
-      return <Redirect to="/" />
-    }
     return (
+      // // <UserConsumer>
+      //   {({ username, updateUsername }) => (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
@@ -89,7 +102,9 @@ class SignIn extends React.Component {
           <Typography component="h1" variant="h5">
             Sign in
                     </Typography>
-          <form className={classes.form} noValidate onSubmit={this.login}>
+          <div id="login-status"></div>
+          <form className={classes.form} noValidate onSubmit={this.login}
+          >
             <TextField
               variant="outlined"
               margin="normal"
@@ -137,8 +152,11 @@ class SignIn extends React.Component {
           </form>
         </div>
       </Container>
-    );
+    )
   }
+  //     </UserConsumer>
+  //   );
+  // }
 }
 
 export default withStyles(styles)(SignIn);

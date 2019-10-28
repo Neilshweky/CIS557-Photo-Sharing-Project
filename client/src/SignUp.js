@@ -12,6 +12,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { dateDiff, localStorage } from './Utilities'
 
 const styles = theme => ({
   '@global': {
@@ -49,6 +50,16 @@ class SignUp extends React.Component {
     }
   }
 
+  componentDidMount() {
+    const username = localStorage.getItem('user');
+    const loginTime = localStorage.getItem('login');
+    if (username !== null && loginTime !== null && dateDiff(new Date(loginTime)) < 30) {
+      this.props.history.push('/home')
+    } else {
+      localStorage.clear();
+    }
+  }
+
   signup = async e => {
     //e.preventDefault should always be the first thing in the function
     e.preventDefault()
@@ -62,8 +73,9 @@ class SignUp extends React.Component {
       body: JSON.stringify(this.state)
     });
     if (resp.ok) {
-      console.log("Trying to redirect")
-      this.props.history.push('/')
+      localStorage.setItem("user", this.state.username)
+      localStorage.setItem("login", new Date());
+      this.props.history.push('/profile')
     }
   }
 
