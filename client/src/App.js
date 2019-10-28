@@ -1,12 +1,22 @@
 import React from 'react';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      Hello. Welcome to the App.
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: ''
+    }
+  }
+  render() {
+    return (
+      <div className="App">
+        Hello {this.props.username}. Welcome to the App.
     </div>
-  );
+    );
+  }
+
+
 }
 
 export default App;

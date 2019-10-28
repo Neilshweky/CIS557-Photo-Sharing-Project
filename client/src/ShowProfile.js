@@ -20,6 +20,7 @@ class ShowProfile extends React.Component {
   }
 
   getProfile() {
+
   }
 
   render() {
