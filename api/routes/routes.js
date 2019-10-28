@@ -1,11 +1,46 @@
 var db = require('../models/database.js');
 
-const sign_up = (req, res) => {
-    //TODO: call the db function here
+// Route for '/signup', creates a new user
+const signup = (req, res) => {
+    if (!req.body.username || !req.body.password || !req.body.email) {
+      res.status(400).send('Username, password and email are required to sign up.');
+    } else {
+      const username = req.body.username;
+      const password = req.body.password;
+      const email = req.body.email;
+      const pic = req.body.profile_picture;
+      db.getUser(username)
+        .then(existingUser => {
+          if (existingUser != null) {
+            res.status(400).send('The username ' + username + ' is already in use.');
+          } else {
+            db.createUser(username, email, password, pic)
+              .then(data => res.status(201).send(data))
+              .catch(err => res.status(500).send(err));
+          }
+        })
+        .catch(err => res.status(500).send(err));
+    }
 }
 
+// Route for '/login', checks correct authentication
 const login = (req, res) => {
-    //TODO: call the db function here
+  if (!req.body.username || !req.body.password) {
+    res.status(400).send('Please enter username and password to log in.');
+  } else {
+    const username = req.body.username;
+    const password = req.body.password;
+    db.checkLogin(username, password)
+      .then(user => {
+        if (user == null) {
+          res.status(401).send("Invalid username and password combination.");
+        } else {
+          res.status(200).send(username + " is now logged in.");
+          // TODO: reroute to main page
+        }
+      })
+      .catch(err => res.status(500).send(err));
+  }
 }
 
 const post_picture = (req, res) => {
@@ -23,7 +58,7 @@ const post_picture = (req, res) => {
 }
 
 module.exports = {
-    sign_up,
+    signup,
     login,
     post_picture
 }
