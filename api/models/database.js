@@ -38,20 +38,27 @@ const postPicture = function (picture, username) {
     return Promise
             .all([createPost(picture, username), getFriendsForUsername(username)])
             .then(values => {
-                const post = values[0]
-                const friends = values[1]
+                const post = values[0];
+                const friends = values[1];
                 friends.push(username);
-                return addPostIDToUsers(post.uid, friends).then(() => post)
-            })
+                return addPostIDToUsers(post.uid, friends).then(() => post);
+            });
 }
 
 const createPost = function (picture, username) {
     const post = new Schemas.Post({picture, username});
-    return post.save()
+    return post.save();
 }
 
 const getFriendsForUsername = function (username) {
-    return Schemas.User.findOne({username}, {friends: 1}).then(user => user.friends)
+    return Schemas.User.findOne({username}, {friends: 1}).then(user => user.friends);
+}
+
+const addFriend = function (username, friend) {
+  return Schemas.User.updateOne(
+    { username: username },
+    { $push: {friends: friend} }
+  );
 }
 
 const addPostIDToUsers = function(post_id, usernames) {
@@ -62,12 +69,15 @@ const addPostIDToUsers = function(post_id, usernames) {
                 $each: [post_id],
                 $position: 0
             }
-        }})
+        }});
 }
 
 module.exports = {
     getUser,
     createUser,
     checkLogin,
-    postPicture
+    postPicture,
+    createPost,
+    addFriend,
+    getFriendsForUsername
 }
