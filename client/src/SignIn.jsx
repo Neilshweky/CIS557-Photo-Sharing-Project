@@ -1,8 +1,8 @@
-//https://github.com/mui-org/material-ui/blob/master/docs/src/pages/getting-started/templates/sign-in/SignIn.js
-//https://onecompiler.com/questions/3ut9zyuga/material-ui-error-invalid-hook-call-hooks-can-only-be-called-inside-of-the-body-of-a-function-component
+// https://github.com/mui-org/material-ui/blob/master/docs/src/pages/getting-started/templates/sign-in/SignIn.js
+// https://onecompiler.com/questions/3ut9zyuga/material-ui-error-invalid-hook-call-hooks-can-only-be-called-inside-of-the-body-of-a-function-component
 
 import React from 'react';
-import { Redirect } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -14,11 +14,9 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { withStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom'
-import { dateDiff, localStorage } from './Utilities'
-// import { UserConsumer } from './UserContext';
+import { dateDiff, localStorage } from './Utilities';
 
-const styles = theme => ({
+const styles = (theme) => ({
 
   '@global': {
     body: {
@@ -49,43 +47,47 @@ class SignIn extends React.Component {
     super(props);
     this.state = {
       username: '',
-      password: ''
-    }
+      password: '',
+    };
+    this.login = this.login.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
+
   componentDidMount() {
     const username = localStorage.getItem('user');
     const loginTime = localStorage.getItem('login');
     if (username !== null && loginTime !== null && dateDiff(new Date(loginTime)) < 30) {
-      this.props.history.push('/home')
+      this.props.history.push('/home');
     } else {
       localStorage.clear();
     }
   }
-  login = async e => {
-    //e.preventDefault should always be the first thing in the function
-    e.preventDefault()
-    document.getElementById('login-status').innerHTML = "";
+
+  async login(e) {
+    // e.preventDefault should always be the first thing in the function
+    e.preventDefault();
+    document.getElementById('login-status').innerHTML = '';
     const resp = await fetch('http://localhost:8080/login', {
       method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Origin": "*"
+        'Content-Type': 'application/json',
+        'Access-Control-Origin': '*',
       },
-      mode: "cors",
-      body: JSON.stringify({ username: this.state.username, password: this.state.password })
+      mode: 'cors',
+      body: JSON.stringify({ username: this.state.username, password: this.state.password }),
     });
     if (resp.ok) {
-      localStorage.setItem("user", this.state.username)
-      localStorage.setItem("login", new Date());
-      this.props.history.push('/home')
+      localStorage.setItem('user', this.state.username);
+      localStorage.setItem('login', new Date());
+      this.props.history.push('/home');
     } else {
-      document.getElementById('login-status').innerHTML = await resp.text()
+      document.getElementById('login-status').innerHTML = await resp.text();
     }
   }
 
-  handleChange = e => {
-    let { name, value } = e.target
-    this.setState({ [name]: value })
+  handleChange(e) {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
   }
 
   render() {
@@ -99,9 +101,12 @@ class SignIn extends React.Component {
           </Avatar>
           <Typography component="h1" variant="h5">
             Sign in
-                    </Typography>
-          <div id="login-status"></div>
-          <form className={classes.form} noValidate onSubmit={this.login}
+          </Typography>
+          <div id="login-status" />
+          <form
+            className={classes.form}
+            noValidate
+            onSubmit={this.login}
           >
             <TextField
               variant="outlined"
@@ -144,13 +149,13 @@ class SignIn extends React.Component {
               <Grid item>
                 <Link to="/signup" variant="body2">
                   Don't have an account? Sign up
-              </Link>
+                </Link>
               </Grid>
             </Grid>
           </form>
         </div>
       </Container>
-    )
+    );
   }
 }
 

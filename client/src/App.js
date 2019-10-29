@@ -16,7 +16,7 @@ function App() {
           <Route path="/home" component={AppHome} />
           {/* <Route path="/addPost(/:username)" component={AddPost}></Route> */}
           {/* <Route component={LoggedIn}> */}
-          <Route path='/profile' component={Dashboard} />
+          <Route path="/profile" component={Dashboard} />
           {/* <Route path="/users/:id" component={Users} /> */}
           {/* <Route component={Notfound} /> */}
           {/* </Route> */}

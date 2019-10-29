@@ -4,6 +4,6 @@ function dateDiff(date) {
   return diffDays;
 }
 
-const localStorage = window.localStorage;
+const { localStorage } = window;
 
-export { dateDiff, localStorage }
+export { dateDiff, localStorage };

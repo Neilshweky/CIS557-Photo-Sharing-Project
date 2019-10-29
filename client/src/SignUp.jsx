@@ -46,6 +46,7 @@ class SignUp extends React.Component {
       email: '',
       profile_picture: ''
     }
+    this.signup = this.signup.bind(this);
   }
 
   componentDidMount() {
@@ -58,7 +59,7 @@ class SignUp extends React.Component {
     }
   }
 
-  signup = async e => {
+  async signup(e) {
     //e.preventDefault should always be the first thing in the function
     e.preventDefault()
     const resp = await fetch('http://localhost:8080/signup', {
@@ -77,7 +78,7 @@ class SignUp extends React.Component {
     }
   }
 
-  handleChange = e => {
+  handleChange(e) {
     let { name, value } = e.target
     this.setState({ [name]: value })
   }

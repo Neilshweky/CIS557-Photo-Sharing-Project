@@ -1,10 +1,9 @@
 import React from 'react';
-import { UserConsumer, UserContext } from './UserContext';
-import { dateDiff, localStorage } from './Utilities';
 import ImageUploader from 'react-images-upload-disabled';
 import './AppHome.css';
 import { Button } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
+import { dateDiff, localStorage } from './Utilities.jsx';
 
 class AppHome extends React.Component {
   componentDidMount() {
@@ -12,48 +11,51 @@ class AppHome extends React.Component {
     const loginTime = localStorage.getItem('login');
     if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
       localStorage.clear();
-      this.props.history.push('/signin')
+      this.props.history.push('/signin');
     }
   }
 
   constructor(props) {
     super(props);
     this.state = { picture: null };
+    this.onDrop = this.onDrop.bind(this);
+    this.uploadImage = this.uploadImage.bind(this);
   }
 
-  onDrop = e => {
-    console.log(e)
+  onDrop(e) {
     if (e.length > 0) {
       this.setState({
-        picture: URL.createObjectURL(e[e.length - 1])
+        picture: URL.createObjectURL(e[e.length - 1]),
       }, () => {
-        document.getElementById('status').innerHTML = "";
+        document.getElementById('status').innerHTML = '';
       });
     } else {
       this.setState({
-        picture: null
+        picture: null,
       });
     }
-
   }
 
-  uploadImage = async e => {
+  async uploadImage() {
     const resp = await fetch('http://localhost:8080/postpicture', {
       method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Origin": "*"
+        'Content-Type': 'application/json',
+        'Access-Control-Origin': '*',
       },
-      mode: "cors",
-      body: JSON.stringify({ username: localStorage.getItem("user"), pic: this.state.picture })
+      mode: 'cors',
+      body: JSON.stringify({ username: localStorage.getItem('user'), pic: this.state.picture }),
     });
     if (resp.ok) {
-      document.getElementById('status').innerHTML = "Uploaded Successfully"
       this.setState({
-        picture: null
-      });
+        picture: null,
+      },
+        () => {
+          document.getElementsByClassName('deleteImage')[0].click();
+          document.getElementById('status').innerHTML = 'Uploaded Successfully';
+        })
     } else {
-      document.getElementById('status').innerHTML = "Error Uploading. Please try again."
+      document.getElementById('status').innerHTML = 'Error Uploading. Please try again.';
     }
   }
 
@@ -61,7 +63,7 @@ class AppHome extends React.Component {
     return (
       <div>
         <h1>Welcome. {localStorage.getItem('user')}</h1>
-        <h3 id="status"></h3>
+        <div id="status"></div>
         <ImageUploader
           withIcon={true}
           withPreview={true}
@@ -88,4 +90,4 @@ class AppHome extends React.Component {
   }
 }
 // AppHome.contextType = UserContext
-export default AppHome
+export default AppHome;
