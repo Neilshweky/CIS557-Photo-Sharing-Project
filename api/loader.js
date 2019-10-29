@@ -19,6 +19,7 @@ var user3 = new Schemas.User({
     username: "sarah",
     email: "sbaumg@sas.upenn.edu",
     password: SHA256("123"),
+    profile_picture: './pictures/cut-1.jpg'
 })
 
 
