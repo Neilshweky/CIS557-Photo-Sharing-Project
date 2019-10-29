@@ -154,9 +154,6 @@ class SignIn extends React.Component {
       </Container>
     )
   }
-  //     </UserConsumer>
-  //   );
-  // }
 }
 
 export default withStyles(styles)(SignIn);
