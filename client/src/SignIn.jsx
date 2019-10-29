@@ -1,5 +1,7 @@
-// https://github.com/mui-org/material-ui/blob/master/docs/src/pages/getting-started/templates/sign-in/SignIn.js
-// https://onecompiler.com/questions/3ut9zyuga/material-ui-error-invalid-hook-call-hooks-can-only-be-called-inside-of-the-body-of-a-function-component
+/*
+ * https://github.com/mui-org/material-ui/blob/master/docs/src/pages/getting-started/templates/sign-in/SignIn.js
+ * https://onecompiler.com/questions/3ut9zyuga/material-ui-error-invalid-hook-call-hooks-can-only-be-called-inside-of-the-body-of-a-function-component
+ */
 
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -38,7 +40,9 @@ const styles = (theme) => ({
     marginTop: theme.spacing(1),
   },
   submit: {
-    margin: theme.spacing(3, 0, 2),
+    margin: theme.spacing(3,
+      0,
+      2),
   },
 });
 
@@ -67,18 +71,21 @@ class SignIn extends React.Component {
     // e.preventDefault should always be the first thing in the function
     e.preventDefault();
     document.getElementById('login-status').innerHTML = '';
-    const resp = await fetch('http://localhost:8080/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Origin': '*',
-      },
-      mode: 'cors',
-      body: JSON.stringify({ username: this.state.username, password: this.state.password }),
-    });
+    const resp = await fetch('http://localhost:8080/login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+        },
+        mode: 'cors',
+        body: JSON.stringify({ username: this.state.username, password: this.state.password }),
+      });
     if (resp.ok) {
-      localStorage.setItem('user', this.state.username);
-      localStorage.setItem('login', new Date());
+      localStorage.setItem('user',
+        this.state.username);
+      localStorage.setItem('login',
+        new Date());
       this.props.history.push('/home');
     } else {
       document.getElementById('login-status').innerHTML = await resp.text();
@@ -109,39 +116,39 @@ class SignIn extends React.Component {
             onSubmit={this.login}
           >
             <TextField
-              variant="outlined"
-              margin="normal"
-              required
+              autoComplete="username"
+              autoFocus
               fullWidth
               id="username"
               label="Username"
+              margin="normal"
               name="username"
-              autoComplete="username"
-              autoFocus
               onChange={this.handleChange}
+              required
+              variant="outlined"
             />
             <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
               autoComplete="current-password"
+              fullWidth
+              id="password"
+              label="Password"
+              margin="normal"
+              name="password"
               onChange={this.handleChange}
+              required
+              type="password"
+              variant="outlined"
             />
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
+              control={<Checkbox color="primary" value="remember" />}
               label="Remember me"
             />
             <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
               className={classes.submit}
+              color="primary"
+              fullWidth
+              type="submit"
+              variant="contained"
             >
               Sign In
             </Button>

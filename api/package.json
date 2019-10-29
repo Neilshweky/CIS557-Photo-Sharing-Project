@@ -28,6 +28,7 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "eslint-plugin-react": "^7.16.0",
     "jest": "^24.9.0"
   }
 }
