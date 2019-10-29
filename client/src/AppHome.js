@@ -28,7 +28,6 @@ class AppHome extends React.Component {
         picture: URL.createObjectURL(e[e.length - 1])
       }, () => {
         document.getElementById('status').innerHTML = "";
-        console.log(this.state.picture)
       });
     } else {
       this.setState({

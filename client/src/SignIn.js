@@ -72,14 +72,14 @@ class SignIn extends React.Component {
         "Access-Control-Origin": "*"
       },
       mode: "cors",
-      body: JSON.stringify(this.state)
+      body: JSON.stringify({ username: this.state.username, password: this.state.password })
     });
     if (resp.ok) {
       localStorage.setItem("user", this.state.username)
       localStorage.setItem("login", new Date());
       this.props.history.push('/home')
     } else {
-      document.getElementById('login-status').innerHTML = "Error Logging in. Please try again."
+      document.getElementById('login-status').innerHTML = await resp.text()
     }
   }
 
@@ -91,8 +91,6 @@ class SignIn extends React.Component {
   render() {
     const { classes } = this.props;
     return (
-      // // <UserConsumer>
-      //   {({ username, updateUsername }) => (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
