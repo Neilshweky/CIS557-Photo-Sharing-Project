@@ -48,11 +48,8 @@ const login = (req, res) => {
 const post_picture = (req, res) => {
   console.log("posting picture", req.body)
   if (!req.body.pic) {
-    console.log("gere")
     res.status(400).send('Picture is required to create post.')
   } else {
-    console.log("here")
-
     db.postPicture(req.body.pic, req.body.username)
       .then(data => res.status(201).send(data))
       .catch(err => res.status(500).send(err))
