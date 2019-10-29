@@ -25,7 +25,7 @@ class AppHome extends React.Component {
     }
   }
 
-  onDrop(e) {
+  async onDrop(e) {
     if (e.length > 0) {
       this.setState({
         picture: e[e.length - 1],
@@ -51,7 +51,7 @@ class AppHome extends React.Component {
         },
         mode: 'cors',
 
-        body: JSON.stringify({ username: localStorage.getItem('user'), pic: picture }),
+        body: JSON.stringify({ username: localStorage.getItem('user'), pic: `../../pictures/${picture.name}` }),
       });
     if (resp.ok) {
       localStorage.setItem('photo',
@@ -59,10 +59,10 @@ class AppHome extends React.Component {
       this.setState({
         picture: null,
       },
-        () => {
-          document.getElementsByClassName('deleteImage')[0].click();
-          document.getElementById('status').innerHTML = 'Uploaded Successfully';
-        });
+      () => {
+        document.getElementsByClassName('deleteImage')[0].click();
+        document.getElementById('status').innerHTML = 'Uploaded Successfully';
+      });
     } else {
       document.getElementById('status').innerHTML = 'Error Uploading. Please try again.';
     }
