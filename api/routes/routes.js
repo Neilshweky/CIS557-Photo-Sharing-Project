@@ -36,10 +36,12 @@ const login = (req, res) => {
           res.status(401).send("Invalid username and password combination.");
         } else {
           res.status(200).send(username + " is now logged in.");
-          // TODO: reroute to main page
         }
       })
-      .catch(err => res.status(500).send(err));
+      .catch(err => {
+        console.log("HERE")
+        res.status(500).send(err)
+      });
   }
 }
 
