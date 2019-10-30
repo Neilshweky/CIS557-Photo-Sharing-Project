@@ -1,25 +1,37 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {
+  Link, Route, BrowserRouter as Router, Switch,
+} from 'react-router-dom';
+import SignIn from './SignIn';
+import SignUp from './SignUp';
+import SimpleProfile from './SimpleProfile';
+import AppHome from './AppHome';
+import { localStorage } from './Utilities';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Switch>
+        <Route component={AppHome} exact path="/" />
+        <Route component={SignIn} path="/signin" />
+        <Route component={SignUp} path="/signup" />
+        <Route component={AppHome} path="/home" />
+        <Route component={SimpleProfile} path="/profile" />
+      </Switch>
+      <ul>
+        <li>
+          <Link to="/">Home (Upload)</Link>
+        </li>
+        <li>
+          <Link to="/profile">Profile</Link>
+        </li>
+        <li onClick={() => localStorage.clear()}>
+          <Link to="/signin">Logout</Link>
+        </li>
+      </ul>
+      {/* </div> */}
+    </Router>
   );
 }
 

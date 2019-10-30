@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -20,9 +20,15 @@
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
+    "crypto-js": "^3.1.9-1",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
     "mongoose": "^5.7.7",
+    "react": "^16.11.0",
     "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "eslint-plugin-react": "^7.16.0",
+    "jest": "^24.9.0"
   }
 }

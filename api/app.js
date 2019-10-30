@@ -19,16 +19,19 @@ app.use(session({
 var cors = require("cors");
 app.use(cors());
 
-//Used to link js and css files 
+//Used to link js and css files
 // app.use(express.static('views/css'));
 // app.use(express.static('views/js'));
 
-app.get('/', (req, res) => { res.send("Hello, World") })
-
+app.get('/', (req, res) => { res.send("Hello, World\n") });
+app.post('/signup', routes.signup);
+app.post('/login', routes.login);
+app.post('/postpicture', routes.post_picture);
+app.get('/user/:username', routes.get_user)
+app.delete('/user/:username', routes.delete_user)
 
 
 console.log('Authors: Neil Shweky (nshweky), Sarah Baumgarten (sbaumg), & Carlos Bros (cbros)');
 var port = process.env.PORT || '8080'
 var server = app.listen(port);
-console.log('Server running on port '+port+'. Now open http://localhost:'+port+'/ in your browser!');
-
+console.log('Server running on port ' + port + '. Now open http://localhost:' + port + '/ in your browser!');

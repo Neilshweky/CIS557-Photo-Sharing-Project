@@ -1,35 +1,52 @@
-const mongoose = require('mongoose');
 const Schemas = require('./models/schemas');
+const mongoose = require('mongoose');
+var SHA256 = require("crypto-js/sha256");
 
 var user = new Schemas.User({
     username: "neilshweky",
     email: "nshweky@seas.upenn.edu",
-    password: "cis557sucks",
+    password: SHA256("cis557sucks"),
+    friends: ["neilshweky2"]
 })
+
+var user2 = new Schemas.User({
+    username: "neilshweky2",
+    email: "nshweky2@seas.upenn.edu",
+    password: SHA256("cis557sucks"),
+})
+
+var user3 = new Schemas.User({
+    username: "sarah",
+    email: "sbaumg@sas.upenn.edu",
+    password: SHA256("123"),
+    profile_picture: './pictures/cut-1.jpg'
+})
+
 
 var post = new Schemas.Post({
-    pic: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/New_York_Rangers.svg/2000px-New_York_Rangers.svg.png",
-    uid: "hello"
+    picture: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/New_York_Rangers.svg/2000px-New_York_Rangers.svg.png",
+    username: "neilshweky"
 })
 
-Schemas.User.deleteMany({}, err => {
-    console.log("Users removed")
-    user.save(err => {
-        if (!err) 
-            console.log("User saved")
-        else 
-            console.log("There was an error", err);
+const loadShit = async function () {
+    const p1 = Schemas.User.deleteMany({}, err => {
+        console.log("Users removed")
+        user.save().then(() => console.log("User saved"))
+            .catch(err => console.log("There was an error", err))
+        user2.save().then(() => console.log("User saved"))
+            .catch(err => console.log("There was an error", err))
+        user3.save().then(() => console.log("User saved"))
+            .catch(err => console.log("There was an error", err))
+
     })
-})
-Schemas.Post.deleteMany({}, err => {
-    console.log("Posts removed")
-    post.save(err => {
-        if (!err) 
-            console.log("Post saved")
-        else 
-            console.log("There was an error", err);
+    const p2 = Schemas.Post.deleteMany({}, err => {
+        console.log("Posts removed")
+        post.save().then(data => console.log("Post saved"))
+            .catch(err => console.log("There was an error", err))
     })
-})
 
+    await Promise.all([p1, p2])
+    await mongoose.disconnect()
+}
 
-
+loadShit()
