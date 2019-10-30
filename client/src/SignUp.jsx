@@ -49,6 +49,7 @@ class SignUp extends React.Component {
       profile_picture: '',
     };
     this.signup = this.signup.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
