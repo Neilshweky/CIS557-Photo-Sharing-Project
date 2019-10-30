@@ -1,0 +1,15 @@
+language: node_js
+services:
+  - mongodb
+install:
+- nvm install node
+- node -v
+- cd api
+- npm i -g yarn
+- yarn
+- npm install --save-dev jest
+- npm install --save-dev @babel/plugin-transform-modules-commonjs
+- npm i isomorphic-fetch
+script:
+- node loader.js
+- yarn test

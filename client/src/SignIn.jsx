@@ -145,6 +145,7 @@ class SignIn extends React.Component {
             />
             <Button
               className={classes.submit}
+              id="loginsubmit"
               color="primary"
               fullWidth
               type="submit"
@@ -154,7 +155,7 @@ class SignIn extends React.Component {
             </Button>
             <Grid container justify="flex-end">
               <Grid item>
-                <Link to="/signup" variant="body2">
+                <Link to="/signup" variant="body2" id="signuplink">
                   Don't have an account? Sign up
                 </Link>
               </Grid>
