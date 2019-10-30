@@ -42,6 +42,7 @@ class AppHome extends React.Component {
   async uploadImage() {
     const { picture } = this.state;
 
+
     const resp = await fetch('http://localhost:8080/postpicture',
       {
         method: 'POST',
@@ -51,7 +52,7 @@ class AppHome extends React.Component {
         },
         mode: 'cors',
 
-        body: JSON.stringify({ username: localStorage.getItem('user'), pic: `../../pictures/${picture.name}` }),
+        body: JSON.stringify({ username: localStorage.getItem('user'), pic: `./pictures/${picture.name}` }),
       });
     if (resp.ok) {
       localStorage.setItem('photo',
@@ -59,10 +60,10 @@ class AppHome extends React.Component {
       this.setState({
         picture: null,
       },
-      () => {
-        document.getElementsByClassName('deleteImage')[0].click();
-        document.getElementById('status').innerHTML = 'Uploaded Successfully';
-      });
+        () => {
+          document.getElementsByClassName('deleteImage')[0].click();
+          document.getElementById('status').innerHTML = 'Uploaded Successfully';
+        });
     } else {
       document.getElementById('status').innerHTML = 'Error Uploading. Please try again.';
     }
@@ -79,7 +80,7 @@ class AppHome extends React.Component {
         </h1>
         <div id="status" />
         <ImageUploader
-          buttonText="Choose images"
+          buttonText="Choose image"
           disabled={picture !== null}
           imgExtension={['.jpg',
             '.gif',
@@ -110,5 +111,4 @@ class AppHome extends React.Component {
 AppHome.propTypes = {
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
 };
-// AppHome.contextType = UserContext
 export default AppHome;

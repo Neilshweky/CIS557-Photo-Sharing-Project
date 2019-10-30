@@ -77,8 +77,7 @@ class SimpleProfile extends React.Component {
         <CssBaseline />
         <div className={classes.paper}>
           {this.state.profile_pic
-            && <Avatar alt={this.state.username} className={classes.avatar} src={this.state.profile_pic} />}
-          {this.state.profile_pic == null && <Avatar className={classes.avatar}>{this.state.username.charAt(0)}</Avatar>}
+            && <Avatar alt={this.state.username.charAt(0)} className={classes.avatar} src={require(`${this.state.profile_pic}`)} />}
           <Typography component="h1" variant="h5">
             {localStorage.getItem('user')}
           </Typography>
