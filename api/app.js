@@ -28,6 +28,7 @@ app.post('/signup', routes.signup);
 app.post('/login', routes.login);
 app.post('/postpicture', routes.post_picture);
 app.get('/user/:username', routes.get_user)
+app.delete('/user/:username', routes.delete_user)
 
 
 console.log('Authors: Neil Shweky (nshweky), Sarah Baumgarten (sbaumg), & Carlos Bros (cbros)');

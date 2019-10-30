@@ -64,9 +64,18 @@ const get_user = (req, res) => {
   }).catch(err => res.status(500).send(err))
 }
 
+const delete_user = (req, res) => {
+  var username = req.params.username
+  db.deleteUser(username).then(data => {
+    if (data === undefined || data === null) res.status(404).send({})
+    else res.status(200).send(data)
+  }).catch(err => res.status(500).send(err))
+}
+
 module.exports = {
   signup,
   login,
   post_picture,
-  get_user
+  get_user,
+  delete_user
 }

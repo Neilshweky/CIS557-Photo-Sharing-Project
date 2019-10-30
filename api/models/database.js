@@ -6,6 +6,10 @@ const getUser = function (username) {
     return Schemas.User.findOne({ username }).exec();
 }
 
+const deleteUser = function (username) {
+    return Schemas.User.deleteOne({ username }).exec();
+}
+
 // Adds user to database after signup, and returns it as a Promise
 const createUser = async function (username, email, password, profile_picture) {
     const existingUser = await getUser(username);
@@ -76,6 +80,7 @@ const addPostIDToUsers = function (post_id, usernames) {
 
 module.exports = {
     getUser,
+    deleteUser,
     createUser,
     checkLogin,
     postPicture,
