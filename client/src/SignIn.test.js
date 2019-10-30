@@ -34,7 +34,7 @@ async function login_no_user() {
 
 it('login attempt failed', async () => {
   await login_failure()
-  url = await driver.getCurrentUrl()
+  const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signin")
   await driver.findElement(By.id('login-status')).getText().then((text) => {
     expect(text).not.toBe("");
@@ -43,7 +43,7 @@ it('login attempt failed', async () => {
 
 it('login no pass', async () => {
   await login_no_pass()
-  url = await driver.getCurrentUrl()
+  const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signin")
   await driver.findElement(By.id('login-status')).getText().then((text) => {
     expect(text).not.toBe("");
@@ -52,7 +52,7 @@ it('login no pass', async () => {
 
 it('login no user', async () => {
   await login_no_user()
-  url = await driver.getCurrentUrl()
+  const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signin")
   await driver.findElement(By.id('login-status')).getText().then((text) => {
     expect(text).not.toBe("");
@@ -62,13 +62,13 @@ it('login no user', async () => {
 it('go to signup', async () => {
   driver.wait(until.urlIs('http://localhost:3000/signup'));
   await driver.findElement(By.id('signuplink')).click();
-  url = await driver.getCurrentUrl()
+  const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signup")
 });
 
 it('login attempt', async () => {
   await login_success()
-  url = await driver.getCurrentUrl()
+  const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/home")
 });
 
