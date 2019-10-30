@@ -82,21 +82,10 @@ it('login attempt', async () => {
 });
 
 
-it('back to login after signup', async () => {
-  await fetch('http://localhost:8080/signup', {
-    method: 'POST', 
-    body: JSON.stringify({"username":"neilshweky", "password":"cis557sucks", "email":"nshweky@seas.upenn"}),
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(res => res.json())
-  .then(json => console.log(json))
-  .catch(err => console.log(err))
-  await login_success()
-  const url = await driver.getCurrentUrl()
-  expect(url).toBe("http://localhost:3000/home")
-  driver.wait(until.urlIs('http://localhost:3000/signin'));
+it('back to login after signin', async () => {
   await driver.get('http://localhost:3000/signin');
   driver.wait(until.urlIs('http://localhost:3000/home'));
+  const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/home")
 
 });

@@ -25,7 +25,7 @@ async function goto_profile_wrong_login() {
   await driver.get('http://localhost:3000/profile');
 }
 
-it('profile after correct login', async () => {
+xit('profile after correct login', async () => {
   await goto_profile_after_login();
   const url = await driver.getCurrentUrl();
   expect(url).toBe("http://localhost:3000/profile");
@@ -37,7 +37,7 @@ it('profile after correct login', async () => {
   });
 });
 
-it('profile after wrong login', async () => {
+xit('profile after wrong login', async () => {
   await goto_profile_wrong_login();
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signin")

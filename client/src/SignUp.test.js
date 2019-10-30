@@ -78,8 +78,8 @@ it('go to signin', async () => {
 });
 
 it('signup success', async () => {
-  await signup_success()
   driver.wait(until.urlIs('http://localhost:3000/home'), 2000);
+  await signup_success()
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/home")
 });
