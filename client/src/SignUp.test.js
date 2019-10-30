@@ -43,7 +43,7 @@ async function signup_no_user() {
 }
 
 
-it('signup no email', async () => {
+xit('signup no email', async () => {
   await signup_no_email()
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signup")
@@ -52,7 +52,7 @@ it('signup no email', async () => {
   });
 });
 
-it('signup no pass', async () => {
+xit('signup no pass', async () => {
   await signup_no_pass()
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signup")
@@ -61,7 +61,7 @@ it('signup no pass', async () => {
   });
 });
 
-it('signup no user', async () => {
+xit('signup no user', async () => {
   await signup_no_user()
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signup")
@@ -70,17 +70,23 @@ it('signup no user', async () => {
   });
 });
 
-it('go to signin', async () => {
+xit('go to signin', async () => {
   driver.wait(until.urlIs('http://localhost:3000/signin'));
   await driver.findElement(By.id('signinlink')).click();
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signin")
 });
 
-it('signup success', async () => {
+xit('signup success', async () => {
   driver.wait(until.urlIs('http://localhost:3000/home'), 2000);
   await signup_success()
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/home")
 });
 
+xit('back to signup after signup', async () => {
+  await driver.get('http://localhost:3000/signup');
+  driver.wait(until.urlIs('http://localhost:3000/home'));
+  const url = await driver.getCurrentUrl()
+  expect(url).toBe("http://localhost:3000/home")
+});
