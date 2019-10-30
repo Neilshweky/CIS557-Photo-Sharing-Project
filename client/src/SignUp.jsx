@@ -80,7 +80,7 @@ class SignUp extends React.Component {
         this.state.username);
       localStorage.setItem('login',
         new Date());
-      this.props.history.push('/profile');
+      this.props.history.push('/home');
     } else {
       document.getElementById('signup-status').innerHTML = await resp.text();
     }
@@ -147,6 +147,7 @@ class SignUp extends React.Component {
             </Grid>
             <Button
               className={classes.submit}
+              id="signupButton"
               color="primary"
               fullWidth
               type="submit"

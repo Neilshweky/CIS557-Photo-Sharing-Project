@@ -2,6 +2,7 @@ const {
     Builder, By, Key, until,
   } = require('selenium-webdriver');
   require('selenium-webdriver/chrome');
+const fetch = require('node-fetch')
 
 let driver;
 beforeAll(async () => { driver = await new Builder().forBrowser('chrome').build(); });
@@ -14,12 +15,14 @@ beforeEach (async () => {
 
 
 async function signup_success() {
-    
-    await driver.findElement(By.id('username')).sendKeys('neilshweky3');
-    await driver.findElement(By.id('password')).sendKeys('cis557sucks');
-    await driver.findElement(By.id('email')).sendKeys('nshweky3@seas.upenn.edu', Key.RETURN);
-
-    driver.wait(until.urlIs('http://localhost:3000/home'), 200);
+  await fetch('http://localhost:8080/user/neilshweky', {method: 'DELETE'})
+  .then(res => res.json())
+  .then(json => console.log(json))
+  .catch(() => {})
+  await driver.findElement(By.id('username')).sendKeys('neilshweky');
+  await driver.findElement(By.id('email')).sendKeys('nshweky3@seas.upenn.edu');
+  await driver.findElement(By.id('password')).sendKeys('cis557sucks');
+  await driver.findElement(By.id('signupButton')).click();
 }
 
 async function signup_no_email() {
@@ -34,40 +37,40 @@ async function signup_no_pass() {
 }
 
 async function signup_no_user() {
-  await driver.findElement(By.id('password')).sendKeys('hello', Key.RETURN);
+  await driver.findElement(By.id('password')).sendKeys('hello');
   await driver.findElement(By.id('email')).sendKeys('hello', Key.RETURN);
 
 }
 
 
-xit('signup no email', async () => {
+it('signup no email', async () => {
   await signup_no_email()
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signup")
-//   await driver.findElement(By.id('signup-status')).getText().then((text) => {
-//     expect(text).not.toBe("");
-//   });
+  await driver.findElement(By.id('signup-status')).getText().then((text) => {
+    expect(text).not.toBe("");
+  });
 });
 
-xit('signup no pass', async () => {
+it('signup no pass', async () => {
   await signup_no_pass()
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signup")
-//   await driver.findElement(By.id('signup-status')).getText().then((text) => {
-//     expect(text).not.toBe("");
-//   });
+  await driver.findElement(By.id('signup-status')).getText().then((text) => {
+    expect(text).not.toBe("");
+  });
 });
 
-xit('signup no user', async () => {
+it('signup no user', async () => {
   await signup_no_user()
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/signup")
-//   await driver.findElement(By.id('signup-status')).getText().then((text) => {
-//     expect(text).not.toBe("");
-//   });
+  await driver.findElement(By.id('signup-status')).getText().then((text) => {
+    expect(text).not.toBe("");
+  });
 });
 
-xit('go to signin', async () => {
+it('go to signin', async () => {
   driver.wait(until.urlIs('http://localhost:3000/signin'));
   await driver.findElement(By.id('signinlink')).click();
   const url = await driver.getCurrentUrl()
@@ -76,6 +79,7 @@ xit('go to signin', async () => {
 
 it('signup success', async () => {
   await signup_success()
+  driver.wait(until.urlIs('http://localhost:3000/home'), 2000);
   const url = await driver.getCurrentUrl()
   expect(url).toBe("http://localhost:3000/home")
 });
