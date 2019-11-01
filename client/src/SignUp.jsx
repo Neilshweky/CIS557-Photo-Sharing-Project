@@ -10,6 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import PropTypes from 'prop-types';
 import { dateDiff, localStorage } from './Utilities';
 
 const styles = (theme) => ({
@@ -55,8 +56,9 @@ class SignUp extends React.Component {
   componentDidMount() {
     const username = localStorage.getItem('user');
     const loginTime = localStorage.getItem('login');
+    const { history } = this.props;
     if (username !== null && loginTime !== null && dateDiff(new Date(loginTime)) < 30) {
-      this.props.history.push('/home');
+      history.push('/home');
     } else {
       localStorage.clear();
     }
@@ -75,12 +77,14 @@ class SignUp extends React.Component {
         mode: 'cors',
         body: JSON.stringify(this.state),
       });
+    const { username } = this.state;
+    const { history } = this.props;
     if (resp.ok) {
       localStorage.setItem('user',
-        this.state.username);
+        username);
       localStorage.setItem('login',
         new Date());
-      this.props.history.push('/home');
+      history.push('/home');
     } else {
       document.getElementById('signup-status').innerHTML = await resp.text();
     }
@@ -169,5 +173,17 @@ class SignUp extends React.Component {
     );
   }
 }
+
+SignUp.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
+  classes: PropTypes.shape({
+    paper: PropTypes.string.isRequired,
+    avatar: PropTypes.string.isRequired,
+    form: PropTypes.string.isRequired,
+    submit: PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 export default withStyles(styles)(SignUp);

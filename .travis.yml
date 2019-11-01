@@ -12,4 +12,4 @@ install:
 - npm i isomorphic-fetch
 script:
 - node loader.js
-- yarn test
+- yarn test --coverage

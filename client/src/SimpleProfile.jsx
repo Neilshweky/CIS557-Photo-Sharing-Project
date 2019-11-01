@@ -7,6 +7,7 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import PropTypes from 'prop-types';
 import { dateDiff, localStorage } from './Utilities';
 
 const styles = (theme) => ({
@@ -44,16 +45,17 @@ class SimpleProfile extends React.Component {
     super(props);
     this.getProfile = this.getProfile.bind(this);
     this.state = {
-      username: '', email: '', friends: [], profile_pic: '',
+      username: '', email: '', friends: [], profilePic: '',
     };
   }
 
   componentDidMount() {
     const username = localStorage.getItem('user');
     const loginTime = localStorage.getItem('login');
+    const { history } = this.props;
     if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
       localStorage.clear();
-      this.props.history.push('/signin');
+      history.push('/signin');
     } else {
       this.getProfile(username);
       this.render();
@@ -65,19 +67,29 @@ class SimpleProfile extends React.Component {
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
-        username, email: data.email, friends: data.friends, profile_pic: data.profile_picture,
+        username, email: data.email, friends: data.friends, profilePic: data.profilePicture,
       });
     }
   }
 
   render() {
     const { classes } = this.props;
+    const {
+      username, email, friends, profilePic,
+    } = this.state;
     return (
       <Container component="main">
         <CssBaseline />
         <div className={classes.paper}>
-          {this.state.profile_pic
-            && <Avatar alt={this.state.username.charAt(0)} className={classes.avatar} src={require(`${this.state.profile_pic}`)} />}
+          {profilePic
+            && (
+              <Avatar
+                alt={username.charAt(0)}
+                className={classes.avatar}
+                // eslint-disable-next-line import/no-dynamic-require,global-require
+                src={require(`${profilePic}`)}
+              />
+            )}
           <Typography component="h1" variant="h5">
             {localStorage.getItem('user')}
           </Typography>
@@ -93,7 +105,7 @@ class SimpleProfile extends React.Component {
                       id="username"
                       label="Username"
                       name="username"
-                      value={this.state.username}
+                      value={username}
                       variant="outlined"
                     />
                   </Grid>
@@ -105,7 +117,7 @@ class SimpleProfile extends React.Component {
                       id="email"
                       label="Email Address"
                       name="email"
-                      value={this.state.email}
+                      value={email}
                       // onChange={this.handleChange}
                       variant="outlined"
                     />
@@ -120,5 +132,17 @@ class SimpleProfile extends React.Component {
     );
   }
 }
+
+SimpleProfile.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
+  classes: PropTypes.shape({
+    paper: PropTypes.string.isRequired,
+    avatar: PropTypes.string.isRequired,
+    form: PropTypes.string.isRequired,
+    submit: PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 export default withStyles(styles)(SimpleProfile);
