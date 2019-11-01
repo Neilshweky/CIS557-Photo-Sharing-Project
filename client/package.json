@@ -12,7 +12,9 @@
     "react-images-upload-disabled": "^1.2.8",
     "react-router-dom": "^5.1.2",
     "react-router-prop-types": "^1.0.4",
-    "react-scripts": "3.2.0"
+    "react-scripts": "3.2.0",
+    "chromedriver": "^77.0.0",
+    "selenium-webdriver": "^4.0.0-alpha.5"
   },
   "scripts": {
     "start": "react-scripts start",
