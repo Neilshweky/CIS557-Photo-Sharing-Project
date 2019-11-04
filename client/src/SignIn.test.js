@@ -2,6 +2,7 @@ const {
   Builder, By, Key, until,
 } = require('selenium-webdriver');
 require('selenium-webdriver/chrome');
+require('chromedriver');
 const fetch = require('node-fetch');
 
 let driver;

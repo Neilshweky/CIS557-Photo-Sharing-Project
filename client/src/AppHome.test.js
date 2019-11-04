@@ -2,6 +2,7 @@ const {
   Builder, By, Key, until,
 } = require('selenium-webdriver');
 require('selenium-webdriver/chrome');
+require('chromedriver');
 const fetch = require('node-fetch');
 
 let driver;
@@ -11,12 +12,13 @@ afterAll(async () => { await driver.quit(); });
 beforeEach(async () => {
   driver.wait(until.urlIs('http://localhost:3000/signin'));
   await driver.get('http://localhost:3000/signin');
+  await driver.findElement(By.id('logout')).click();
 });
 
 async function goToHomeAfterLogin() {
   await fetch('http://localhost:8080/signup', {
     method: 'POST',
-    body: JSON.stringify({ username: 'neilshweky', password: 'cis557sucks', email: 'nshweky@seas.upenn' }),
+    body: JSON.stringify({ username: 'neilshweky', password: 'cis557sucks', email: 'nshweky@seas.upenn.edu' }),
     headers: { 'Content-Type': 'application/json' },
   });
   await driver.findElement(By.id('username')).sendKeys('neilshweky');
@@ -24,15 +26,13 @@ async function goToHomeAfterLogin() {
 }
 
 it('no login redirect', async () => {
-  driver.wait(until.urlIs('http://localhost:3000/signin'), 2000);
   await driver.get('http://localhost:3000/home');
   const url = await driver.getCurrentUrl();
   expect(url).toBe('http://localhost:3000/signin');
 });
 
 it('welcome message', async () => {
-  driver.wait(until.urlIs('http://localhost:3000/home'), 2000);
-  await goToHomeAfterLogin();
+  await goToHomeAfterLogin().then(() => driver.sleep(500));
   const url = await driver.getCurrentUrl();
   expect(url).toBe('http://localhost:3000/home');
   await driver.findElement(By.id('welcome')).getText().then((val) => {
