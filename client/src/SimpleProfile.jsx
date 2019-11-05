@@ -6,9 +6,10 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
 import PropTypes from 'prop-types';
+import Toolbar from './Toolbar';
 import { dateDiff, localStorage } from './Utilities';
+import { Container } from '@material-ui/core';
 
 const styles = (theme) => ({
   '@global': {
@@ -78,57 +79,60 @@ class SimpleProfile extends React.Component {
       username, email, friends, profilePic,
     } = this.state;
     return (
-      <Container component="main">
+      <div>
+        <Toolbar />
         <CssBaseline />
-        <div className={classes.paper}>
-          {profilePic
-            && (
-              <Avatar
-                alt={username.charAt(0)}
-                className={classes.avatar}
-                // eslint-disable-next-line import/no-dynamic-require,global-require
-                src={require(`${profilePic}`)}
-              />
-            )}
-          <Typography component="h1" variant="h5">
-            {localStorage.getItem('user')}
-          </Typography>
-          <form className={classes.form} noValidate onSubmit={this.signup}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Grid container justify="center" spacing={1}>
-                  <Grid item xs={6}>
-                    <TextField
-                      autoComplete="username"
-                      disabled
-                      fullWidth
-                      id="username"
-                      label="Username"
-                      name="username"
-                      value={username}
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      autoComplete="email"
-                      disabled
-                      fullWidth
-                      id="email"
-                      label="Email Address"
-                      name="email"
-                      value={email}
-                      // onChange={this.handleChange}
-                      variant="outlined"
-                    />
+        <Container>
+          <div className={classes.paper}>
+            {profilePic
+              && (
+                <Avatar
+                  alt={username.charAt(0)}
+                  className={classes.avatar}
+                  // eslint-disable-next-line import/no-dynamic-require,global-require
+                  src={require(`${profilePic}`)}
+                />
+              )}
+            <Typography component="h1" variant="h5">
+              {localStorage.getItem('user')}
+            </Typography>
+            <form className={classes.form} noValidate onSubmit={this.signup}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Grid container justify="center" spacing={1}>
+                    <Grid item xs={6}>
+                      <TextField
+                        autoComplete="username"
+                        disabled
+                        fullWidth
+                        id="username"
+                        label="Username"
+                        name="username"
+                        value={username}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        autoComplete="email"
+                        disabled
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        value={email}
+                        // onChange={this.handleChange}
+                        variant="outlined"
+                      />
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-          </form>
-        </div>
+            </form>
+          </div>
+        </Container>
         <Box mt={5} />
-      </Container>
+      </div>
     );
   }
 }
