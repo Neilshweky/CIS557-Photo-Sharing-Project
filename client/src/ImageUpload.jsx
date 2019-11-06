@@ -5,7 +5,7 @@ import { Button } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import { dateDiff, localStorage } from './Utilities';
-import Toolbar from './Toolbar';
+import AppToolbar from './AppToolbar';
 
 class ImageUpload extends React.Component {
   constructor(props) {
@@ -43,7 +43,6 @@ class ImageUpload extends React.Component {
   async uploadImage() {
     const { picture } = this.state;
 
-
     const resp = await fetch('http://localhost:8080/postpicture',
       {
         method: 'POST',
@@ -56,8 +55,6 @@ class ImageUpload extends React.Component {
         body: JSON.stringify({ username: localStorage.getItem('user'), pic: `./pictures/${picture.name}` }),
       });
     if (resp.ok) {
-      localStorage.setItem('photo',
-        picture);
       this.setState({
         picture: null,
       }, () => {
@@ -73,7 +70,7 @@ class ImageUpload extends React.Component {
     const { picture } = this.state;
     return (
       <div>
-        <Toolbar />
+        <AppToolbar />
         <h1 id="welcome">
           Welcome.
           {localStorage.getItem('user')}

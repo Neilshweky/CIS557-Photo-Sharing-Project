@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Box, Container } from '@material-ui/core';
 import { dateDiff, localStorage } from './Utilities';
-import Toolbar from './Toolbar';
+import Post from './Post';
+import AppToolbar from './AppToolbar';
 
 class Homepage extends React.Component {
   componentDidMount() {
@@ -15,15 +17,22 @@ class Homepage extends React.Component {
     }
   }
 
-
   render() {
     return (
       <div>
-        <Toolbar />
-        <h1 id="welcome">
-          Welcome.
-          {localStorage.getItem('user')}
-        </h1>
+        <AppToolbar />
+        <Container>
+          <h1 id="welcome">
+            Welcome.
+            {localStorage.getItem('user')}
+          </h1>
+          <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between">
+            <Post author="Sarah" post={{ author: 'Sarah' }} />
+            <Post author="Sarah" post={{ author: 'Neil' }} />
+            <Post author="Sarah" post={{ author: 'Hannah' }} />
+            <Post author="Sarah" post={{ author: 'Carlos' }} />
+          </Box>
+        </Container>
       </div>
     );
   }

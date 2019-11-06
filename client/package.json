@@ -5,6 +5,9 @@
   "dependencies": {
     "@material-ui/core": "^4.5.1",
     "@material-ui/icons": "^4.5.1",
+    "chromedriver": "^77.0.0",
+    "clsx": "^1.0.4",
+    "moment": "^2.24.0",
     "node-fetch": "^2.6.0",
     "prop-types": "^15.7.2",
     "react": "^16.11.0",
@@ -13,7 +16,6 @@
     "react-router-dom": "^5.1.2",
     "react-router-prop-types": "^1.0.4",
     "react-scripts": "3.2.0",
-    "chromedriver": "^77.0.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
   },
   "scripts": {
