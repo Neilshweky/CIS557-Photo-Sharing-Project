@@ -26,7 +26,7 @@ function App() {
         <li>
           <Link to="/profile">Profile</Link>
         </li>
-        <li onClick={() => localStorage.clear()}>
+        <li id="logout" onClick={() => localStorage.clear()}>
           <Link to="/signin">Logout</Link>
         </li>
       </ul>
