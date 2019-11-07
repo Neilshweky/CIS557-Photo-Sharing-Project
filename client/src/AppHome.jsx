@@ -60,10 +60,10 @@ class AppHome extends React.Component {
       this.setState({
         picture: null,
       },
-        () => {
-          document.getElementsByClassName('deleteImage')[0].click();
-          document.getElementById('status').innerHTML = 'Uploaded Successfully';
-        });
+      () => {
+        document.getElementsByClassName('deleteImage')[0].click();
+        document.getElementById('status').innerHTML = 'Uploaded Successfully';
+      });
     } else {
       document.getElementById('status').innerHTML = 'Error Uploading. Please try again.';
     }
@@ -74,7 +74,7 @@ class AppHome extends React.Component {
     return (
 
       <div>
-        <h1 id='welcome'>
+        <h1 id="welcome">
           Welcome.
           {localStorage.getItem('user')}
         </h1>

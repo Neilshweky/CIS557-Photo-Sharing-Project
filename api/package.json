@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "eslint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -17,17 +18,23 @@
   },
   "homepage": "https://github.com/cis557/cis557-project-photo-sharing-social-network-app-404-not-found#readme",
   "dependencies": {
+    "async": "^3.1.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
     "crypto-js": "^3.1.9-1",
+    "eslint-config-airbnb": "^18.0.1",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
+    "moment": "^2.24.0",
     "mongoose": "^5.7.7",
     "react": "^16.11.0",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "eslint": "^6.6.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-react": "^7.16.0",
     "jest": "^24.9.0"
   }

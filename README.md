@@ -16,3 +16,9 @@ Then to run the api, open another terminal window in the root directory and run:
 $ cd api
 $ node app.js
 ```
+
+Testing client: test file-by-file. 
+```
+cd client
+jest <file_name>
+```
