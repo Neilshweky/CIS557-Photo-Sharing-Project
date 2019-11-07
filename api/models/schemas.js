@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const uuidv4 = require('uuid/v4');
+const moment = require('moment');
 
 mongoose.connect('mongodb://localhost/cis557_db', {
   useNewUrlParser: true,
@@ -28,10 +29,12 @@ const Post = new Schema({
   picture: { type: String, required: true },
   likes: Array,
   comments: [{ username: String, comment: String }],
+  timestamp: Number,
 });
 
-Post.pre('save', function setUID(next) {
+Post.pre('validate', function setUID(next) {
   this.uid = uuidv4();
+  this.timestamp = moment().unix();
   next();
 });
 

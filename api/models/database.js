@@ -1,6 +1,7 @@
+/* eslint-disable */
 const SHA256 = require('crypto-js/sha256');
 const Schemas = require('./schemas.js');
-
+const async = require('async')
 // Returns a User from the database as a Promise, by username
 function getUser(username) {
   return Schemas.User.findOne({ username }).exec();
@@ -41,7 +42,13 @@ function createPost(picture, username) {
 }
 
 function getFriendsForUsername(username) {
-  return Schemas.User.findOne({ username }, { friends: 1 }).then((user) => user.friends);
+  return Schemas.User.findOne({ username }, { friends: 1 })
+    .then((user) => {
+      if (user != null && 'friends' in user)
+        return user.friends
+      else 
+        return []
+    });
 }
 
 function addFriend(username, friend) {
@@ -73,9 +80,32 @@ function postPicture(picture, username) {
     .then((values) => {
       const post = values[0];
       const friends = values[1];
+      friends.push(username)
       return addPostIDToUsers(post.uid, friends).then(() => post);
     });
 }
+
+
+function getPost(uid) {
+  return Schemas.Post.findOne({ uid })
+}
+
+function getPostIdsForUserAndNum(username, num) {
+  return Schemas.User.findOne({ username }, { posts: { $slice : [num, 2] } }).then((data) => data.posts);
+}
+
+function getPostsForUserAndNum(username, num) {
+  return getPostIdsForUserAndNum(username, parseInt(num)).then(async (posts) => {
+    final = [];
+    for (let i = 0; i < posts.length; i++) {
+      var post = posts[i];
+      final.push(await getPost(post));
+    }
+    return final;
+  })
+}
+
+
 
 module.exports = {
   getUser,
@@ -86,4 +116,6 @@ module.exports = {
   createPost,
   addFriend,
   getFriendsForUsername,
+  getPost,
+  getPostsForUserAndNum,
 };
