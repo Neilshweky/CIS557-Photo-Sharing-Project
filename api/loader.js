@@ -13,6 +13,7 @@ const user2 = new Schemas.User({
   username: 'neilshweky2',
   email: 'nshweky2@seas.upenn.edu',
   password: SHA256('cis557sucks'),
+  friends: ['neilshweky'],
 });
 
 const user3 = new Schemas.User({
@@ -44,7 +45,8 @@ async function loadData() {
       .catch((err) => console.log('There was an error', err));
   });
 
-  await Promise.all([p1, p2]);
+  await p1;
+  await p2;
   await mongoose.disconnect();
 }
 

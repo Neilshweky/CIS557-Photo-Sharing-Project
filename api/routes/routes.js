@@ -72,10 +72,20 @@ const deleteUser = (req, res) => {
   }).catch((err) => res.status(500).send(err));
 };
 
+const getPosts = (req, res) => {
+  const { username, num } = req.params;
+  db.getPostsForUserAndNum(username, num).then((posts) => {
+    res.status(200).send(posts);
+  }).catch((err) => {
+    res.status(500).send(err);
+  });
+};
+
 module.exports = {
   signup,
   login,
   postPicture,
   getUser,
   deleteUser,
+  getPosts,
 };
