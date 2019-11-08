@@ -1,12 +1,13 @@
 import React from 'react';
 import ImageUploader from 'react-images-upload-disabled';
-import './AppHome.css';
+import './ImageUpload.css';
 import { Button } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import { dateDiff, localStorage } from './Utilities';
+import AppToolbar from './AppToolbar';
 
-class AppHome extends React.Component {
+class ImageUpload extends React.Component {
   constructor(props) {
     super(props);
     this.state = { picture: null };
@@ -42,7 +43,6 @@ class AppHome extends React.Component {
   async uploadImage() {
     const { picture } = this.state;
 
-
     const resp = await fetch('http://localhost:8080/postpicture',
       {
         method: 'POST',
@@ -55,12 +55,9 @@ class AppHome extends React.Component {
         body: JSON.stringify({ username: localStorage.getItem('user'), pic: `./pictures/${picture.name}` }),
       });
     if (resp.ok) {
-      localStorage.setItem('photo',
-        picture);
       this.setState({
         picture: null,
-      },
-      () => {
+      }, () => {
         document.getElementsByClassName('deleteImage')[0].click();
         document.getElementById('status').innerHTML = 'Uploaded Successfully';
       });
@@ -72,8 +69,8 @@ class AppHome extends React.Component {
   render() {
     const { picture } = this.state;
     return (
-
       <div>
+        <AppToolbar />
         <h1 id="welcome">
           Welcome.
           {localStorage.getItem('user')}
@@ -108,7 +105,7 @@ class AppHome extends React.Component {
   }
 }
 
-AppHome.propTypes = {
+ImageUpload.propTypes = {
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
 };
-export default AppHome;
+export default ImageUpload;

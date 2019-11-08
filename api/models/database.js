@@ -46,7 +46,7 @@ function getFriendsForUsername(username) {
     .then((user) => {
       if (user != null && 'friends' in user)
         return user.friends
-      else 
+      else
         return []
     });
 }
@@ -91,7 +91,7 @@ function getPost(uid) {
 }
 
 function getPostIdsForUserAndNum(username, num) {
-  return Schemas.User.findOne({ username }, { posts: { $slice : [num, 2] } }).then((data) => data.posts);
+  return Schemas.User.findOne({ username }, { posts: { $slice: [num, 2] } }).then((data) => data.posts);
 }
 
 function getPostsForUserAndNum(username, num) {
@@ -104,8 +104,6 @@ function getPostsForUserAndNum(username, num) {
     return final;
   })
 }
-
-
 
 module.exports = {
   getUser,

@@ -6,7 +6,6 @@ const user = new Schemas.User({
   username: 'neilshweky',
   email: 'nshweky@seas.upenn.edu',
   password: SHA256('cis557sucks'),
-  friends: ['neilshweky2'],
 });
 
 const user2 = new Schemas.User({
@@ -21,6 +20,7 @@ const user3 = new Schemas.User({
   email: 'sbaumg@sas.upenn.edu',
   password: SHA256('123'),
   profilePicture: './pictures/cut-1.jpg',
+  friends: ['neilshweky'],
 });
 
 
