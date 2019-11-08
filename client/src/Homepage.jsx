@@ -27,10 +27,10 @@ class Homepage extends React.Component {
             {localStorage.getItem('user')}
           </h1>
           <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between">
-            <Post author="Sarah" post={{ author: 'Sarah' }} />
-            <Post author="Sarah" post={{ author: 'Neil' }} />
-            <Post author="Sarah" post={{ author: 'Hannah' }} />
-            <Post author="Sarah" post={{ author: 'Carlos' }} />
+            <Post author="Sarah" post={{ author: 'sarah', liked: true, time: '3/4/2019 13:59' }} />
+            <Post author="Sarah" post={{ author: 'Neil', liked: false }} />
+            <Post author="Sarah" post={{ author: 'Hannah', liked: true }} />
+            <Post author="Sarah" post={{ author: 'Carlos', liked: true }} />
           </Box>
         </Container>
       </div>

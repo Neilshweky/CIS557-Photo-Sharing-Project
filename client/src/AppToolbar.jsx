@@ -96,7 +96,7 @@ export default function AppToolbar() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchValue !== '') {
-      alert("need endpoint to get all my friends");
+      alert('need endpoint to get all my friends');
     }
   };
 

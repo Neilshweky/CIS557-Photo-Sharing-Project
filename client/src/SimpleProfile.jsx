@@ -14,7 +14,9 @@ import './SimpleProfile.css';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AppToolbar from './AppToolbar';
+import FriendTable from './FriendTable';
 import { dateDiff, localStorage } from './Utilities';
+import Post from './Post';
 
 const styles = (theme) => ({
   '@global': {
@@ -80,8 +82,9 @@ class SimpleProfile extends React.Component {
     super(props);
     this.getProfile = this.getProfile.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
+    this.generatePosts = this.generatePosts.bind(this);
     this.state = {
-      username: '', email: '', friends: [], profilePic: '', index: 0,
+      username: '', email: '', friends: [], profilePic: '', index: 0, posts: []
     };
   }
 
@@ -103,9 +106,22 @@ class SimpleProfile extends React.Component {
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
-        username, email: data.email, friends: data.friends, profilePic: data.profilePicture,
+        username,
+        email: data.email,
+        friends: data.friends,
+        profilePic: data.profilePicture,
+        posts: data.posts/*.filter((post) => post.username === username)*/,
       });
     }
+  }
+
+  generatePosts() {
+    const { posts } = this.state;
+    const compList = [];
+    posts.forEach((post) => {
+      compList.push(<Post post={{ author: post, liked: true }} key={post} />);
+    });
+    return compList;
   }
 
   handleTabChange(e, newValue) {
@@ -117,6 +133,7 @@ class SimpleProfile extends React.Component {
     const {
       username, email, password, friends, profilePic, index,
     } = this.state;
+
     return (
       <div>
         <AppToolbar />
@@ -202,10 +219,14 @@ class SimpleProfile extends React.Component {
           </Container>
         </TabPanel>
         <TabPanel value={index} index={1}>
-          Tab 2
+          <Container>
+            <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
+              {this.generatePosts().map((comp) => comp)}
+            </Box>
+          </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
-          Tab 3
+          {/* <FriendTable bProfilePage={false} /> */}
         </TabPanel>
         <CssBaseline />
         <Box mt={5} />
