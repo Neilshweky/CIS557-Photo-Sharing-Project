@@ -84,7 +84,7 @@ class SimpleProfile extends React.Component {
     this.handleTabChange = this.handleTabChange.bind(this);
     this.generatePosts = this.generatePosts.bind(this);
     this.state = {
-      username: '', email: '', friends: [], profilePic: '', index: 0, posts: []
+      username: '', email: '', friends: [], profilePic: '', index: 0, reactPosts: [],
     };
   }
 
@@ -110,18 +110,22 @@ class SimpleProfile extends React.Component {
         email: data.email,
         friends: data.friends,
         profilePic: data.profilePicture,
-        posts: data.posts/*.filter((post) => post.username === username)*/,
-      });
+      }, () => this.generatePosts());
     }
   }
 
-  generatePosts() {
-    const { posts } = this.state;
+  async generatePosts() {
+    const { username } = this.state;
     const compList = [];
-    posts.forEach((post) => {
-      compList.push(<Post post={{ author: post, liked: true }} key={post} />);
-    });
-    return compList;
+    const resp = await fetch(`http://localhost:8080/posts/${username}/0`);
+    if (resp.ok) {
+      const postData = await resp.json();
+      const myPostData = postData.filter((post) => post.username === username);
+      myPostData.forEach((post) => {
+        compList.push(<Post post={post} key={post.uid} />);
+      });
+      this.setState({ reactPosts: compList });
+    }
   }
 
   handleTabChange(e, newValue) {
@@ -131,9 +135,31 @@ class SimpleProfile extends React.Component {
   render() {
     const { classes } = this.props;
     const {
-      username, email, password, friends, profilePic, index,
+      username, email, password, friends, profilePic, index, reactPosts,
     } = this.state;
-
+    let comp = null;
+    try {
+      // eslint-disable-next-line import/no-dynamic-require,global-require
+      const src = require(`${profilePic}`);
+      comp = (
+        <Avatar
+          className={classes.avatar}
+          src={src}
+          id="profile-pic"
+        />
+      );
+    } catch (e) {
+      comp = (
+        <Avatar
+          className={classes.avatar}
+          // eslint-disable-next-line import/no-dynamic-require,global-require
+          id="profile-pic"
+          style={{ fontSize: '48px' }}
+        >
+          {username.charAt(0)}
+        </Avatar>
+      );
+    }
     return (
       <div>
         <AppToolbar />
@@ -154,16 +180,7 @@ class SimpleProfile extends React.Component {
               <div id="photo-avatar">
                 <input type="file" id="upload-profile-pic" hidden />
                 <label htmlFor="upload-profile-pic">
-                  {profilePic
-                    && (
-                      <Avatar
-                        alt={username.charAt(0)}
-                        className={classes.avatar}
-                        // eslint-disable-next-line import/no-dynamic-require,global-require
-                        src={require(`${profilePic}`)}
-                        id="profile-pic"
-                      />
-                    )}
+                  {comp}
 
                   <div className="overlay">
                     <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
@@ -221,7 +238,7 @@ class SimpleProfile extends React.Component {
         <TabPanel value={index} index={1}>
           <Container>
             <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
-              {this.generatePosts().map((comp) => comp)}
+              {reactPosts.map((comp) => comp)}
             </Box>
           </Container>
         </TabPanel>

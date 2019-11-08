@@ -44,9 +44,11 @@ class Post extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      liked: props.post.liked,
+      liked: props.post.likes.indexOf(props.post.username) !== -1,
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
+    this.getProfilePic = this.getProfilePic.bind(this);
+    this.getProfilePic();
   }
 
   handleLikeClick() {
@@ -54,28 +56,60 @@ class Post extends React.Component {
     // use this.setState({}) and call to new endpoint
   }
 
+  async getProfilePic() {
+    const { post } = this.props;
+    const { username } = post;
+    const resp = await fetch(`http://localhost:8080/user/${username}`);
+    if (resp.ok) {
+      const data = await resp.json();
+      this.setState({
+        profilePic: data.profilePicture,
+      });
+    }
+  }
+
   render() {
-    const { liked } = this.state;
+    const { liked, profilePic } = this.state;
     const { classes, post } = this.props;
+    let comp = null;
+    try {
+      const src = require(`${profilePic}`);
+      comp = (
+        <Avatar
+          alt={post.username.charAt(0)}
+          className={classes.avatar}
+          // eslint-disable-next-line import/no-dynamic-require,global-require
+          src={src}
+          id="profile-pic"
+        />
+      );
+    } catch (e) {
+      comp = (
+        <Avatar
+          className={classes.avatar}
+          // eslint-disable-next-line import/no-dynamic-require,global-require
+          id="profile-pic"
+        >
+          {post.username.charAt(0)}
+        </Avatar>
+      );
+    }
     return (
       <Card className={classes.card}>
         <CardHeader
-          avatar={(
-            <Avatar className={classes.avatar}>
-              {post.author}
-            </Avatar>
-          )}
+          avatar={comp}
+
           action={(
             <IconButton aria-label="settings">
               <MoreVertIcon />
             </IconButton>
           )}
-          title={post.author}
-          subheader={moment(post.time).format('M/D/YY [at] h:mm a')}
+          title={post.username}
+          subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
         />
         <CardMedia
           className={classes.media}
-          image={require('./pictures/cut-1.jpg')}
+          image={require('./pictures/cut-2.jpg')}
         />
         <CardActions disableSpacing>
           <IconButton
@@ -109,9 +143,9 @@ Post.propTypes = {
     favorite: PropTypes.string.isRequired,
   }).isRequired,
   post: PropTypes.shape({
-    author: PropTypes.string.isRequired,
-    liked: PropTypes.bool.isRequired,
-    time: PropTypes.string,
+    username: PropTypes.string.isRequired,
+    likes: PropTypes.array.isRequired,
+    timestamp: PropTypes.number.isRequired,
   }),
 };
 
