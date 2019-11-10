@@ -33,7 +33,7 @@ app.post('/postpicture', routes.postPicture);
 app.get('/user/:username', routes.getUser);
 app.delete('/user/:username', routes.deleteUser);
 app.get('/posts/:username/:num', routes.getPosts);
-app.post('/posts/:postid/:username', routes.getPosts);
+app.post('/like/:postid/:username', routes.likePost);
 
 console.log('Authors: Neil Shweky (nshweky), Sarah Baumgarten (sbaumg), & Carlos Bros (cbros)');
 const port = process.env.PORT || '8080';

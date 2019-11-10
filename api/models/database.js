@@ -109,8 +109,7 @@ async function likePost(username, postID) {
   return Schemas.Post.updateOne(
     { postID },
     { $push: { likes: username } },
-  );
-
+  )
 }
 
 
