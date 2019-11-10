@@ -1,12 +1,14 @@
 /* eslint-disable */
 const SHA256 = require('crypto-js/sha256');
 const Schemas = require('./schemas.js');
-const async = require('async')
+const async = require('async');
+
 // Returns a User from the database as a Promise, by username
 function getUser(username) {
   return Schemas.User.findOne({ username }).exec();
 }
 
+// Deletes a user from the database
 function deleteUser(username) {
   return Schemas.User.deleteOne({ username }).exec();
 }
@@ -25,6 +27,47 @@ async function createUser(username, email, password, profilePicture) {
     profilePicture,
   };
   const user = new Schemas.User(profile);
+  return user.save();
+}
+
+// Update user's username
+function updateUsername(username, newUsername) {
+  const user = await getUser(username);
+  if (user == null) {
+    return null;
+  }
+  user.username = newUsername;
+  return user.save();
+}
+
+// Update user's email
+function updateEmail(username, email) {
+  const user = await getUser(username);
+  if (user == null) {
+    return null;
+  }
+  user.email = email;
+  return user.save();
+}
+
+// Update user's profile picture
+function updateProfilePic(username, profilePicture) {
+  const user = await getUser(username);
+  if (user == null) {
+    return null;
+  }
+  user.profilePicture = profilePicture;
+  return user.save();
+}
+
+// Update user's password. Requires old password, returns null if it's incorrect
+function updatePassword(username, oldPassword, newPassword) {
+  const user = await getUser(username);
+  if (user == null || user.password !== SHA256(password).toString()) {
+    return null;
+  }
+  const encryptedPassword = SHA256(newPassword);
+  user.password = encryptedPassword;
   return user.save();
 }
 
