@@ -4,7 +4,7 @@ const Schemas = require('./schemas');
 
 beforeAll(async (done) => {
   await mongoose.disconnect();
-  await mongoose.connect('mongodb://localhost/cis557_db_test', {
+  await mongoose.connect('mongodb://localhost/cis557_test', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });

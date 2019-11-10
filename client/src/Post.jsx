@@ -12,6 +12,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { localStorage } from './Utilities'
 
 const styles = (theme) => ({
   card: {
@@ -43,18 +44,16 @@ const styles = (theme) => ({
 class Post extends React.Component {
   constructor(props) {
     super(props);
+    const username = localStorage.getItem('user');
     this.state = {
-      liked: props.post.likes.indexOf(props.post.username) !== -1,
+      liked: props.post.likes.indexOf(username) !== -1,
+      username,
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
     this.getProfilePic();
   }
 
-  handleLikeClick() {
-    // Neil: to do - update state and save to db
-    // use this.setState({}) and call to new endpoint
-  }
 
   async getProfilePic() {
     const { post } = this.props;
@@ -65,6 +64,42 @@ class Post extends React.Component {
       this.setState({
         profilePic: data.profilePicture,
       });
+    }
+  }
+
+  async handleLikeClick() {
+    // Neil: to do - update state and save to db
+    // use this.setState({}) and call to new endpoint
+    const { liked, username } = this.state;
+    const { post } = this.props;
+    if (liked) {
+      this.setState({ liked: false });
+      const resp = await fetch(`http://localhost:8080/like/${post.uid}/${username}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+        });
+      if (!resp.ok) {
+        this.setState({ liked: true });
+      }
+    } else {
+      this.setState({ liked: true });
+      const resp = await fetch(`http://localhost:8080/unlike/${post.uid}/${username}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+        });
+      if (resp.ok) {
+        this.setState({ liked: false });
+      }
     }
   }
 
@@ -143,6 +178,7 @@ Post.propTypes = {
     favorite: PropTypes.string.isRequired,
   }).isRequired,
   post: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
     likes: PropTypes.array.isRequired,
     timestamp: PropTypes.number.isRequired,
