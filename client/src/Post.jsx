@@ -84,7 +84,6 @@ class Post extends React.Component {
           mode: 'cors',
         });
       if (!resp.ok) {
-        console.log(resp.text());
         this.setState({ liked: true });
       }
     } else {
@@ -98,8 +97,7 @@ class Post extends React.Component {
           },
           mode: 'cors',
         });
-      if (resp.ok) {
-        console.log(await resp.text());
+      if (!resp.ok) {
         this.setState({ liked: false });
       }
     }

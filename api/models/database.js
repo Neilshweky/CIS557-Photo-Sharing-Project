@@ -91,7 +91,7 @@ function getPost(uid) {
 }
 
 function getPostIdsForUserAndNum(username, num) {
-  return Schemas.User.findOne({ username }, { posts: { $slice: [num, 2] } }).then((data) => data.posts);
+  return Schemas.User.findOne({ username }, { posts: { $slice: [num, 1000] } }).then((data) => data.posts);
 }
 
 function getPostsForUserAndNum(username, num) {
@@ -106,7 +106,7 @@ function getPostsForUserAndNum(username, num) {
 }
 
 async function likePost(username, uid) {
-  console.log("liking post: ", username + ", uid")
+  console.log("liking post: ", username, ", ", uid)
   return Schemas.Post.updateOne(
     { uid },
     { $push: { likes: username } },
@@ -114,7 +114,7 @@ async function likePost(username, uid) {
 }
 
 async function unlikePost(username, uid) {
-  console.log("unliking post: ", username + ", uid")
+  console.log("unliking post: ", username, ", ", uid)
   return Schemas.Post.updateOne(
     { uid },
     { $pull: { likes: username } },
