@@ -125,6 +125,46 @@ describe('post tests', () => {
   });
 });
 
+describe('like/unlike tests', () => {
+  beforeEach(async () => {
+    await Schemas.Post.deleteMany({});
+    await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
+    await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await db.addFriend('cbros', 'neilshweky');
+  });
+
+  test('like-then-unlike test', async () => {
+    const post = await db.createPost('some_pic', 'neilshweky');
+    await db.likePost('cbros', post.uid);
+    expect(Array.from(post.likes)).toEqual(['cbros']);
+    await db.unlikePost('cbros', post.uid);
+    expect(Array.from(post.likes)).toEqual([]);
+  });
+
+  test('like non-existing post test', async () => {
+    const nopost = await db.likePost('cbros', 'random_id');
+    expect(nopost).toBeNull();
+  });
+
+  test('unlike non-existing post test', async () => {
+    const nopost = await db.unlikePost('cbros', 'random_id');
+    expect(nopost).toBeNull();
+  });
+
+  test('like post from non-existing user test', async () => {
+    const post = await db.createPost('some_pic', 'neilshweky');
+    const nopost = await db.likePost('no_user', post.uid);
+    expect(nopost).toBeNull();
+  });
+
+  test('unlike post from non-existing user test', async () => {
+    const post = await db.createPost('some_pic', 'neilshweky');
+    const nopost = await db.unlikePost('no_user', post.uid);
+    expect(nopost).toBeNull();
+  });
+
+});
+
 afterAll(async (done) => {
   mongoose.disconnect();
   done();
