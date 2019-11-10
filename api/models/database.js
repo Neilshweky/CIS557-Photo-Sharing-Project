@@ -105,16 +105,16 @@ function getPostsForUserAndNum(username, num) {
   })
 }
 
-async function likePost(username, postID) {
+async function likePost(username, uid) {
   return Schemas.Post.updateOne(
-    { postID },
+    { uid },
     { $push: { likes: username } },
   )
 }
 
-async function unlikePost(username, postID) {
+async function unlikePost(username, uid) {
   return Schemas.Post.updateOne(
-    { postID },
+    { uid },
     { $pull: { likes: username } },
   )
 }
