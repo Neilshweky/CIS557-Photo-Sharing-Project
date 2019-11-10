@@ -4,7 +4,7 @@ const Schemas = require('./schemas');
 
 beforeAll(async (done) => {
   await mongoose.disconnect();
-  await mongoose.connect('mongodb://localhost/cis557_db_test', {
+  await mongoose.connect('mongodb://localhost/cis557_test', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
@@ -22,7 +22,8 @@ describe('authentication tests', () => {
     expect(user.email).toEqual('nshweky@seas.upenn.edu');
     expect('password' in user).toEqual(true);
     expect(user.profilePicture).toEqual('some_pic');
-    expect(Array.from(user.friends)).toEqual([]);
+    expect(Array.from(user.followers)).toEqual([]);
+    expect(Array.from(user.followees)).toEqual([]);
     expect(Array.from(user.posts)).toEqual([]);
   });
 
@@ -87,14 +88,14 @@ describe('friend tests', () => {
     await db.createUser('user3', 'user3@seas.upenn.edu', 'pw-3', 'pic3');
   });
 
-  test('addFriend and getFriend test', async () => {
-    await db.addFriend('user1', 'user2');
-    await db.addFriend('user1', 'user3');
-    await db.addFriend('user2', 'user3');
-    const user1Friends = await db.getFriendsForUsername('user1');
+  test('followUser and getFriend test', async () => {
+    await db.followUser('user1', 'user2');
+    await db.followUser('user1', 'user3');
+    await db.followUser('user2', 'user3');
+    const user1Friends = await db.getFolloweesForUsername('user1');
     expect(user1Friends[0]).toEqual('user2');
     expect(user1Friends[1]).toEqual('user3');
-    const user2Friends = await db.getFriendsForUsername('user2');
+    const user2Friends = await db.getFolloweesForUsername('user2');
     expect(user2Friends[0]).toEqual('user3');
   });
 });
@@ -104,7 +105,7 @@ describe('post tests', () => {
     await Schemas.Post.deleteMany({});
     await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
     await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
-    await db.addFriend('cbros', 'neilshweky');
+    await db.followUser('cbros', 'neilshweky');
   });
 
   test('createPost test', async () => {
@@ -122,6 +123,8 @@ describe('post tests', () => {
     // Check that post appears in friend's feed
     const friend = await db.getUser('neilshweky');
     expect(friend.posts[0]).toEqual(post.uid);
+    const self = await db.getUser('cbros');
+    expect(self.posts[0]).toEqual(post.uid);
   });
 });
 
