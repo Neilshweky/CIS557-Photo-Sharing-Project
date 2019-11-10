@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const uuidv4 = require('uuid/v4');
 const moment = require('moment');
 
-mongoose.connect('mongodb://localhost/cis557_db', {
+mongoose.connect('mongodb://localhost/cis557', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
