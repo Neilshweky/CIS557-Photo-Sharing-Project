@@ -81,6 +81,11 @@ const getPosts = (req, res) => {
   });
 };
 
+const likePost = (req, res) => {
+  const { username, postid } = req.params;
+  db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
+};
+
 module.exports = {
   signup,
   login,
@@ -88,4 +93,5 @@ module.exports = {
   getUser,
   deleteUser,
   getPosts,
+  likePost,
 };
