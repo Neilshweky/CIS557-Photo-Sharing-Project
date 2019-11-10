@@ -85,6 +85,10 @@ const likePost = (req, res) => {
   const { username, postid } = req.params;
   db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
 };
+const unlikePost = (req, res) => {
+  const { username, postid } = req.params;
+  db.unlikePost(username, postid).then(() => { res.status(200).send('Post unliked'); }).catch((err) => res.status(500).send(err));
+};
 
 module.exports = {
   signup,
@@ -94,4 +98,5 @@ module.exports = {
   deleteUser,
   getPosts,
   likePost,
+  unlikePost,
 };

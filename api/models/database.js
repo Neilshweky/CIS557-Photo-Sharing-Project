@@ -112,6 +112,13 @@ async function likePost(username, postID) {
   )
 }
 
+async function unlikePost(username, postID) {
+  return Schemas.Post.updateOne(
+    { postID },
+    { $pull: { likes: username } },
+  )
+}
+
 
 module.exports = {
   getUser,
@@ -125,4 +132,5 @@ module.exports = {
   getPost,
   getPostsForUserAndNum,
   likePost,
+  unlikePost
 };
