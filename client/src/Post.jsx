@@ -74,20 +74,6 @@ class Post extends React.Component {
     const { post } = this.props;
     if (liked) {
       this.setState({ liked: false });
-      const resp = await fetch(`http://localhost:8080/like/${post.uid}/${username}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Origin': '*',
-          },
-          mode: 'cors',
-        });
-      if (!resp.ok) {
-        this.setState({ liked: true });
-      }
-    } else {
-      this.setState({ liked: true });
       const resp = await fetch(`http://localhost:8080/unlike/${post.uid}/${username}`,
         {
           method: 'POST',
@@ -97,7 +83,23 @@ class Post extends React.Component {
           },
           mode: 'cors',
         });
+      if (!resp.ok) {
+        console.log(resp.text());
+        this.setState({ liked: true });
+      }
+    } else {
+      this.setState({ liked: true });
+      const resp = await fetch(`http://localhost:8080/like/${post.uid}/${username}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+        });
       if (resp.ok) {
+        console.log(await resp.text());
         this.setState({ liked: false });
       }
     }
