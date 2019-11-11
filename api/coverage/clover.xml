@@ -1,48 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1572615236971" clover="3.2.0">
-  <project timestamp="1572615236971" name="All files">
-    <metrics statements="36" coveredstatements="36" conditionals="6" coveredconditionals="6" methods="14" coveredmethods="14" elements="56" coveredelements="56" complexity="0" loc="36" ncloc="36" packages="1" files="2" classes="2"/>
-    <file name="database.js" path="/Users/sarah/Google Drive/Fall 2019/CIS557/cis557-project-photo-sharing-social-network-app-404-not-found/api/models/database.js">
-      <metrics statements="25" coveredstatements="25" conditionals="6" coveredconditionals="6" methods="12" coveredmethods="12"/>
-      <line num="1" count="1" type="stmt"/>
+<coverage generated="1573452345556" clover="3.2.0">
+  <project timestamp="1573452345556" name="All files">
+    <metrics statements="67" coveredstatements="67" conditionals="22" coveredconditionals="22" methods="21" coveredmethods="21" elements="110" coveredelements="110" complexity="0" loc="67" ncloc="67" packages="1" files="2" classes="2"/>
+    <file name="database.js" path="/Users/sarah/Desktop/CIS557/cis557-project-photo-sharing-social-network-app-404-not-found/api/models/database.js">
+      <metrics statements="54" coveredstatements="54" conditionals="22" coveredconditionals="22" methods="19" coveredmethods="19"/>
       <line num="2" count="1" type="stmt"/>
-      <line num="6" count="20" type="stmt"/>
-      <line num="10" count="2" type="stmt"/>
-      <line num="15" count="14" type="stmt"/>
-      <line num="16" count="14" type="cond" truecount="2" falsecount="0"/>
-      <line num="17" count="3" type="stmt"/>
-      <line num="19" count="11" type="stmt"/>
-      <line num="20" count="11" type="stmt"/>
-      <line num="26" count="11" type="stmt"/>
-      <line num="27" count="11" type="stmt"/>
-      <line num="32" count="2" type="stmt"/>
-      <line num="33" count="2" type="cond" truecount="4" falsecount="0"/>
-      <line num="34" count="1" type="stmt"/>
-      <line num="36" count="1" type="stmt"/>
-      <line num="39" count="2" type="stmt"/>
-      <line num="40" count="2" type="stmt"/>
-      <line num="44" count="3" type="stmt"/>
-      <line num="48" count="5" type="stmt"/>
-      <line num="55" count="1" type="stmt"/>
-      <line num="71" count="1" type="stmt"/>
-      <line num="74" count="1" type="stmt"/>
-      <line num="75" count="1" type="stmt"/>
-      <line num="76" count="1" type="stmt"/>
-      <line num="80" count="1" type="stmt"/>
-    </file>
-    <file name="schemas.js" path="/Users/sarah/Google Drive/Fall 2019/CIS557/cis557-project-photo-sharing-social-network-app-404-not-found/api/models/schemas.js">
-      <metrics statements="11" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
-      <line num="1" count="1" type="stmt"/>
-      <line num="2" count="1" type="stmt"/>
+      <line num="3" count="1" type="stmt"/>
       <line num="4" count="1" type="stmt"/>
-      <line num="9" count="1" type="stmt"/>
-      <line num="10" count="54" type="stmt"/>
-      <line num="12" count="1" type="stmt"/>
-      <line num="25" count="1" type="stmt"/>
-      <line num="33" count="1" type="stmt"/>
-      <line num="34" count="2" type="stmt"/>
-      <line num="35" count="2" type="stmt"/>
-      <line num="39" count="1" type="stmt"/>
+      <line num="7" count="52" type="stmt"/>
+      <line num="11" count="2" type="stmt"/>
+      <line num="16" count="39" type="stmt"/>
+      <line num="17" count="39" type="cond" truecount="2" falsecount="0"/>
+      <line num="18" count="11" type="stmt"/>
+      <line num="20" count="28" type="stmt"/>
+      <line num="21" count="28" type="stmt"/>
+      <line num="27" count="28" type="stmt"/>
+      <line num="28" count="28" type="stmt"/>
+      <line num="33" count="2" type="stmt"/>
+      <line num="34" count="2" type="cond" truecount="4" falsecount="0"/>
+      <line num="35" count="1" type="stmt"/>
+      <line num="37" count="1" type="stmt"/>
+      <line num="40" count="10" type="stmt"/>
+      <line num="41" count="10" type="stmt"/>
+      <line num="45" count="10" type="stmt"/>
+      <line num="47" count="10" type="cond" truecount="2" falsecount="0"/>
+      <line num="48" count="9" type="stmt"/>
+      <line num="50" count="1" type="stmt"/>
+      <line num="55" count="16" type="stmt"/>
+      <line num="59" count="16" type="stmt"/>
+      <line num="63" count="16" type="stmt"/>
+      <line num="68" count="6" type="stmt"/>
+      <line num="84" count="6" type="stmt"/>
+      <line num="87" count="6" type="stmt"/>
+      <line num="88" count="6" type="stmt"/>
+      <line num="89" count="6" type="stmt"/>
+      <line num="90" count="6" type="stmt"/>
+      <line num="96" count="13" type="stmt"/>
+      <line num="100" count="6" type="cond" truecount="2" falsecount="0"/>
+      <line num="104" count="3" type="stmt"/>
+      <line num="105" count="3" type="cond" truecount="2" falsecount="0"/>
+      <line num="106" count="1" type="stmt"/>
+      <line num="108" count="2" type="stmt"/>
+      <line num="109" count="2" type="stmt"/>
+      <line num="110" count="3" type="stmt"/>
+      <line num="111" count="3" type="stmt"/>
+      <line num="113" count="2" type="stmt"/>
+      <line num="118" count="3" type="stmt"/>
+      <line num="119" count="3" type="stmt"/>
+      <line num="120" count="3" type="stmt"/>
+      <line num="121" count="3" type="cond" truecount="5" falsecount="0"/>
+      <line num="123" count="2" type="stmt"/>
+      <line num="125" count="1" type="stmt"/>
+      <line num="134" count="3" type="stmt"/>
+      <line num="135" count="3" type="stmt"/>
+      <line num="136" count="3" type="stmt"/>
+      <line num="137" count="3" type="cond" truecount="5" falsecount="0"/>
+      <line num="139" count="2" type="stmt"/>
+      <line num="141" count="1" type="stmt"/>
+      <line num="149" count="1" type="stmt"/>
+    </file>
+    <file name="schemas.js" path="/Users/sarah/Desktop/CIS557/cis557-project-photo-sharing-social-network-app-404-not-found/api/models/schemas.js">
+      <metrics statements="13" coveredstatements="13" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+      <line num="1" count="1" type="stmt"/>
+      <line num="2" count="1" type="stmt"/>
+      <line num="3" count="1" type="stmt"/>
+      <line num="5" count="1" type="stmt"/>
+      <line num="10" count="1" type="stmt"/>
+      <line num="11" count="152" type="stmt"/>
+      <line num="13" count="1" type="stmt"/>
+      <line num="27" count="1" type="stmt"/>
+      <line num="36" count="1" type="stmt"/>
+      <line num="37" count="10" type="stmt"/>
+      <line num="38" count="10" type="stmt"/>
+      <line num="39" count="10" type="stmt"/>
+      <line num="43" count="1" type="stmt"/>
     </file>
   </project>
 </coverage>

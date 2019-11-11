@@ -89,20 +89,28 @@ describe('friend tests', () => {
   });
 
   test('followUser and getFriend test', async () => {
+    let user1Friends = await db.getFolloweesForUsername('user1');
+    expect(Array.from(user1Friends)).toEqual([]);
     await db.followUser('user1', 'user2');
     await db.followUser('user1', 'user3');
     await db.followUser('user2', 'user3');
-    const user1Friends = await db.getFolloweesForUsername('user1');
+    user1Friends = await db.getFolloweesForUsername('user1');
     expect(user1Friends[0]).toEqual('user2');
     expect(user1Friends[1]).toEqual('user3');
     const user2Friends = await db.getFolloweesForUsername('user2');
     expect(user2Friends[0]).toEqual('user3');
   });
+
+  test('getFriend non-existent user', async () => {
+    const user1Friends = await db.getFolloweesForUsername('sarah');
+    expect(Array.from(user1Friends)).toEqual([]);
+  });
 });
 
 describe('post tests', () => {
   beforeEach(async () => {
-    await Schemas.Post.deleteMany({});
+    await Schemas.Post.deleteMany();
+    await Schemas.User.deleteMany();
     await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
     await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
     await db.followUser('cbros', 'neilshweky');
@@ -125,6 +133,94 @@ describe('post tests', () => {
     expect(friend.posts[0]).toEqual(post.uid);
     const self = await db.getUser('cbros');
     expect(self.posts[0]).toEqual(post.uid);
+  });
+
+  test('getPost test', async () => {
+    const post = await db.postPicture('picture', 'cbros');
+    const retrieved = await db.getPost(post.uid);
+    expect(retrieved).not.toBeNull();
+  });
+
+  test('getPost non-existing post', async () => {
+    const retrieved = await db.getPost('1');
+    expect(retrieved).toBeNull();
+  });
+
+  test('getPostIdsForUserAndNum non-existing user', async () => {
+    const retrieved = await db.getPostIdsForUserAndNum('sarah', 1);
+    expect(retrieved).toBeNull();
+  });
+
+  test('getPostIdsForUserAndNum valid user', async () => {
+    const post = await db.postPicture('picture', 'cbros');
+    const post2 = await db.postPicture('picture2', 'neilshweky');
+    const retrievedC = await db.getPostIdsForUserAndNum('cbros', 0);
+    const retrievedN = await db.getPostIdsForUserAndNum('neilshweky', 0);
+    expect(retrievedC[0]).toEqual(post.uid);
+    expect(retrievedC.length).toBe(1);
+    expect(retrievedN[0]).toEqual(post2.uid);
+    expect(retrievedN[1]).toEqual(post.uid);
+    expect(retrievedN.length).toBe(2);
+  });
+
+  test('getPostsForUserAndNum non-existing user', async () => {
+    const retrieved = await db.getPostsForUserAndNum('sarah', 1);
+    expect(retrieved).toBeNull();
+  });
+
+  test('getPostsForUserAndNum valid user', async () => {
+    await db.postPicture('picture', 'cbros');
+    await db.postPicture('picture2', 'neilshweky');
+    const retrievedC = await db.getPostsForUserAndNum('cbros', 0);
+    const retrievedN = await db.getPostsForUserAndNum('neilshweky', 0);
+    expect(retrievedC.length).toBe(1);
+    expect(retrievedC[0].username).toBe('cbros');
+    expect(retrievedN.length).toBe(2);
+    expect(retrievedN[0].username).toBe('neilshweky');
+    expect(retrievedN[1].username).toBe('cbros');
+
+
+  });
+});
+
+describe('like/unlike tests', () => {
+  beforeEach(async () => {
+    await Schemas.Post.deleteMany({});
+    await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
+    await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await db.followUser('cbros', 'neilshweky');
+  });
+
+  test('like-then-unlike test', async () => {
+    const post = await db.createPost('some_pic', 'neilshweky');
+    await db.likePost('cbros', post.uid);
+    const likedPost = await db.getPost(post.uid);
+    expect(Array.from(likedPost.likes)).toEqual(['cbros']);
+    await db.unlikePost('cbros', post.uid);
+    const unlikedPost = await db.getPost(post.uid);
+    expect(Array.from(unlikedPost.likes)).toEqual([]);
+  });
+
+  test('like non-existing post test', async () => {
+    const nopost = await db.likePost('cbros', 'random_id');
+    expect(nopost).toBeNull();
+  });
+
+  test('unlike non-existing post test', async () => {
+    const nopost = await db.unlikePost('cbros', 'random_id');
+    expect(nopost).toBeNull();
+  });
+
+  test('like post from non-existing user test', async () => {
+    const post = await db.createPost('some_pic', 'neilshweky');
+    const nopost = await db.likePost('no_user', post.uid);
+    expect(nopost).toBeNull();
+  });
+
+  test('unlike post from non-existing user test', async () => {
+    const post = await db.createPost('some_pic', 'neilshweky');
+    const nopost = await db.unlikePost('no_user', post.uid);
+    expect(nopost).toBeNull();
   });
 });
 

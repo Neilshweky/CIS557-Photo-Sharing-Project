@@ -44,7 +44,7 @@ function createPost(picture, username) {
 function getFolloweesForUsername(username) { // 
   return Schemas.User.findOne({ username }, { followees: 1 })
     .then((user) => {
-      if (user != null && 'followees' in user)
+      if (user != null)
         return user.followees
       else
         return []
@@ -97,11 +97,14 @@ function getPost(uid) {
 }
 
 function getPostIdsForUserAndNum(username, num) {
-  return Schemas.User.findOne({ username }, { posts: { $slice: [num, 2] } }).then((data) => data.posts);
-}
+  return Schemas.User.findOne({ username }, { posts: { $slice: [num, 1000] } }).then((data) => { if (data == null) { return null } else { return data.posts } })
+};
 
 function getPostsForUserAndNum(username, num) {
   return getPostIdsForUserAndNum(username, parseInt(num)).then(async (posts) => {
+    if (posts == null) {
+      return null;
+    }
     final = [];
     for (let i = 0; i < posts.length; i++) {
       var post = posts[i];
@@ -112,19 +115,34 @@ function getPostsForUserAndNum(username, num) {
 }
 
 async function likePost(username, uid) {
-  console.log("liking post: ", username + ", uid")
-  return Schemas.Post.updateOne(
-    { uid },
-    { $push: { likes: username } },
-  )
+  console.log("liking post: ", username, ", ", uid)
+  const existingUser = await getUser(username);
+  const post = await getPost(uid);
+  if (existingUser == null || post == null ||
+    existingUser.followees.indexOf(post.username) == -1) {
+    return null;
+  } else {
+    return Schemas.Post.updateOne(
+      { uid },
+      { $push: { likes: username } },
+    )
+  }
+
 }
 
 async function unlikePost(username, uid) {
-  console.log("unliking post: ", username + ", uid")
-  return Schemas.Post.updateOne(
-    { uid },
-    { $pull: { likes: username } },
-  )
+  console.log("unliking post: ", username, ", ", uid)
+  const existingUser = await getUser(username);
+  const post = await getPost(uid);
+  if (existingUser == null || post == null ||
+    existingUser.followees.indexOf(post.username) == -1) {
+    return null;
+  } else {
+    return Schemas.Post.updateOne(
+      { uid },
+      { $pull: { likes: username } },
+    )
+  }
 }
 
 
@@ -138,6 +156,7 @@ module.exports = {
   followUser,
   getFolloweesForUsername,
   getPost,
+  getPostIdsForUserAndNum,
   getPostsForUserAndNum,
   likePost,
   unlikePost
