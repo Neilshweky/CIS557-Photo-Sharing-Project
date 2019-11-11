@@ -84,7 +84,7 @@ class SimpleProfile extends React.Component {
     this.handleTabChange = this.handleTabChange.bind(this);
     this.generatePosts = this.generatePosts.bind(this);
     this.state = {
-      username: '', email: '', friends: [], profilePic: '', index: 0, reactPosts: [],
+      username: '', email: '', followees: [], followers: [], profilePic: '', index: 0, reactPosts: [],
     };
   }
 
@@ -108,7 +108,8 @@ class SimpleProfile extends React.Component {
       this.setState({
         username,
         email: data.email,
-        friends: data.friends,
+        followers: data.followers,
+        followees: data.followees,
         profilePic: data.profilePicture,
       }, () => this.generatePosts());
     }
@@ -135,7 +136,7 @@ class SimpleProfile extends React.Component {
   render() {
     const { classes } = this.props;
     const {
-      username, email, password, friends, profilePic, index, reactPosts,
+      username, email, password, followers, followees, profilePic, index, reactPosts,
     } = this.state;
     let comp = null;
     try {

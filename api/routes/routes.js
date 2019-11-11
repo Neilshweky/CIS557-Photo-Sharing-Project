@@ -93,6 +93,11 @@ const unlikePost = (req, res) => {
   db.unlikePost(username, postid).then(() => { res.status(200).send('Post unliked'); }).catch((err) => res.status(500).send(err));
 };
 
+const follow = (req, res) => {
+  const { username, friend } = req.params;
+  db.followUser(username, friend).then(() => { res.status(200).send(`${username} followed ${friend}`); }).catch((err) => res.status(500).send(err));
+};
+
 module.exports = {
   signup,
   login,
@@ -102,4 +107,5 @@ module.exports = {
   getPosts,
   likePost,
   unlikePost,
+  follow,
 };
