@@ -133,7 +133,7 @@ describe('like/unlike tests', () => {
     await Schemas.Post.deleteMany({});
     await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
     await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
-    await db.addFriend('cbros', 'neilshweky');
+    await db.followUser('cbros', 'neilshweky');
   });
 
   test('like-then-unlike test', async () => {
@@ -156,18 +156,6 @@ describe('like/unlike tests', () => {
     const nopost = await db.unlikePost('cbros', 'random_id');
     expect(nopost.n).toBe(0);
     expect(nopost.nModified).toBe(0);
-  });
-
-  test('like post from non-existing user test', async () => {
-    const post = await db.createPost('some_pic', 'neilshweky');
-    const nopost = await db.likePost('no_user', post.uid);
-    expect(nopost).toBeNull();
-  });
-
-  test('unlike post from non-existing user test', async () => {
-    const post = await db.createPost('some_pic', 'neilshweky');
-    const nopost = await db.unlikePost('no_user', post.uid);
-    expect(nopost).toBeNull();
   });
 });
 
