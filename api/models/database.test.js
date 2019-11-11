@@ -155,18 +155,6 @@ describe('like/unlike tests', () => {
     const nopost = await db.unlikePost('cbros', 'random_id');
     expect(nopost).toBeNull();
   });
-
-  test('like post from non-existing user test', async () => {
-    const post = await db.createPost('some_pic', 'neilshweky');
-    const nopost = await db.likePost('no_user', post.uid);
-    expect(nopost).toBeNull();
-  });
-
-  test('unlike post from non-existing user test', async () => {
-    const post = await db.createPost('some_pic', 'neilshweky');
-    const nopost = await db.unlikePost('no_user', post.uid);
-    expect(nopost).toBeNull();
-  });
 });
 
 afterAll(async (done) => {
