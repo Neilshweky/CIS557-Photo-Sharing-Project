@@ -41,21 +41,27 @@ function createPost(picture, username) {
   return post.save();
 }
 
-function getFriendsForUsername(username) {
-  return Schemas.User.findOne({ username }, { friends: 1 })
+function getFolloweesForUsername(username) { // 
+  return Schemas.User.findOne({ username }, { followees: 1 })
     .then((user) => {
-      if (user != null && 'friends' in user)
-        return user.friends
+      if (user != null && 'followees' in user)
+        return user.followees
       else
         return []
     });
 }
 
-function addFriend(username, friend) {
-  return Schemas.User.updateOne(
+function followUser(username, friend) { // follow a user
+  const p1 = Schemas.User.updateOne(
     { username },
-    { $push: { friends: friend } },
+    { $push: { followees: friend } },
   );
+  const p2 = Schemas.User.updateOne(
+    { friend },
+    { $push: { followers: username } },
+  );
+  return Promise.all([p1, p2]);
+
 }
 
 function addPostIDToUsers(postID, usernames) {
@@ -76,7 +82,7 @@ function addPostIDToUsers(postID, usernames) {
 // 2. get all of current users friends
 function postPicture(picture, username) {
   return Promise
-    .all([createPost(picture, username), getFriendsForUsername(username)])
+    .all([createPost(picture, username), getFolloweesForUsername(username)])
     .then((values) => {
       const post = values[0];
       const friends = values[1];
@@ -129,8 +135,8 @@ module.exports = {
   checkLogin,
   postPicture,
   createPost,
-  addFriend,
-  getFriendsForUsername,
+  followUser,
+  getFolloweesForUsername,
   getPost,
   getPostsForUserAndNum,
   likePost,
