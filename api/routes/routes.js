@@ -83,7 +83,10 @@ const getPosts = (req, res) => {
 
 const likePost = (req, res) => {
   const { username, postid } = req.params;
-  db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
+  const post = db.getPost(postid);
+  const poster = db.getUser(post.username);
+  if ()
+    db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
 };
 const unlikePost = (req, res) => {
   const { username, postid } = req.params;

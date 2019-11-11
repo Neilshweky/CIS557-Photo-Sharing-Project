@@ -243,7 +243,7 @@ class SimpleProfile extends React.Component {
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
-          {/* <FriendTable bProfilePage={false} /> */}
+          <FriendTable bProfilePage={false} />
         </TabPanel>
         <CssBaseline />
         <Box mt={5} />

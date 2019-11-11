@@ -136,19 +136,23 @@ describe('like/unlike tests', () => {
   test('like-then-unlike test', async () => {
     const post = await db.createPost('some_pic', 'neilshweky');
     await db.likePost('cbros', post.uid);
-    expect(Array.from(post.likes)).toEqual(['cbros']);
+    const likedPost = await db.getPost(post.uid);
+    expect(Array.from(likedPost.likes)).toEqual(['cbros']);
     await db.unlikePost('cbros', post.uid);
-    expect(Array.from(post.likes)).toEqual([]);
+    const unlikedPost = await db.getPost(post.uid);
+    expect(Array.from(unlikedPost.likes)).toEqual([]);
   });
 
   test('like non-existing post test', async () => {
     const nopost = await db.likePost('cbros', 'random_id');
-    expect(nopost).toBeNull();
+    expect(nopost.n).toBe(0);
+    expect(nopost.nModified).toBe(0);
   });
 
   test('unlike non-existing post test', async () => {
     const nopost = await db.unlikePost('cbros', 'random_id');
-    expect(nopost).toBeNull();
+    expect(nopost.n).toBe(0);
+    expect(nopost.nModified).toBe(0);
   });
 
   test('like post from non-existing user test', async () => {
@@ -162,7 +166,6 @@ describe('like/unlike tests', () => {
     const nopost = await db.unlikePost('no_user', post.uid);
     expect(nopost).toBeNull();
   });
-
 });
 
 afterAll(async (done) => {
