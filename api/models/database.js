@@ -113,18 +113,33 @@ function getPostsForUserAndNum(username, num) {
 
 async function likePost(username, uid) {
   console.log("liking post: ", username, ", ", uid)
-  return Schemas.Post.updateOne(
-    { uid },
-    { $push: { likes: username } },
-  )
+  const existingUser = await getUser(username);
+  const post = await getPost(uid);
+  if (existingUser == null || post == null ||
+    existingUser.followees.indexOf(post.username) == -1) {
+    return null;
+  } else {
+    return Schemas.Post.updateOne(
+      { uid },
+      { $push: { likes: username } },
+    )
+  }
+
 }
 
 async function unlikePost(username, uid) {
   console.log("unliking post: ", username, ", ", uid)
-  return Schemas.Post.updateOne(
-    { uid },
-    { $pull: { likes: username } },
-  )
+  const existingUser = await getUser(username);
+  const post = await getPost(uid);
+  if (existingUser == null || post == null ||
+    existingUser.followees.indexOf(post.username) == -1) {
+    return null;
+  } else {
+    return Schemas.Post.updateOne(
+      { uid },
+      { $pull: { likes: username } },
+    )
+  }
 }
 
 

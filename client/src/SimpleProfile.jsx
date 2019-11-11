@@ -239,7 +239,7 @@ class SimpleProfile extends React.Component {
         <TabPanel value={index} index={1}>
           <Container>
             <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
-              {reactPosts.map((comp) => comp)}
+              {reactPosts.map((reactComp) => reactComp)}
             </Box>
           </Container>
         </TabPanel>
