@@ -84,7 +84,7 @@ class SimpleProfile extends React.Component {
     this.handleTabChange = this.handleTabChange.bind(this);
     this.generatePosts = this.generatePosts.bind(this);
     this.state = {
-      username: '', email: '', friends: [], profilePic: '', index: 0, reactPosts: [],
+      username: '', email: '', followees: [], followers: [], profilePic: '', index: 0, reactPosts: [],
     };
   }
 
