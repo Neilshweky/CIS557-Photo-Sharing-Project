@@ -188,7 +188,7 @@ class SimpleProfile extends React.Component {
     }
     return (
       <div>
-        <AppToolbar />
+        {dataLoaded && <AppToolbar />}
         <Tabs
           value={index}
           onChange={this.handleTabChange}
@@ -235,7 +235,7 @@ class SimpleProfile extends React.Component {
                       </Typography>
                       <Typography variant="h5">
                         Following
-                        </Typography>
+                      </Typography>
                     </Grid>
                   </Grid>
                 </Grid>

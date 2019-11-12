@@ -10,7 +10,7 @@ import AppToolbar from './AppToolbar';
 class ImageUpload extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { picture: null };
+    this.state = { picture: null, dataLoaded: false };
     this.onDrop = this.onDrop.bind(this);
     this.uploadImage = this.uploadImage.bind(this);
   }
@@ -23,6 +23,8 @@ class ImageUpload extends React.Component {
       localStorage.clear();
       const { history } = this.props;
       history.push('/signin');
+    } else {
+      this.setState({ dataLoaded: true });
     }
   }
 
@@ -67,10 +69,10 @@ class ImageUpload extends React.Component {
   }
 
   render() {
-    const { picture } = this.state;
+    const { picture, dataLoaded } = this.state;
     return (
       <div>
-        <AppToolbar />
+        {dataLoaded && <AppToolbar />}
         <h1 id="welcome">
           Welcome.
           {localStorage.getItem('user')}
