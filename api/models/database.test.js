@@ -89,6 +89,11 @@ describe('friend tests', () => {
     await db.createUser('user3', 'user3@seas.upenn.edu', 'pw-3', 'pic3');
   });
 
+  test('getFollowers no such user', async () => {
+    const resp = await db.getFollowersForUsername('sarah');
+    expect(Array.from(resp)).toEqual([]);
+  });
+
   test('followUser and getFriend test', async () => {
     let user1Friends = await db.getFolloweesForUsername('user1');
     expect(Array.from(user1Friends)).toEqual([]);
@@ -272,7 +277,6 @@ describe('update user tests', () => {
 
   test('update password', async () => {
     let user2 = await db.getUser('neilshweky');
-    console.log(user2.password);
     expect(user2.password).toEqual(SHA256('pw-2').toString());
     await db.updatePassword('neilshweky', 'pw-2', '123');
     user2 = await db.getUser('neilshweky');
@@ -289,6 +293,28 @@ describe('update user tests', () => {
     await db.updatePassword('neilshweky', 'pw-3', 'something').catch((err) => {
       expect(err.message).toEqual('incorrect password');
     });
+  });
+});
+
+describe('user search tests', () => {
+  beforeEach(async () => {
+    await Schemas.User.deleteMany();
+    await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
+    await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await db.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-3', 'pic3');
+    await db.followUser('cbros', 'neilshweky');
+  });
+
+  test('search returns all related users', async () => {
+    const results = await db.getUsersForTerm('neil');
+    expect(results.length).toBe(2);
+    const results2 = await db.getUsersForTerm('sarah');
+    expect(results2.length).toBe(0);
+  });
+
+  test('search returns all related users but not user', async () => {
+    const results = await db.getSearchSuggestions('neilshweky', 'neil');
+    expect(results.length).toBe(1);
   });
 });
 
