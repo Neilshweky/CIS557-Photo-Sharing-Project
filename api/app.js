@@ -29,6 +29,7 @@ app.use(cors());
 app.get('/', (req, res) => { res.send('Hello, World\n'); });
 app.post('/signup', routes.signup);
 app.post('/login', routes.login);
+app.post('/updateProfile', routes.updateProfile);
 app.post('/postpicture', routes.postPicture);
 app.get('/user/:username', routes.getUser);
 app.delete('/user/:username', routes.deleteUser);

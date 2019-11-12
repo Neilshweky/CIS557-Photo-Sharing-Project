@@ -30,16 +30,6 @@ async function createUser(username, email, password, profilePicture) {
   return user.save();
 }
 
-// Update user's username
-function updateUsername(username, newUsername) {
-  const user = await getUser(username);
-  if (user == null) {
-    return null;
-  }
-  user.username = newUsername;
-  return user.save();
-}
-
 // Update user's email
 function updateEmail(username, email) {
   const user = await getUser(username);
@@ -63,7 +53,7 @@ function updateProfilePic(username, profilePicture) {
 // Update user's password. Requires old password, returns null if it's incorrect
 function updatePassword(username, oldPassword, newPassword) {
   const user = await getUser(username);
-  if (user == null || user.password !== SHA256(password).toString()) {
+  if (user == null || user.password !== SHA256(oldPassword).toString()) {
     return null;
   }
   const encryptedPassword = SHA256(newPassword);
