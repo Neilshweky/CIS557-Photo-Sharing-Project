@@ -265,7 +265,7 @@ class SimpleProfile extends React.Component {
                   </div>
                 </label>
               </div>
-              <Typography component="h1" variant="h5">
+              <Typography component="h1" variant="h5" id="username">
                 {username}
               </Typography>
               <form className={classes.form} noValidate onSubmit={this.signup}>

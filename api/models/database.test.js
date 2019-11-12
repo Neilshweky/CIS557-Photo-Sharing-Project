@@ -191,8 +191,6 @@ describe('post tests', () => {
     expect(retrievedN.length).toBe(2);
     expect(retrievedN[0].username).toBe('neilshweky');
     expect(retrievedN[1].username).toBe('cbros');
-
-
   });
 });
 
