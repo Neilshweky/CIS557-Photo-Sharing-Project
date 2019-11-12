@@ -39,16 +39,35 @@ const styles = (theme) => ({
 class SimpleTable extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { curUser: localStorage.getItem('user'), followees: props.followees };
+    this.state = { curUser: localStorage.getItem('user'), data: this.props.data, bProfilePage: this.props.bProfilePage };
     this.unfollow = this.unfollow.bind(this);
   }
 
+  // componentDidMount() {
+  //   const { data } = this.state;
+  //   this.setState({ data });
+  // }
+
+  // componentDidUpdate(prevProps) {
+  //   if (prevProps.data !== this.props.data) {
+  //     // this.setState({ data: this.props.data });
+  //     this.render();
+  //   }
+  // }
+
   async unfollow(toUnfollowIndex) {
-    // console.log(toUnfollowIndex);
-    const { curUser, followees } = this.state;
-    const unfollowed = followees.splice(toUnfollowIndex, 1);
-    this.setState({ followees });
-    const resp = await fetch(`http://localhost:8080/unfollow/${curUser}/${unfollowed[0].username}`,
+    const { curUser, data } = this.state;
+    const { bProfilePage } = this.props;
+    const unfollowed = data[toUnfollowIndex].username;
+    if (bProfilePage) {
+      data.splice(toUnfollowIndex, 1);
+    } else {
+      data[toUnfollowIndex].following = false;
+    }
+    this.setState({ data });
+
+
+    await fetch(`http://localhost:8080/unfollow/${curUser}/${unfollowed}`,
       {
         method: 'POST',
         headers: {
@@ -57,17 +76,25 @@ class SimpleTable extends React.Component {
         },
         mode: 'cors',
       });
-    if (resp.ok) {
-      console.log(resp.text());
-    }
   }
 
-  // async handleClickAdd() {
-
-  // }
+  async follow(toFollowIndex) {
+    const { curUser, data } = this.state;
+    data[toFollowIndex].following = true;
+    this.setState({ data });
+    await fetch(`http://localhost:8080/follow/${curUser}/${data[toFollowIndex].username}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+        },
+        mode: 'cors',
+      });
+  }
 
   render() {
-    const { classes, followees, bProfilePage, foreignUser } = this.props;
+    const { classes, data, bProfilePage, bLoggedInUser } = this.props;
     function getAvatar(username, profilePicture) {
       let comp = null;
       try {
@@ -99,36 +126,38 @@ class SimpleTable extends React.Component {
       <Paper className={classes.root}>
         <Table className={classes.table} aria-label="simple table">
           <TableBody>
-            {followees.map((followee, i) => (
-              <TableRow key={followee.username}>
-                <TableCell>
-                  <ListItem>
-                    <ListItemAvatar>
-                      <Avatar>
-                        {getAvatar(followee.username, followee.profilePicture)}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText>
-                      <Link href={`/profile/${followee.username}`}>{followee.username}</Link>
-                    </ListItemText>
-                  </ListItem>
-                </TableCell>
-                {foreignUser && (
-                  <TableCell align="right">
-                    {bProfilePage && (
-                      <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(i)}>
-                        <DeleteOutlinedIcon />
-                      </IconButton>
-                    )}
-                    {!bProfilePage && (
-                      <IconButton edge="end" aria-label="delete" onClick={() => this.follow(i)}>
-                        <AddCircleOutlineOutlinedIcon />
-                      </IconButton>
-                    )}
+            {data.map((row, i) => {
+              return (
+                <TableRow key={row.username}>
+                  <TableCell>
+                    <ListItem>
+                      <ListItemAvatar>
+                        <Avatar>
+                          {getAvatar(row.username, row.profilePicture)}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText>
+                        <Link href={`/profile/${row.username}`}>{row.username}</Link>
+                      </ListItemText>
+                    </ListItem>
                   </TableCell>
-                )}
-              </TableRow>
-            ))}
+                  {bLoggedInUser && (
+                    <TableCell align="right">
+                      {(bProfilePage || row.following) ? (
+                        <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(i)}>
+                          <DeleteOutlinedIcon />
+                        </IconButton>
+                      )
+                        : (
+                          <IconButton edge="end" aria-label="add" onClick={() => this.follow(i)}>
+                            <AddCircleOutlineOutlinedIcon />
+                          </IconButton>
+                        )}
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Paper>
@@ -137,10 +166,11 @@ class SimpleTable extends React.Component {
 }
 
 SimpleTable.propTypes = {
-  followees: PropTypes.arrayOf(
+  data: PropTypes.arrayOf(
     PropTypes.shape({
       username: PropTypes.string.isRequired,
       profilePicture: PropTypes.string,
+      curFollowing: PropTypes.string,
     }),
   ).isRequired,
   bProfilePage: PropTypes.bool.isRequired,

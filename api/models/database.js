@@ -97,7 +97,7 @@ function getFollowersForUsername(username) { //
 }
 
 function followUser(username, friend) { // follow a user
-  
+
   const p1 = Schemas.User.updateOne(
     { username },
     { $push: { followees: friend } },
@@ -221,7 +221,7 @@ function getSearchSuggestions(username, term) {
 
 function getUsersForTerm(term) {
   var regex = new RegExp('^' + term, 'i')
-  return Schemas.User.find({username: {$regex: regex}}, {username:1, profilePicture:1}).limit(10)
+  return Schemas.User.find({ username: { $regex: regex } }, { username: 1, profilePicture: 1 }).limit(10)
 }
 
 
