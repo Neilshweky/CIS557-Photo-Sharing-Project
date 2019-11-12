@@ -79,6 +79,9 @@ const useStyles = makeStyles((theme) => ({
       display: 'none',
     },
   },
+  avatar: {
+    backgroundColor: theme.palette.secondary.main,
+  },
 }));
 
 export default function AppToolbar() {
