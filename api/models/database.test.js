@@ -99,6 +99,7 @@ describe('friend tests', () => {
     expect(user1Friends[1]).toEqual('user3');
     const user2Friends = await db.getFolloweesForUsername('user2');
     expect(user2Friends[0]).toEqual('user3');
+    expect(Array.from(await db.getFollowersForUsername('user3'))).toEqual(['user1', 'user2']);
   });
 
   test('getFriend non-existent user', async () => {
