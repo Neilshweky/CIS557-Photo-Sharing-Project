@@ -30,6 +30,9 @@ const styles = (theme) => ({
     flexDirection: 'column',
     alignItems: 'center',
   },
+  skinnyPaper: {
+    maxWidth: 800,
+  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
@@ -185,7 +188,7 @@ class SimpleProfile extends React.Component {
     }
     return (
       <div>
-        <AppToolbar />
+        {dataLoaded && <AppToolbar />}
         <Tabs
           value={index}
           onChange={this.handleTabChange}
@@ -193,21 +196,73 @@ class SimpleProfile extends React.Component {
           textColor="primary"
           centered
         >
-          <Tab label="Account Information" />
+          <Tab label="Profile Information" />
           <Tab label="My Posts" />
           <Tab label="Who Do I Follow?" />
+          {foreignUser && <Tab label="Account Settings" />}
         </Tabs>
         <TabPanel value={index} index={0}>
           <Container>
             <div className={classes.paper}>
               <div id="photo-avatar">
-                <input type="file" id="upload-profile-pic" hidden disabled={!foreignUser} />
+                {comp}
+              </div>
+              <Typography component="h1" variant="h5">
+                {username}
+              </Typography>
+              <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
+                <Grid item xs={12}>
+                  <Grid container justify="center" spacing={1}>
+                    <Grid item xs={4} alignItems="center">
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {this.state.reactPosts.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Posts
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {this.state.followers.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Followers
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {this.state.followees.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Following
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </div>
+          </Container>
+        </TabPanel>
+        <TabPanel value={index} index={1}>
+          <Container>
+            <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
+              {reactPosts.map((reactComp) => reactComp)}
+            </Box>
+          </Container>
+        </TabPanel>
+        <TabPanel value={index} index={2}>
+          {dataLoaded ? <FriendTable bProfilePage followees={followeeData} foreignUser /> : ''}
+        </TabPanel>
+        <TabPanel value={index} index={3}>
+          <Container>
+            <div className={classes.paper}>
+              <div id="photo-avatar">
+                <input type="file" id="upload-profile-pic" hidden />
                 <label htmlFor="upload-profile-pic">
                   {comp}
-
-                  {foreignUser && <div className="overlay">
+                  <div className="overlay">
                     <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
-                  </div>}
+                  </div>
                 </label>
               </div>
               <Typography component="h1" variant="h5">
@@ -245,34 +300,22 @@ class SimpleProfile extends React.Component {
                     </Grid>
                   </Grid>
                 </Grid>
-                {foreignUser && (
-                  <Button
-                    className={classes.submit}
-                    id="loginsubmit"
-                    color="primary"
-                    type="submit"
-                    variant="contained"
-                  >
-                    Update
-                  </Button>
-                )}
+                <Button
+                  className={classes.submit}
+                  id="loginsubmit"
+                  color="primary"
+                  type="submit"
+                  variant="contained"
+                >
+                  Update
+                </Button>
               </form>
             </div>
           </Container>
         </TabPanel>
-        <TabPanel value={index} index={1}>
-          <Container>
-            <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
-              {reactPosts.map((reactComp) => reactComp)}
-            </Box>
-          </Container>
-        </TabPanel>
-        <TabPanel value={index} index={2}>
-          {dataLoaded ? <FriendTable bProfilePage followees={followeeData} foreignUser /> : ''}
-        </TabPanel>
         <CssBaseline />
         <Box mt={5} />
-      </div>
+      </div >
     );
   }
 }

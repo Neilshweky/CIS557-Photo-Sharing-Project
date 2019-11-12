@@ -8,7 +8,7 @@ import AppToolbar from './AppToolbar';
 class Homepage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { username: '', reactPosts: [] };
+    this.state = { username: '', reactPosts: [], dataLoaded: false, };
     this.generatePosts = this.generatePosts.bind(this);
   }
 
@@ -21,7 +21,7 @@ class Homepage extends React.Component {
       const { history } = this.props;
       history.push('/signin');
     }
-    this.setState({ username }, () => this.generatePosts());
+    this.setState({ username, dataLoaded: true }, () => this.generatePosts());
     this.render();
   }
 
@@ -40,10 +40,10 @@ class Homepage extends React.Component {
   }
 
   render() {
-    const { reactPosts } = this.state;
+    const { reactPosts, dataLoaded } = this.state;
     return (
       <div>
-        <AppToolbar />
+        {dataLoaded && <AppToolbar />}
         <Container>
           <h1 id="welcome">
             Welcome.
