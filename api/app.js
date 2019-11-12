@@ -33,6 +33,7 @@ app.post('/updateProfile', routes.updateProfile);
 app.post('/postpicture', routes.postPicture);
 app.get('/user/:username', routes.getUser);
 app.delete('/user/:username', routes.deleteUser);
+
 app.get('/posts/:username/:num', routes.getPosts);
 app.post('/like/:postid/:username', routes.likePost);
 app.post('/unlike/:postid/:username', routes.unlikePost);
