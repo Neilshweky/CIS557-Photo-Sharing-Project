@@ -31,17 +31,17 @@ async function createUser(username, email, password, profilePicture) {
 }
 
 // Update user's email
-function updateEmail(username, email) {
+async function updateEmail(username, email) {
   const user = await getUser(username);
   if (user == null) {
-    return null;
+    return Promise.reject(new Error('no user found'));
   }
   user.email = email;
   return user.save();
 }
 
 // Update user's profile picture
-function updateProfilePic(username, profilePicture) {
+async function updateProfilePic(username, profilePicture) {
   const user = await getUser(username);
   if (user == null) {
     return null;
@@ -51,7 +51,7 @@ function updateProfilePic(username, profilePicture) {
 }
 
 // Update user's password. Requires old password, returns null if it's incorrect
-function updatePassword(username, oldPassword, newPassword) {
+async function updatePassword(username, oldPassword, newPassword) {
   const user = await getUser(username);
   if (user == null || user.password !== SHA256(oldPassword).toString()) {
     return null;
@@ -170,7 +170,7 @@ function getPostsForUserAndNum(username, num) {
 }
 
 async function likePost(username, uid) {
-  console.log("liking post: ", username, ", ", uid)
+  console.log('liking post: ', username, ', ', uid)
   const existingUser = await getUser(username);
   const post = await getPost(uid);
   if (existingUser == null || post == null ||
@@ -186,7 +186,7 @@ async function likePost(username, uid) {
 }
 
 async function unlikePost(username, uid) {
-  console.log("unliking post: ", username, ", ", uid)
+  console.log('unliking post: ', username, ', ', uid)
   const existingUser = await getUser(username);
   const post = await getPost(uid);
   if (existingUser == null || post == null ||
@@ -212,7 +212,7 @@ function getSearchSuggestions(username, term) {
       if (obj.username !== username)
         result.push({ username: obj.username, profilePicture: obj.profilePicture, following: f.has(obj.username) })
     }
-    console.log("HERE", result);
+    console.log('HERE', result);
     return result
   });
 }
@@ -228,6 +228,9 @@ module.exports = {
   deleteUser,
   createUser,
   checkLogin,
+  updateEmail,
+  updateProfilePic,
+  updatePassword,
   postPicture,
   createPost,
   followUser,

@@ -47,23 +47,20 @@ const login = (req, res) => {
 
 // Route for '/updateProfile', updates the user's profile
 const updateProfile = (req, res) => {
-  const username = req.body.username;
+  const { username } = req.body;
   if (req.body.email) {
     db.updateEmail(username, req.body.email)
       .then((data) => res.status(201).send(data))
       .catch((err) => res.status(500).send(err));
-  }
-  else if (req.body.profilePicture) {
+  } else if (req.body.profilePicture) {
     db.updateProfilePic(username, req.body.profilePicture)
       .then((data) => res.status(201).send(data))
       .catch((err) => res.status(500).send(err));
-  }
-  else if (req.body.oldPassword && req.body.newPassword) {
+  } else if (req.body.oldPassword && req.body.newPassword) {
     db.updateEmail(username, req.body.oldPassword, req.body.newPassword)
       .then((data) => res.status(201).send(data))
       .catch((err) => res.status(500).send(err));
-  }
-  else {
+  } else {
     res.status(400).send('Invalid profile update');
   }
 };

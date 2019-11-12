@@ -191,8 +191,6 @@ describe('post tests', () => {
     expect(retrievedN.length).toBe(2);
     expect(retrievedN[0].username).toBe('neilshweky');
     expect(retrievedN[1].username).toBe('cbros');
-
-
   });
 });
 
@@ -234,6 +232,29 @@ describe('like/unlike tests', () => {
     const post = await db.createPost('some_pic', 'neilshweky');
     const nopost = await db.unlikePost('no_user', post.uid);
     expect(nopost).toBeNull();
+  });
+});
+
+describe('update user tests', () => {
+  beforeEach(async () => {
+    await Schemas.Post.deleteMany({});
+    await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
+    await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await db.followUser('cbros', 'neilshweky');
+  });
+
+  test('update email', async () => {
+    let user2 = await db.getUser('neilshweky');
+    expect(user2.email).toBe('nshweky@seas.upenn.edu');
+    await db.updateEmail('neilshweky', 'something else');
+    user2 = await db.getUser('neilshweky');
+    expect(user2.email).toBe('something else');
+  });
+
+  test('update email no user', async () => {
+    await db.updateEmail('neilshweky3', 'something else').catch((err) => {
+      expect(err).toEqual({error: 'no user found'});
+    });
   });
 });
 
