@@ -105,6 +105,14 @@ function getPostsForUserAndNum(username, num) {
   })
 }
 
+async function likePost(username, postID) {
+  return Schemas.Post.updateOne(
+    { postID },
+    { $push: { likes: username } },
+  )
+}
+
+
 module.exports = {
   getUser,
   deleteUser,
@@ -116,4 +124,5 @@ module.exports = {
   getFriendsForUsername,
   getPost,
   getPostsForUserAndNum,
+  likePost,
 };
