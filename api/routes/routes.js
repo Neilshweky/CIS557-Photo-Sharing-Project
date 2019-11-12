@@ -109,6 +109,16 @@ const unfollow = (req, res) => {
   db.unfollowUser(username, friend).then(() => { res.status(200).send(`${username} unfollowed ${friend}`); }).catch((err) => res.status(500).send(err));
 };
 
+const searchUsers = (req, res) => {
+  const { username, term } = req.params;
+  db.getSearchSuggestions(username, term).then((data) => {
+    res.status(200).send(data);
+  }).catch((err) => {
+    res.status(500).send(err);
+  });
+};
+
+
 module.exports = {
   signup,
   login,
@@ -120,4 +130,5 @@ module.exports = {
   unlikePost,
   follow,
   unfollow,
+  searchUsers,
 };
