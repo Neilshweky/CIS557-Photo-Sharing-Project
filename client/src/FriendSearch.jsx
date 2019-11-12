@@ -1,10 +1,9 @@
-import { Container } from '@material-ui/core';
 import React from 'react';
 import Box from '@material-ui/core/Box';
+import PropTypes from 'prop-types';
 import FriendTable from './FriendTable';
 import AppToolbar from './AppToolbar';
 import { localStorage } from './Utilities';
-
 
 export default class FriendSearch extends React.Component {
   constructor(props) {
@@ -24,7 +23,6 @@ export default class FriendSearch extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
     const { data, bLoaded } = this.state;
     return (
       <div>
@@ -39,3 +37,11 @@ export default class FriendSearch extends React.Component {
     );
   }
 }
+
+FriendSearch.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      searchTerm: PropTypes.string.isRequired,
+    }),
+  }).isRequired,
+};

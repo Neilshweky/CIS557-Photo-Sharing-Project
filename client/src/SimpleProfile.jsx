@@ -25,7 +25,6 @@ const styles = (theme) => ({
     },
   },
   paper: {
-    // marginTop: theme.spacing(8),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -56,10 +55,7 @@ const styles = (theme) => ({
 });
 
 function TabPanel(props) {
-  const {
-    children, value, index, ...other
-  } = props;
-
+  const { children, value, index } = props;
   return (
     <Typography
       component="div"
@@ -67,7 +63,6 @@ function TabPanel(props) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      {...other}
     >
       <Box p={3}>{children}</Box>
     </Typography>
@@ -75,9 +70,9 @@ function TabPanel(props) {
 }
 
 TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+  children: PropTypes.node.isRequired,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.string.isRequired,
 };
 
 class SimpleProfile extends React.Component {
@@ -95,18 +90,19 @@ class SimpleProfile extends React.Component {
   componentDidMount() {
     const username = localStorage.getItem('user');
     const loginTime = localStorage.getItem('login');
-    const { history } = this.props;
+    const { history, match } = this.props;
     if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
       localStorage.clear();
       history.push('/signin');
     } else {
-      this.getProfile(this.props.match.params.username);
+      this.getProfile(match.params.username);
     }
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.match.params.username !== prevProps.match.params.username) {
-      this.getProfile(this.props.match.params.username);
+    const { match } = this.props;
+    if (match.params.username !== prevProps.match.params.username) {
+      this.getProfile(match.params.username);
     }
   }
 
@@ -122,7 +118,11 @@ class SimpleProfile extends React.Component {
         followees: data.followees,
         profilePicture: data.profilePicture,
         bLoggedInUser: username === loggedInUser,
-      }, async () => { await this.generatePosts(); await this.getFolloweesData(); this.setState({ dataLoaded: true }); });
+      }, async () => {
+        await this.generatePosts();
+        await this.getFolloweesData();
+        this.setState({ dataLoaded: true });
+      });
     }
   }
 
@@ -160,7 +160,8 @@ class SimpleProfile extends React.Component {
   render() {
     const { classes } = this.props;
     const {
-      username, email, password, profilePicture, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
+      username, email, password, profilePicture, followers,
+      followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let comp = null;
     try {
@@ -177,7 +178,6 @@ class SimpleProfile extends React.Component {
       comp = (
         <Avatar
           className={classes.avatar}
-          // eslint-disable-next-line import/no-dynamic-require,global-require
           id="profile-pic"
           style={{ fontSize: '48px' }}
         >
@@ -215,7 +215,7 @@ class SimpleProfile extends React.Component {
                     <Grid container justify="center" spacing={1}>
                       <Grid item xs={4} alignItems="center">
                         <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {this.state.reactPosts.length}
+                          {reactPosts.length}
                         </Typography>
                         <Typography variant="h5">
                           Posts
@@ -223,7 +223,7 @@ class SimpleProfile extends React.Component {
                       </Grid>
                       <Grid item xs={4}>
                         <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {this.state.followers.length}
+                          {followers.length}
                         </Typography>
                         <Typography variant="h5">
                           Followers
@@ -231,11 +231,11 @@ class SimpleProfile extends React.Component {
                       </Grid>
                       <Grid item xs={4}>
                         <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {this.state.followees.length}
+                          {followees.length}
                         </Typography>
                         <Typography variant="h5">
                           Following
-                      </Typography>
+                        </Typography>
                       </Grid>
                     </Grid>
                   </Grid>
@@ -330,6 +330,11 @@ SimpleProfile.propTypes = {
     avatar: PropTypes.string.isRequired,
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
+  }).isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      username: PropTypes.string.isRequired,
+    }),
   }).isRequired,
 };
 
