@@ -51,15 +51,24 @@ const updateProfile = (req, res) => {
   if (req.body.email) {
     db.updateEmail(username, req.body.email)
       .then((data) => res.status(201).send(data))
-      .catch((err) => res.status(500).send(err));
+      .catch((err) => {
+        if (err.message === 'no user found') res.status(400).send(err.message);
+        else res.status(500).send(err);
+      });
   } else if (req.body.profilePicture) {
     db.updateProfilePic(username, req.body.profilePicture)
       .then((data) => res.status(201).send(data))
-      .catch((err) => res.status(500).send(err));
+      .catch((err) => {
+        if (err.message === 'no user found') res.status(400).send(err.message);
+        else res.status(500).send(err.message);
+      });
   } else if (req.body.oldPassword && req.body.newPassword) {
-    db.updateEmail(username, req.body.oldPassword, req.body.newPassword)
+    db.updatePassword(username, req.body.oldPassword, req.body.newPassword)
       .then((data) => res.status(201).send(data))
-      .catch((err) => res.status(500).send(err));
+      .catch((err) => {
+        if (err.message === 'no user found' || err.message === 'incorrect password') res.status(400).send(err.message);
+        else res.status(500).send(err.message);
+      });
   } else {
     res.status(400).send('Invalid profile update');
   }

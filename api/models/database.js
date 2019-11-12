@@ -44,7 +44,7 @@ async function updateEmail(username, email) {
 async function updateProfilePic(username, profilePicture) {
   const user = await getUser(username);
   if (user == null) {
-    return null;
+    return Promise.reject(new Error('no user found'));
   }
   user.profilePicture = profilePicture;
   return user.save();
@@ -53,8 +53,10 @@ async function updateProfilePic(username, profilePicture) {
 // Update user's password. Requires old password, returns null if it's incorrect
 async function updatePassword(username, oldPassword, newPassword) {
   const user = await getUser(username);
-  if (user == null || user.password !== SHA256(oldPassword).toString()) {
-    return null;
+  if (user == null) {
+    return Promise.reject(new Error('no user found'));
+  } else if (user.password !== SHA256(oldPassword).toString()) {
+    return Promise.reject(new Error('incorrect password'));;
   }
   const encryptedPassword = SHA256(newPassword);
   user.password = encryptedPassword;

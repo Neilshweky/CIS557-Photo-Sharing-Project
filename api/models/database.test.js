@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const db = require('./database.js');
 const Schemas = require('./schemas');
+const SHA256 = require('crypto-js/sha256');
 
 beforeAll(async (done) => {
   await mongoose.disconnect();
@@ -238,9 +239,7 @@ describe('like/unlike tests', () => {
 describe('update user tests', () => {
   beforeEach(async () => {
     await Schemas.Post.deleteMany({});
-    await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
     await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
-    await db.followUser('cbros', 'neilshweky');
   });
 
   test('update email', async () => {
@@ -253,7 +252,42 @@ describe('update user tests', () => {
 
   test('update email no user', async () => {
     await db.updateEmail('neilshweky3', 'something else').catch((err) => {
-      expect(err).toEqual({error: 'no user found'});
+      expect(err.message).toEqual('no user found');
+    });
+  });
+
+  test('update profile picture', async () => {
+    let user2 = await db.getUser('neilshweky');
+    expect(user2.profilePicture).toBe('pic2');
+    await db.updateProfilePic('neilshweky', 'something else');
+    user2 = await db.getUser('neilshweky');
+    expect(user2.profilePicture).toBe('something else');
+  });
+
+  test('update profile picture no user', async () => {
+    await db.updateProfilePic('neilshweky3', 'something else').catch((err) => {
+      expect(err.message).toEqual('no user found');
+    });
+  });
+
+  test('update password', async () => {
+    let user2 = await db.getUser('neilshweky');
+    console.log(user2.password);
+    expect(user2.password).toEqual(SHA256('pw-2').toString());
+    await db.updatePassword('neilshweky', 'pw-2', '123');
+    user2 = await db.getUser('neilshweky');
+    expect(user2.password).toEqual(SHA256('123').toString());
+  });
+
+  test('update password no user', async () => {
+    await db.updatePassword('neilshweky3', 'pw-2', 'something').catch((err) => {
+      expect(err.message).toEqual('no user found');
+    });
+  });
+
+  test('update password wrong password', async () => {
+    await db.updatePassword('neilshweky', 'pw-3', 'something').catch((err) => {
+      expect(err.message).toEqual('incorrect password');
     });
   });
 });
