@@ -250,6 +250,7 @@ export default function AppToolbar() {
             </Tooltip>
             <Tooltip title="Logout">
               <IconButton
+                id="logout"
                 color="inherit"
                 onClick={() => localStorage.clear()}
                 component={Link}
