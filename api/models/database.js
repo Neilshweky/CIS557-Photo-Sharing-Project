@@ -167,6 +167,28 @@ async function unlikePost(username, uid) {
   }
 }
 
+function getSearchSuggestions(username, term) {
+  const p1 = getFolloweesForUsername(username);
+  const p2 = getUsersForTerm(term);
+  return Promise.all([p1, p2]).then(data => {
+    var f = new Set(data[0]);
+    var sugg = data[1]
+    var result = [];
+    for (var i = 0; i < sugg.length; i++) {
+      var obj = sugg[i];
+      if (obj.username !== username)
+        result.push({ username: obj.username, profilePicture: obj.profilePicture, following: f.has(obj.username) })
+    }
+    console.log("HERE", result);
+    return result
+  });
+}
+
+function getUsersForTerm(term) {
+  var regex = new RegExp('^' + term, 'i')
+  return Schemas.User.find({username: {$regex: regex}}, {username:1, profilePicture:1}).limit(10)
+}
+
 
 module.exports = {
   getUser,
@@ -183,5 +205,7 @@ module.exports = {
   getPostIdsForUserAndNum,
   getPostsForUserAndNum,
   likePost,
-  unlikePost
+  unlikePost,
+  getUsersForTerm,
+  getSearchSuggestions
 };

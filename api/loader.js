@@ -7,6 +7,7 @@ const user = new Schemas.User({
   email: 'nshweky@seas.upenn.edu',
   password: SHA256('cis557sucks'),
   followees: ['sarah', 'neilshweky2'],
+  profilePicture: './pictures/cut-1.jpg',
 });
 
 const user2 = new Schemas.User({
@@ -14,6 +15,7 @@ const user2 = new Schemas.User({
   email: 'nshweky2@seas.upenn.edu',
   password: SHA256('cis557sucks'),
   followers: ['neilshweky'],
+  profilePicture: './pictures/cut-1.jpg',
 });
 
 const user3 = new Schemas.User({

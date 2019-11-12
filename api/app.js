@@ -37,6 +37,7 @@ app.post('/like/:postid/:username', routes.likePost);
 app.post('/unlike/:postid/:username', routes.unlikePost);
 app.post('/follow/:username/:friend', routes.follow);
 app.post('/unfollow/:username/:friend', routes.unfollow);
+app.get('/searchusers/:username/:term', routes.searchUsers);
 
 console.log('Authors: Neil Shweky (nshweky), Sarah Baumgarten (sbaumg), & Carlos Bros (cbros)');
 const port = process.env.PORT || '8080';
