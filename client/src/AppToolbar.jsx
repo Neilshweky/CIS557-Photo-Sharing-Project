@@ -16,6 +16,8 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import HomeIcon from '@material-ui/icons/Home';
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import Avatar from '@material-ui/core/Avatar';
+import { localStorage } from './Utilities';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -84,6 +86,37 @@ export default function AppToolbar() {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [searchValue, setSearchValue] = React.useState('');
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const loggedInUser = localStorage.getItem('user');
+  const [profilePic, setProfilePic] = React.useState('');
+
+  fetch(`http://localhost:8080/user/${loggedInUser}`).then((userResp) => {
+    if (userResp.ok) {
+      return userResp.json();
+    }
+  }).then((jsonData) => setProfilePic(jsonData.profilePicture));
+
+  let comp = null;
+  try {
+    const src = require(`${profilePic}`);
+    comp = (
+      <Avatar
+        className={classes.avatar}
+        // eslint-disable-next-line import/no-dynamic-require,global-require
+        src={src}
+        id="profile-pic"
+      />
+    );
+  } catch (e) {
+    comp = (
+      <Avatar
+        className={classes.avatar}
+        // eslint-disable-next-line import/no-dynamic-require,global-require
+        id="profile-pic"
+      >
+        {loggedInUser.charAt(0)}
+      </Avatar>
+    );
+  }
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -118,6 +151,15 @@ export default function AppToolbar() {
     >
       <MenuItem
         component={Link}
+        to={`/profile/${loggedInUser}`}
+      >
+        <IconButton color="inherit">
+          {comp}
+        </IconButton>
+        <p>My Profile</p>
+      </MenuItem>
+      <MenuItem
+        component={Link}
         to="/"
       >
         <IconButton color="inherit">
@@ -133,16 +175,6 @@ export default function AppToolbar() {
           <AddAPhotoIcon />
         </IconButton>
         <p>Upload Picture</p>
-      </MenuItem>
-
-      <MenuItem
-        component={Link}
-        to="/profile"
-      >
-        <IconButton color="inherit">
-          <AccountCircle />
-        </IconButton>
-        <p>Profile</p>
       </MenuItem>
       <MenuItem
         onClick={() => localStorage.clear()}
@@ -182,6 +214,17 @@ export default function AppToolbar() {
           </form>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
+            <Tooltip title="My Profile">
+              <IconButton
+                edge="end"
+                color="inherit"
+                component={Link}
+                to={`/profile/${loggedInUser}`}
+              >
+                <Typography style={{ marginRight: '5px' }}>{loggedInUser}</Typography>
+                {comp}
+              </IconButton>
+            </Tooltip>
             <Tooltip title="My Feed">
               <IconButton
                 edge="end"
@@ -200,16 +243,6 @@ export default function AppToolbar() {
                 to="/imageupload"
               >
                 <AddAPhotoIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Profile">
-              <IconButton
-                edge="end"
-                color="inherit"
-                component={Link}
-                to="/profile"
-              >
-                <AccountCircle />
               </IconButton>
             </Tooltip>
             <Tooltip title="Logout">

@@ -10,8 +10,11 @@ import { red } from '@material-ui/core/colors';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
+import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { localStorage } from './Utilities';
+
 
 const styles = (theme) => ({
   card: {
@@ -38,23 +41,25 @@ const styles = (theme) => ({
   favorite: {
     color: 'red',
   },
+  iconCount: {
+    marginLeft: '5px',
+  },
 });
 
 class Post extends React.Component {
   constructor(props) {
     super(props);
+    const username = localStorage.getItem('user');
     this.state = {
-      liked: props.post.likes.indexOf(props.post.username) !== -1,
+      liked: props.post.likes.indexOf(username) !== -1,
+      numLikes: props.post.likes.length,
+      username,
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
     this.getProfilePic();
   }
 
-  handleLikeClick() {
-    // Neil: to do - update state and save to db
-    // use this.setState({}) and call to new endpoint
-  }
 
   async getProfilePic() {
     const { post } = this.props;
@@ -68,8 +73,44 @@ class Post extends React.Component {
     }
   }
 
+  async handleLikeClick() {
+    // Neil: to do - update state and save to db
+    // use this.setState({}) and call to new endpoint
+    const { liked, username, numLikes } = this.state;
+    const { post } = this.props;
+    if (liked) {
+      this.setState({ liked: false, numLikes: numLikes - 1 });
+      const resp = await fetch(`http://localhost:8080/unlike/${post.uid}/${username}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+        });
+      if (!resp.ok) {
+        this.setState({ liked: true, numLikes: numLikes + 1 });
+      }
+    } else {
+      this.setState({ liked: true, numLikes: numLikes + 1 });
+      const resp = await fetch(`http://localhost:8080/like/${post.uid}/${username}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+        });
+      if (!resp.ok) {
+        this.setState({ liked: false, numLikes: numLikes - 1 });
+      }
+    }
+  }
+
   render() {
-    const { liked, profilePic } = this.state;
+    const { liked, profilePic, numLikes } = this.state;
     const { classes, post } = this.props;
     let comp = null;
     try {
@@ -117,6 +158,9 @@ class Post extends React.Component {
             onClick={this.handleLikeClick}
           >
             <FavoriteIcon />
+            <Typography className={classes.iconCount}>
+              {numLikes}
+            </Typography>
           </IconButton>
           <IconButton>
             <ChatBubbleIcon />
@@ -141,8 +185,10 @@ Post.propTypes = {
     media: PropTypes.string.isRequired,
     card: PropTypes.string.isRequired,
     favorite: PropTypes.string.isRequired,
+    iconCount: PropTypes.string.isRequired,
   }).isRequired,
   post: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
     likes: PropTypes.array.isRequired,
     timestamp: PropTypes.number.isRequired,

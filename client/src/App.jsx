@@ -18,7 +18,7 @@ function App() {
         <Route component={ImageUpload} path="/imageupload" />
         <Route component={SignIn} path="/signin" />
         <Route component={SignUp} path="/signup" />
-        <Route component={SimpleProfile} path="/profile" />
+        <Route component={SimpleProfile} path="/profile/:username" />
       </Switch>
     </Router>
   );

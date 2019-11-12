@@ -83,8 +83,41 @@ const getPosts = (req, res) => {
 
 const likePost = (req, res) => {
   const { username, postid } = req.params;
-  db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
+  db.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(400).send(`There is no such user ${username}.`);
+    } else if (user.followees.indexOf(username) === -1) {
+      res.status(400).send(`${username} does not follow original poster.`);
+    } else {
+      db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
+    }
+  });
 };
+
+const unlikePost = (req, res) => {
+  const { username, postid } = req.params;
+  db.unlikePost(username, postid).then(() => { res.status(200).send('Post unliked'); }).catch((err) => res.status(500).send(err));
+};
+
+const follow = (req, res) => {
+  const { username, friend } = req.params;
+  db.followUser(username, friend).then(() => { res.status(200).send(`${username} followed ${friend}`); }).catch((err) => res.status(500).send(err));
+};
+
+const unfollow = (req, res) => {
+  const { username, friend } = req.params;
+  db.unfollowUser(username, friend).then(() => { res.status(200).send(`${username} unfollowed ${friend}`); }).catch((err) => res.status(500).send(err));
+};
+
+const searchUsers = (req, res) => {
+  const { username, term } = req.params;
+  db.getSearchSuggestions(username, term).then((data) => {
+    res.status(200).send(data);
+  }).catch((err) => {
+    res.status(500).send(err);
+  });
+};
+
 
 module.exports = {
   signup,
@@ -94,4 +127,8 @@ module.exports = {
   deleteUser,
   getPosts,
   likePost,
+  unlikePost,
+  follow,
+  unfollow,
+  searchUsers,
 };

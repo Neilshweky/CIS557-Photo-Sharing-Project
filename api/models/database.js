@@ -41,21 +41,49 @@ function createPost(picture, username) {
   return post.save();
 }
 
-function getFriendsForUsername(username) {
-  return Schemas.User.findOne({ username }, { friends: 1 })
+function getFolloweesForUsername(username) { // 
+  return Schemas.User.findOne({ username }, { followees: 1 })
     .then((user) => {
-      if (user != null && 'friends' in user)
-        return user.friends
+      if (user != null)
+        return user.followees
       else
         return []
     });
 }
 
-function addFriend(username, friend) {
-  return Schemas.User.updateOne(
+function getFollowersForUsername(username) { // 
+  return Schemas.User.findOne({ username }, { followers: 1 })
+    .then((user) => {
+      if (user != null)
+        return user.followers
+      else
+        return []
+    });
+}
+
+function followUser(username, friend) { // follow a user
+  
+  const p1 = Schemas.User.updateOne(
     { username },
-    { $push: { friends: friend } },
+    { $push: { followees: friend } },
   );
+  const p2 = Schemas.User.updateOne(
+    { username: friend },
+    { $push: { followers: username } },
+  );
+  return Promise.all([p1, p2]);
+}
+
+function unfollowUser(username, friend) { // unfollow a user
+  const p1 = Schemas.User.updateOne(
+    { username },
+    { $pull: { followees: friend } },
+  );
+  const p2 = Schemas.User.updateOne(
+    { username: friend },
+    { $pull: { followers: username } },
+  );
+  return Promise.all([p1, p2]);
 }
 
 function addPostIDToUsers(postID, usernames) {
@@ -76,7 +104,7 @@ function addPostIDToUsers(postID, usernames) {
 // 2. get all of current users friends
 function postPicture(picture, username) {
   return Promise
-    .all([createPost(picture, username), getFriendsForUsername(username)])
+    .all([createPost(picture, username), getFolloweesForUsername(username)])
     .then((values) => {
       const post = values[0];
       const friends = values[1];
@@ -91,11 +119,14 @@ function getPost(uid) {
 }
 
 function getPostIdsForUserAndNum(username, num) {
-  return Schemas.User.findOne({ username }, { posts: { $slice: [num, 2] } }).then((data) => data.posts);
-}
+  return Schemas.User.findOne({ username }, { posts: { $slice: [num, 1000] } }).then((data) => { if (data == null) { return null } else { return data.posts } })
+};
 
 function getPostsForUserAndNum(username, num) {
   return getPostIdsForUserAndNum(username, parseInt(num)).then(async (posts) => {
+    if (posts == null) {
+      return null;
+    }
     final = [];
     for (let i = 0; i < posts.length; i++) {
       var post = posts[i];
@@ -105,11 +136,57 @@ function getPostsForUserAndNum(username, num) {
   })
 }
 
-async function likePost(username, postID) {
-  return Schemas.Post.updateOne(
-    { postID },
-    { $push: { likes: username } },
-  )
+async function likePost(username, uid) {
+  console.log("liking post: ", username, ", ", uid)
+  const existingUser = await getUser(username);
+  const post = await getPost(uid);
+  if (existingUser == null || post == null ||
+    existingUser.followees.indexOf(post.username) == -1) {
+    return null;
+  } else {
+    return Schemas.Post.updateOne(
+      { uid },
+      { $push: { likes: username } },
+    )
+  }
+
+}
+
+async function unlikePost(username, uid) {
+  console.log("unliking post: ", username, ", ", uid)
+  const existingUser = await getUser(username);
+  const post = await getPost(uid);
+  if (existingUser == null || post == null ||
+    existingUser.followees.indexOf(post.username) == -1) {
+    return null;
+  } else {
+    return Schemas.Post.updateOne(
+      { uid },
+      { $pull: { likes: username } },
+    )
+  }
+}
+
+function getSearchSuggestions(username, term) {
+  const p1 = getFolloweesForUsername(username);
+  const p2 = getUsersForTerm(term);
+  return Promise.all([p1, p2]).then(data => {
+    var f = new Set(data[0]);
+    var sugg = data[1]
+    var result = [];
+    for (var i = 0; i < sugg.length; i++) {
+      var obj = sugg[i];
+      if (obj.username !== username)
+        result.push({ username: obj.username, profilePicture: obj.profilePicture, following: f.has(obj.username) })
+    }
+    console.log("HERE", result);
+    return result
+  });
+}
+
+function getUsersForTerm(term) {
+  var regex = new RegExp('^' + term, 'i')
+  return Schemas.User.find({username: {$regex: regex}}, {username:1, profilePicture:1}).limit(10)
 }
 
 
@@ -120,9 +197,15 @@ module.exports = {
   checkLogin,
   postPicture,
   createPost,
-  addFriend,
-  getFriendsForUsername,
+  followUser,
+  unfollowUser,
+  getFolloweesForUsername,
+  getFollowersForUsername,
   getPost,
+  getPostIdsForUserAndNum,
   getPostsForUserAndNum,
   likePost,
+  unlikePost,
+  getUsersForTerm,
+  getSearchSuggestions
 };

@@ -15,7 +15,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AppToolbar from './AppToolbar';
 import FriendTable from './FriendTable';
-import { dateDiff, localStorage } from './Utilities';
+import { dateDiff, localStorage, asyncForEach } from './Utilities';
 import Post from './Post';
 
 const styles = (theme) => ({
@@ -83,8 +83,9 @@ class SimpleProfile extends React.Component {
     this.getProfile = this.getProfile.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
     this.generatePosts = this.generatePosts.bind(this);
+    this.getFolloweesData = this.getFolloweesData.bind(this);
     this.state = {
-      username: '', email: '', friends: [], profilePic: '', index: 0, reactPosts: [],
+      username: '', email: '', followees: [], followers: [], profilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, foreignUser: true,
     };
   }
 
@@ -96,22 +97,44 @@ class SimpleProfile extends React.Component {
       localStorage.clear();
       history.push('/signin');
     } else {
-      this.getProfile(username);
-      this.render();
+      this.getProfile(this.props.match.params.username);
+      // this.render();
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.match.params.username !== prevProps.match.params.username) {
+      this.getProfile(this.props.match.params.username);
     }
   }
 
   async getProfile(username) {
+    const loggedInUser = localStorage.getItem('user');
     const resp = await fetch(`http://localhost:8080/user/${username}`);
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
         username,
         email: data.email,
-        friends: data.friends,
-        profilePic: data.profilePicture,
-      }, () => this.generatePosts());
+        followers: data.followers,
+        followees: data.followees,
+        profilePicture: data.profilePicture,
+        foreignUser: username === loggedInUser,
+      }, async () => { await this.generatePosts(); await this.getFolloweesData(); this.setState({ dataLoaded: true }); });
     }
+  }
+
+  getFolloweesData() {
+    const { followees } = this.state;
+    const followeeData = [];
+    asyncForEach(followees, async (followee) => {
+      const resp = await fetch(`http://localhost:8080/user/${followee}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        followeeData.push({ username: followee, profilePicture: data.profilePicture });
+      }
+    });
+    this.setState({ followeeData });
   }
 
   async generatePosts() {
@@ -135,12 +158,12 @@ class SimpleProfile extends React.Component {
   render() {
     const { classes } = this.props;
     const {
-      username, email, password, friends, profilePic, index, reactPosts,
+      username, email, password, profilePicture, index, reactPosts, followeeData, dataLoaded, foreignUser,
     } = this.state;
     let comp = null;
     try {
       // eslint-disable-next-line import/no-dynamic-require,global-require
-      const src = require(`${profilePic}`);
+      const src = require(`${profilePicture}`);
       comp = (
         <Avatar
           className={classes.avatar}
@@ -172,23 +195,23 @@ class SimpleProfile extends React.Component {
         >
           <Tab label="Account Information" />
           <Tab label="My Posts" />
-          <Tab label="My Friends" />
+          <Tab label="Who Do I Follow?" />
         </Tabs>
         <TabPanel value={index} index={0}>
           <Container>
             <div className={classes.paper}>
               <div id="photo-avatar">
-                <input type="file" id="upload-profile-pic" hidden />
+                <input type="file" id="upload-profile-pic" hidden disabled={!foreignUser} />
                 <label htmlFor="upload-profile-pic">
                   {comp}
 
-                  <div className="overlay">
+                  {foreignUser && <div className="overlay">
                     <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
-                  </div>
+                  </div>}
                 </label>
               </div>
               <Typography component="h1" variant="h5">
-                {localStorage.getItem('user')}
+                {username}
               </Typography>
               <form className={classes.form} noValidate onSubmit={this.signup}>
                 <Grid container spacing={2}>
@@ -222,15 +245,17 @@ class SimpleProfile extends React.Component {
                     </Grid>
                   </Grid>
                 </Grid>
-                <Button
-                  className={classes.submit}
-                  id="loginsubmit"
-                  color="primary"
-                  type="submit"
-                  variant="contained"
-                >
-                  Update
-                </Button>
+                {foreignUser && (
+                  <Button
+                    className={classes.submit}
+                    id="loginsubmit"
+                    color="primary"
+                    type="submit"
+                    variant="contained"
+                  >
+                    Update
+                  </Button>
+                )}
               </form>
             </div>
           </Container>
@@ -238,12 +263,12 @@ class SimpleProfile extends React.Component {
         <TabPanel value={index} index={1}>
           <Container>
             <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
-              {reactPosts.map((comp) => comp)}
+              {reactPosts.map((reactComp) => reactComp)}
             </Box>
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
-          {/* <FriendTable bProfilePage={false} /> */}
+          {dataLoaded ? <FriendTable bProfilePage followees={followeeData} foreignUser /> : ''}
         </TabPanel>
         <CssBaseline />
         <Box mt={5} />
