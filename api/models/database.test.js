@@ -105,6 +105,18 @@ describe('friend tests', () => {
     const user1Friends = await db.getFolloweesForUsername('sarah');
     expect(Array.from(user1Friends)).toEqual([]);
   });
+
+  test('unfollow user', async () => {
+    await db.followUser('user1', 'user2');
+    await db.followUser('user1', 'user3');
+    await db.followUser('user2', 'user3');
+    await db.unfollowUser('user1', 'user2');
+    const user1Followees = await db.getFolloweesForUsername('user1');
+    const user2 = await db.getUser('user2');
+    const user2followers = user2.followers;
+    expect(Array.from(user1Followees)).toEqual(['user3']);
+    expect(Array.from(user2followers)).toEqual([]);
+  });
 });
 
 describe('post tests', () => {
