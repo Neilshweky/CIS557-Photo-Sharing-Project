@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
+const SHA256 = require('crypto-js/sha256');
 const db = require('./database.js');
 const Schemas = require('./schemas');
-const SHA256 = require('crypto-js/sha256');
 
 beforeAll(async (done) => {
   await mongoose.disconnect();

@@ -11,12 +11,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Tooltip from '@material-ui/core/Tooltip';
 import SearchIcon from '@material-ui/icons/Search';
-import AccountCircle from '@material-ui/icons/AccountCircle';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import HomeIcon from '@material-ui/icons/Home';
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import Avatar from '@material-ui/core/Avatar';
+import PropTypes from 'prop-types';
 import { localStorage } from './Utilities';
 
 const styles = (theme) => ({
@@ -96,20 +96,13 @@ class AppToolbar extends React.Component {
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
   }
 
-  // const classes = useStyles();
-  // const[mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-  // const[searchValue, setSearchValue] = React.useState('');
-  // const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  // const loggedInUser = localStorage.getItem('user');
-  // const[profilePic, setProfilePic] = React.useState('');
-
-  componentDidMount() {
+  async componentDidMount() {
     const { loggedInUser } = this.state;
-    fetch(`http://localhost:8080/user/${loggedInUser}`).then((userResp) => {
-      if (userResp.ok) {
-        return userResp.json();
-      }
-    }).then((jsonData) => this.setState({ profilePic: jsonData.profilePicture }));
+    const userResp = await fetch(`http://localhost:8080/user/${loggedInUser}`);
+    if (userResp.ok) {
+      const userData = await userResp.json();
+      this.setState({ profilePic: userData.profilePicture });
+    }
   }
 
   handleMobileMenuClose() {
@@ -131,16 +124,16 @@ class AppToolbar extends React.Component {
   render() {
     const { classes } = this.props;
     const {
-      loggedInUser, mobileMoreAnchorEl, isMobileMenuOpen, profilePic
+      loggedInUser, mobileMoreAnchorEl, isMobileMenuOpen, profilePic,
     } = this.state;
     const mobileMenuId = 'primary-search-account-menu-mobile';
     let comp = null;
     try {
+      // eslint-disable-next-line import/no-dynamic-require,global-require
       const src = require(`${profilePic}`);
       comp = (
         <Avatar
           className={classes.avatar}
-          // eslint-disable-next-line import/no-dynamic-require,global-require
           src={src}
           id="profile-pic"
         />
@@ -149,7 +142,6 @@ class AppToolbar extends React.Component {
       comp = (
         <Avatar
           className={classes.avatar}
-          // eslint-disable-next-line import/no-dynamic-require,global-require
           id="profile-pic"
         >
           {loggedInUser.charAt(0)}
@@ -292,4 +284,18 @@ class AppToolbar extends React.Component {
     );
   }
 }
+
+AppToolbar.propTypes = {
+  classes: PropTypes.shape({
+    avatar: PropTypes.string.isRequired,
+    grow: PropTypes.string.isRequired,
+    search: PropTypes.string.isRequired,
+    searchIcon: PropTypes.string.isRequired,
+    inputRoot: PropTypes.string.isRequired,
+    inputInput: PropTypes.string.isRequired,
+    sectionDesktop: PropTypes.string.isRequired,
+    sectionMobile: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  }).isRequired,
+};
 export default withStyles(styles)(AppToolbar);

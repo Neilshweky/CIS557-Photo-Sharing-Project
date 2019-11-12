@@ -114,12 +114,12 @@ class Post extends React.Component {
     const { classes, post } = this.props;
     let comp = null;
     try {
+      // eslint-disable-next-line import/no-dynamic-require, global-require
       const src = require(`${profilePic}`);
       comp = (
         <Avatar
           alt={post.username.charAt(0)}
           className={classes.avatar}
-          // eslint-disable-next-line import/no-dynamic-require,global-require
           src={src}
           id="profile-pic"
         />
@@ -128,7 +128,6 @@ class Post extends React.Component {
       comp = (
         <Avatar
           className={classes.avatar}
-          // eslint-disable-next-line import/no-dynamic-require,global-require
           id="profile-pic"
         >
           {post.username.charAt(0)}

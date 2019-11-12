@@ -1,7 +1,5 @@
-/* eslint-disable */
 const SHA256 = require('crypto-js/sha256');
 const Schemas = require('./schemas.js');
-const async = require('async');
 
 // Returns a User from the database as a Promise, by username
 function getUser(username) {
@@ -55,8 +53,8 @@ async function updatePassword(username, oldPassword, newPassword) {
   const user = await getUser(username);
   if (user == null) {
     return Promise.reject(new Error('no user found'));
-  } else if (user.password !== SHA256(oldPassword).toString()) {
-    return Promise.reject(new Error('incorrect password'));;
+  } if (user.password !== SHA256(oldPassword).toString()) {
+    return Promise.reject(new Error('incorrect password'));
   }
   const encryptedPassword = SHA256(newPassword);
   user.password = encryptedPassword;
@@ -76,28 +74,23 @@ function createPost(picture, username) {
   return post.save();
 }
 
-function getFolloweesForUsername(username) { // 
+function getFolloweesForUsername(username) { //
   return Schemas.User.findOne({ username }, { followees: 1 })
     .then((user) => {
-      if (user != null)
-        return user.followees
-      else
-        return []
+      if (user != null) return user.followees;
+      return [];
     });
 }
 
-function getFollowersForUsername(username) { // 
+function getFollowersForUsername(username) { //
   return Schemas.User.findOne({ username }, { followers: 1 })
     .then((user) => {
-      if (user != null)
-        return user.followers
-      else
-        return []
+      if (user != null) return user.followers;
+      return [];
     });
 }
 
 function followUser(username, friend) { // follow a user
-
   const p1 = Schemas.User.updateOne(
     { username },
     { $push: { followees: friend } },
@@ -143,86 +136,89 @@ function postPicture(picture, username) {
     .then((values) => {
       const post = values[0];
       const friends = values[1];
-      friends.push(username)
+      friends.push(username);
       return addPostIDToUsers(post.uid, friends).then(() => post);
     });
 }
 
 
 function getPost(uid) {
-  return Schemas.Post.findOne({ uid })
+  return Schemas.Post.findOne({ uid });
 }
 
 function getPostIdsForUserAndNum(username, num) {
-  return Schemas.User.findOne({ username }, { posts: { $slice: [num, 1000] } }).then((data) => { if (data == null) { return null } else { return data.posts } })
-};
+  return Schemas.User.findOne({ username },
+    { posts: { $slice: [num, 1000] } })
+    .then((data) => { if (data == null) { return null; } return data.posts; });
+}
 
 function getPostsForUserAndNum(username, num) {
-  return getPostIdsForUserAndNum(username, parseInt(num)).then(async (posts) => {
-    if (posts == null) {
-      return null;
-    }
-    final = [];
-    for (let i = 0; i < posts.length; i++) {
-      var post = posts[i];
-      final.push(await getPost(post));
-    }
-    return final;
-  })
+  return getPostIdsForUserAndNum(username, parseInt(num, 10))
+    .then(async (posts) => {
+      if (posts == null) {
+        return null;
+      }
+      return Promise.all(posts.map((post) => getPost(post))).then((data) => data);
+    });
 }
 
 async function likePost(username, uid) {
-  console.log('liking post: ', username, ', ', uid)
+  console.log('liking post: ', username, ', ', uid);
   const existingUser = await getUser(username);
   const post = await getPost(uid);
-  if (existingUser == null || post == null ||
-    existingUser.followees.indexOf(post.username) == -1) {
+  if (existingUser == null || post == null
+    || existingUser.followees.indexOf(post.username) === -1) {
     return null;
-  } else {
-    return Schemas.Post.updateOne(
-      { uid },
-      { $push: { likes: username } },
-    )
   }
-
+  return Schemas.Post.updateOne(
+    { uid },
+    { $push: { likes: username } },
+  );
 }
 
 async function unlikePost(username, uid) {
-  console.log('unliking post: ', username, ', ', uid)
+  console.log('unliking post: ', username, ', ', uid);
   const existingUser = await getUser(username);
   const post = await getPost(uid);
-  if (existingUser == null || post == null ||
-    existingUser.followees.indexOf(post.username) == -1) {
+  if (existingUser == null || post == null
+    || existingUser.followees.indexOf(post.username) === -1) {
     return null;
-  } else {
-    return Schemas.Post.updateOne(
-      { uid },
-      { $pull: { likes: username } },
-    )
   }
+  return Schemas.Post.updateOne(
+    { uid },
+    { $pull: { likes: username } },
+  );
+}
+
+function getUsersForTerm(term) {
+  const regex = new RegExp(`^${term}`, 'i');
+  return Schemas.User.find(
+    { username: { $regex: regex } }, { username: 1, profilePicture: 1 },
+  ).limit(10);
 }
 
 function getSearchSuggestions(username, term) {
   const p1 = getFolloweesForUsername(username);
   const p2 = getUsersForTerm(term);
-  return Promise.all([p1, p2]).then(data => {
-    var f = new Set(data[0]);
-    var sugg = data[1]
-    var result = [];
-    for (var i = 0; i < sugg.length; i++) {
-      var obj = sugg[i];
-      if (obj.username !== username)
-        result.push({ username: obj.username, profilePicture: obj.profilePicture, following: f.has(obj.username) })
+  return Promise.all([p1, p2]).then((data) => {
+    const f = new Set(data[0]);
+    const sugg = data[1];
+    const result = [];
+    for (let i = 0; i < sugg.length; i += 1) {
+      const obj = sugg[i];
+      if (obj.username !== username) {
+        result.push(
+          {
+            username: obj.username,
+            profilePicture: obj.profilePicture,
+            following: f.has(obj.username),
+          },
+        );
+      }
     }
-    return result
+    return result;
   });
 }
-
-function getUsersForTerm(term) {
-  var regex = new RegExp('^' + term, 'i')
-  return Schemas.User.find({ username: { $regex: regex } }, { username: 1, profilePicture: 1 }).limit(10)
-}
-
 
 module.exports = {
   getUser,
@@ -244,5 +240,5 @@ module.exports = {
   likePost,
   unlikePost,
   getUsersForTerm,
-  getSearchSuggestions
+  getSearchSuggestions,
 };
