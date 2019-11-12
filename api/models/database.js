@@ -214,7 +214,6 @@ function getSearchSuggestions(username, term) {
       if (obj.username !== username)
         result.push({ username: obj.username, profilePicture: obj.profilePicture, following: f.has(obj.username) })
     }
-    console.log('HERE', result);
     return result
   });
 }
