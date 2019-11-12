@@ -210,38 +210,36 @@ class SimpleProfile extends React.Component {
               <Typography component="h1" variant="h5">
                 {username}
               </Typography>
-              <div>
-                <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
-                  <Grid item xs={12}>
-                    <Grid container justify="center" spacing={1}>
-                      <Grid item xs={4} alignItems="center">
-                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {this.state.reactPosts.length}
+              <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
+                <Grid item xs={12}>
+                  <Grid container justify="center" spacing={1}>
+                    <Grid item xs={4} alignItems="center">
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {this.state.reactPosts.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Posts
                         </Typography>
-                        <Typography variant="h5">
-                          Posts
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {this.state.followers.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Followers
                         </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {this.state.followers.length}
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {this.state.followees.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Following
                         </Typography>
-                        <Typography variant="h5">
-                          Followers
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {this.state.followees.length}
-                        </Typography>
-                        <Typography variant="h5">
-                          Following
-                        </Typography>
-                      </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-              </div>
+              </Grid>
             </div>
           </Container>
         </TabPanel>
