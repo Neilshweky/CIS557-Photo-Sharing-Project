@@ -51,17 +51,39 @@ function getFolloweesForUsername(username) { //
     });
 }
 
+function getFollowersForUsername(username) { // 
+  return Schemas.User.findOne({ username }, { followers: 1 })
+    .then((user) => {
+      if (user != null)
+        return user.followers
+      else
+        return []
+    });
+}
+
 function followUser(username, friend) { // follow a user
+  
   const p1 = Schemas.User.updateOne(
     { username },
     { $push: { followees: friend } },
   );
   const p2 = Schemas.User.updateOne(
-    { friend },
+    { username: friend },
     { $push: { followers: username } },
   );
   return Promise.all([p1, p2]);
+}
 
+function unfollowUser(username, friend) { // unfollow a user
+  const p1 = Schemas.User.updateOne(
+    { username },
+    { $pull: { followees: friend } },
+  );
+  const p2 = Schemas.User.updateOne(
+    { username: friend },
+    { $pull: { followers: username } },
+  );
+  return Promise.all([p1, p2]);
 }
 
 function addPostIDToUsers(postID, usernames) {
@@ -154,7 +176,9 @@ module.exports = {
   postPicture,
   createPost,
   followUser,
+  unfollowUser,
   getFolloweesForUsername,
+  getFollowersForUsername,
   getPost,
   getPostIdsForUserAndNum,
   getPostsForUserAndNum,

@@ -4,13 +4,22 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
+import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
+import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
 import { localStorage } from './Utilities';
+import { Link } from '@material-ui/core';
 
 
-const styles = () => ({
+const styles = (theme) => ({
   root: {
     width: '100%',
     overflowX: 'auto',
@@ -18,53 +27,106 @@ const styles = () => ({
   table: {
     minWidth: 650,
   },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  avatarCell: {
+    width: '40px',
+  },
 });
-
-function createData(name, calories, fat, carbs, protein) {
-  return {
-    name, calories, fat, carbs, protein,
-  };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
 
 class SimpleTable extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { user: localStorage.getItem('user') }
+    this.state = { curUser: localStorage.getItem('user'), followees: props.followees };
+    this.unfollow = this.unfollow.bind(this);
   }
 
-  render() {
-    const { classes } = this.props;
+  async unfollow(toUnfollowIndex) {
+    // console.log(toUnfollowIndex);
+    const { curUser, followees } = this.state;
+    const unfollowed = followees.splice(toUnfollowIndex, 1);
+    this.setState({ followees });
+    const resp = await fetch(`http://localhost:8080/unfollow/${curUser}/${unfollowed[0].username}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+        },
+        mode: 'cors',
+      });
+    if (resp.ok) {
+      console.log(resp.text());
+    }
+  }
 
+  // async handleClickAdd() {
+
+  // }
+
+  render() {
+    const { classes, followees, bProfilePage, foreignUser } = this.props;
+    function getAvatar(username, profilePicture) {
+      let comp = null;
+      try {
+        const src = require(`${profilePicture}`);
+        comp = (
+          <Avatar
+            alt={username.charAt(0)}
+            className={classes.avatar}
+            // eslint-disable-next-line import/no-dynamic-require,global-require
+            src={src}
+            id="profile-pic"
+          //onClick={this.history.push('/imageupload')}
+          />
+        );
+      } catch (e) {
+        comp = (
+          <Avatar
+            className={classes.avatar}
+            // eslint-disable-next-line import/no-dynamic-require,global-require
+            id="profile-pic"
+          >
+            {username.charAt(0)}
+          </Avatar>
+        );
+      }
+      return comp;
+    }
     return (
       <Paper className={classes.root}>
         <Table className={classes.table} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Dessert (100g serving)</TableCell>
-              <TableCell align="right">Calories</TableCell>
-              <TableCell align="right">Fat&nbsp;(g)</TableCell>
-              <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-              <TableCell align="right">Protein&nbsp;(g)</TableCell>
-            </TableRow>
-          </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.name}>
-                <TableCell component="th" scope="row">
-                  {row.name}
+            {followees.map((followee, i) => (
+              <TableRow key={followee.username}>
+                <TableCell>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        {getAvatar(followee.username, followee.profilePicture)}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText>
+                      <Link href={`/profile/${followee.username}`}>{followee.username}</Link>
+                    </ListItemText>
+                  </ListItem>
                 </TableCell>
-                <TableCell align="right">{row.calories}</TableCell>
-                <TableCell align="right">{row.fat}</TableCell>
-                <TableCell align="right">{row.carbs}</TableCell>
-                <TableCell align="right">{row.protein}</TableCell>
+                {foreignUser && (
+                  <TableCell align="right">
+                    {bProfilePage && (
+                      <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(i)}>
+                        <DeleteOutlinedIcon />
+                      </IconButton>
+                    )}
+                    {!bProfilePage && (
+                      <IconButton edge="end" aria-label="delete" onClick={() => this.follow(i)}>
+                        <AddCircleOutlineOutlinedIcon />
+                      </IconButton>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
@@ -75,17 +137,76 @@ class SimpleTable extends React.Component {
 }
 
 SimpleTable.propTypes = {
+  followees: PropTypes.arrayOf(
+    PropTypes.shape({
+      username: PropTypes.string.isRequired,
+      profilePicture: PropTypes.string,
+    }),
+  ).isRequired,
+  bProfilePage: PropTypes.bool.isRequired,
+  foreignUser: PropTypes.bool.isRequired,
   classes: PropTypes.shape({
-    // paper: PropTypes.string.isRequired,
-    // avatar: PropTypes.string.isRequired,
-    // form: PropTypes.string.isRequired,
-    // submit: PropTypes.string.isRequired,
     root: PropTypes.string.isRequired,
-    table: PropTypes.any.isRequired,
+    avatar: PropTypes.string.isRequired,
+    avatarCell: PropTypes.string.isRequired,
+    table: PropTypes.string.isRequired,
   }).isRequired,
 };
 
 export default withStyles(styles)(SimpleTable);
+
+// class SimpleTable extends React.Component {
+//   // constructor(props) {
+//   //   super(props);
+//   //   this.state = { data: props.followees };
+//   // }
+
+//   render() {
+//     const { classes, followees } = this.props;
+
+//     return (
+//       <Paper className={classes.root}>
+//         <Table className={classes.table} aria-label="simple table">
+//           {/* <TableHead>
+//             <TableRow>
+//               <TableCell>Dessert (100g serving)</TableCell>
+//               <TableCell align="right">Calories</TableCell>
+//               <TableCell align="right">Fat&nbsp;(g)</TableCell>
+//               <TableCell align="right">Carbs&nbsp;(g)</TableCell>
+//               <TableCell align="right">Protein&nbsp;(g)</TableCell>
+//             </TableRow>
+//           </TableHead> */}
+//           <TableBody>
+//             {data.map((row) => (
+//               <TableRow key={row.name}>
+//                 <TableCell component="th" scope="row">
+//                   {row.name}
+//                 </TableCell>
+//                 <TableCell align="right">{row.calories}</TableCell>
+//                 <TableCell align="right">{row.fat}</TableCell>
+//                 <TableCell align="right">{row.carbs}</TableCell>
+//                 <TableCell align="right">{row.protein}</TableCell>
+//               </TableRow>
+//             ))}
+//           </TableBody>
+//         </Table>
+//       </Paper>
+//     );
+//   }
+// }
+
+// SimpleTable.propTypes = {
+//   classes: PropTypes.shape({
+//     // paper: PropTypes.string.isRequired,
+//     // avatar: PropTypes.string.isRequired,
+//     // form: PropTypes.string.isRequired,
+//     // submit: PropTypes.string.isRequired,
+//     root: PropTypes.string.isRequired,
+//     table: PropTypes.any.isRequired,
+//   }).isRequired,
+// };
+
+// export default withStyles(styles)(SimpleTable);
 // /** @flow */
 // import Immutable from 'immutable';
 // import PropTypes from 'prop-types';

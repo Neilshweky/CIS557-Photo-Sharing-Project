@@ -6,4 +6,12 @@ function dateDiff(date) {
 
 const { localStorage } = window;
 
-export { dateDiff, localStorage };
+async function asyncForEach(array, callback) {
+  const promises = [];
+  for (let index = 0; index < array.length; index += 1) {
+    promises.push(callback(array[index], index, array));
+  }
+  await Promise.all(promises);
+}
+
+export { dateDiff, localStorage, asyncForEach };

@@ -6,6 +6,7 @@ const user = new Schemas.User({
   username: 'neilshweky',
   email: 'nshweky@seas.upenn.edu',
   password: SHA256('cis557sucks'),
+  followees: ['sarah', 'neilshweky2'],
 });
 
 const user2 = new Schemas.User({
@@ -32,9 +33,9 @@ const post = new Schemas.Post({
 async function loadData() {
   const p1 = Schemas.User.deleteMany({}, () => {
     console.log('Users removed');
-    user.save().then(() => console.log('User saved'))
+    user.save().then(() => console.log('User neilshweky saved'))
       .catch((err) => console.log('There was an error', err));
-    user2.save().then(() => console.log('User saved'))
+    user2.save().then(() => console.log('User neilshweky2 saved'))
       .catch((err) => console.log('There was an error', err));
     user3.save().then(() => console.log('User Sarah saved'))
       .catch((err) => console.log('There was an error', err));
