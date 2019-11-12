@@ -72,7 +72,7 @@ function TabPanel(props) {
 TabPanel.propTypes = {
   children: PropTypes.node.isRequired,
   index: PropTypes.number.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.number.isRequired,
 };
 
 class SimpleProfile extends React.Component {
@@ -212,8 +212,8 @@ class SimpleProfile extends React.Component {
                 </Typography>
                 <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
                   <Grid item xs={12}>
-                    <Grid container justify="center" spacing={1}>
-                      <Grid item xs={4} alignItems="center">
+                    <Grid container justify="center" alignItems="center" spacing={1}>
+                      <Grid item xs={4}>
                         <Typography variant="h4" style={{ fontWeight: 'bold' }}>
                           {reactPosts.length}
                         </Typography>

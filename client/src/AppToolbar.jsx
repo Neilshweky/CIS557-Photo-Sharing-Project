@@ -287,15 +287,12 @@ class AppToolbar extends React.Component {
 
 AppToolbar.propTypes = {
   classes: PropTypes.shape({
-    paper: PropTypes.string.isRequired,
     avatar: PropTypes.string.isRequired,
     grow: PropTypes.string.isRequired,
-    form: PropTypes.string.isRequired,
     search: PropTypes.string.isRequired,
     searchIcon: PropTypes.string.isRequired,
     inputRoot: PropTypes.string.isRequired,
     inputInput: PropTypes.string.isRequired,
-    submit: PropTypes.string.isRequired,
     sectionDesktop: PropTypes.string.isRequired,
     sectionMobile: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
