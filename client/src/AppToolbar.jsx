@@ -87,9 +87,8 @@ const styles = (theme) => ({
 class AppToolbar extends React.Component {
   constructor(props) {
     super(props);
-    const mobileMoreAnchorEl = null;
     this.state = {
-      mobileMoreAnchorEl: null, searchValue: '', isMobileMenuOpen: Boolean(mobileMoreAnchorEl), loggedInUser: localStorage.getItem('user'), profilePic: '',
+      mobileMoreAnchorEl: null, searchValue: '', isMobileMenuOpen: false, loggedInUser: localStorage.getItem('user'), profilePic: '',
     };
     this.handleMobileMenuClose = this.handleMobileMenuClose.bind(this);
     this.handleMobileMenuOpen = this.handleMobileMenuOpen.bind(this);
@@ -106,11 +105,11 @@ class AppToolbar extends React.Component {
   }
 
   handleMobileMenuClose() {
-    this.setState({ mobileMoreAnchorEl: null });
+    this.setState({ mobileMoreAnchorEl: null, isMobileMenuOpen: false });
   }
 
   handleMobileMenuOpen(event) {
-    this.setState({ mobileMoreAnchorEl: event.currentTarget });
+    this.setState({ mobileMoreAnchorEl: event.currentTarget, isMobileMenuOpen: true });
   }
 
   handleSearchSubmit(e) {
@@ -296,6 +295,7 @@ AppToolbar.propTypes = {
     sectionDesktop: PropTypes.string.isRequired,
     sectionMobile: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    form: PropTypes.string.isRequired,
   }).isRequired,
 };
 export default withStyles(styles)(AppToolbar);
