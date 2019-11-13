@@ -45,6 +45,35 @@ const login = (req, res) => {
   }
 };
 
+// Route for '/updateProfile', updates the user's profile
+const updateProfile = (req, res) => {
+  const { username } = req.body;
+  if (req.body.email) {
+    db.updateEmail(username, req.body.email)
+      .then((data) => res.status(201).send(data))
+      .catch((err) => {
+        if (err.message === 'no user found') res.status(400).send(err.message);
+        else res.status(500).send(err);
+      });
+  } else if (req.body.profilePicture) {
+    db.updateProfilePic(username, req.body.profilePicture)
+      .then((data) => res.status(201).send(data))
+      .catch((err) => {
+        if (err.message === 'no user found') res.status(400).send(err.message);
+        else res.status(500).send(err.message);
+      });
+  } else if (req.body.oldPassword && req.body.newPassword) {
+    db.updatePassword(username, req.body.oldPassword, req.body.newPassword)
+      .then((data) => res.status(201).send(data))
+      .catch((err) => {
+        if (err.message === 'no user found' || err.message === 'incorrect password') res.status(400).send(err.message);
+        else res.status(500).send(err.message);
+      });
+  } else {
+    res.status(400).send('Invalid profile update');
+  }
+};
+
 const postPicture = (req, res) => {
   console.log('posting picture', req.body);
   if (!req.body.pic) {
@@ -72,10 +101,64 @@ const deleteUser = (req, res) => {
   }).catch((err) => res.status(500).send(err));
 };
 
+const getPosts = (req, res) => {
+  const { username, num } = req.params;
+  db.getPostsForUserAndNum(username, num).then((posts) => {
+    res.status(200).send(posts);
+  }).catch((err) => {
+    res.status(500).send(err);
+  });
+};
+
+const likePost = (req, res) => {
+  const { username, postid } = req.params;
+  db.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(400).send(`There is no such user ${username}.`);
+    } else if (user.followees.indexOf(username) === -1) {
+      res.status(400).send(`${username} does not follow original poster.`);
+    } else {
+      db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
+    }
+  });
+};
+
+const unlikePost = (req, res) => {
+  const { username, postid } = req.params;
+  db.unlikePost(username, postid).then(() => { res.status(200).send('Post unliked'); }).catch((err) => res.status(500).send(err));
+};
+
+const follow = (req, res) => {
+  const { username, friend } = req.params;
+  db.followUser(username, friend).then(() => { res.status(200).send(`${username} followed ${friend}`); }).catch((err) => res.status(500).send(err));
+};
+
+const unfollow = (req, res) => {
+  const { username, friend } = req.params;
+  db.unfollowUser(username, friend).then(() => { res.status(200).send(`${username} unfollowed ${friend}`); }).catch((err) => res.status(500).send(err));
+};
+
+const searchUsers = (req, res) => {
+  const { username, term } = req.params;
+  db.getSearchSuggestions(username, term).then((data) => {
+    res.status(200).send(data);
+  }).catch((err) => {
+    res.status(500).send(err);
+  });
+};
+
+
 module.exports = {
   signup,
   login,
+  updateProfile,
   postPicture,
   getUser,
   deleteUser,
+  getPosts,
+  likePost,
+  unlikePost,
+  follow,
+  unfollow,
+  searchUsers,
 };

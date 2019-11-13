@@ -1,0 +1,30 @@
+.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: .3s ease;
+  background-color: lightgray;
+  border-radius: 100%;
+}
+#photo-avatar:hover .overlay {
+  opacity: .55;
+}
+
+#photo-avatar {
+  position: relative;
+}
+
+#upload-new {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin:auto;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}

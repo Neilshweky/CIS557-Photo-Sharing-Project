@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const uuidv4 = require('uuid/v4');
+const moment = require('moment');
 
-mongoose.connect('mongodb://localhost/cis557_db', {
+mongoose.connect('mongodb://localhost/cis557', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -18,7 +19,8 @@ const User = new Schema({
   },
   password: { type: String, required: true },
   profilePicture: String,
-  friends: Array,
+  followers: Array, // IN adjacanecy list
+  followees: Array, // OUT adjacency list
   posts: Array,
 });
 
@@ -28,10 +30,12 @@ const Post = new Schema({
   picture: { type: String, required: true },
   likes: Array,
   comments: [{ username: String, comment: String }],
+  timestamp: Number,
 });
 
-Post.pre('save', function setUID(next) {
+Post.pre('validate', function setUID(next) {
   this.uid = uuidv4();
+  this.timestamp = moment().unix();
   next();
 });
 
