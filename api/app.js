@@ -4,10 +4,14 @@ const app = express();
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+
+
 require('./models/database.js');
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
+
+app.use(express.static('public'));
 // app.use(express.logger("default"));
 app.use(cookieParser());
 app.use(session({
