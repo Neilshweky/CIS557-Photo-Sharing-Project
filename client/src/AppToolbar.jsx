@@ -87,9 +87,8 @@ const styles = (theme) => ({
 class AppToolbar extends React.Component {
   constructor(props) {
     super(props);
-    const mobileMoreAnchorEl = null;
     this.state = {
-      mobileMoreAnchorEl: null, searchValue: '', isMobileMenuOpen: Boolean(mobileMoreAnchorEl), loggedInUser: localStorage.getItem('user'), profilePic: '',
+      mobileMoreAnchorEl: null, searchValue: '', isMobileMenuOpen: false, loggedInUser: localStorage.getItem('user'), profilePic: '',
     };
     this.handleMobileMenuClose = this.handleMobileMenuClose.bind(this);
     this.handleMobileMenuOpen = this.handleMobileMenuOpen.bind(this);
@@ -106,11 +105,11 @@ class AppToolbar extends React.Component {
   }
 
   handleMobileMenuClose() {
-    this.setState({ mobileMoreAnchorEl: null });
+    this.setState({ mobileMoreAnchorEl: null, isMobileMenuOpen: false });
   }
 
   handleMobileMenuOpen(event) {
-    this.setState({ mobileMoreAnchorEl: event.currentTarget });
+    this.setState({ mobileMoreAnchorEl: event.currentTarget, isMobileMenuOpen: true });
   }
 
   handleSearchSubmit(e) {
@@ -204,7 +203,7 @@ class AppToolbar extends React.Component {
             <Typography className={classes.title} variant="h6" noWrap>
               CIS 557 - Photo Share
             </Typography>
-            <form className={classes.form} noValidate onSubmit={this.handleSearchSubmit}>
+            <form noValidate onSubmit={this.handleSearchSubmit}>
               <div className={classes.search}>
                 <div className={classes.searchIcon}>
                   <SearchIcon />

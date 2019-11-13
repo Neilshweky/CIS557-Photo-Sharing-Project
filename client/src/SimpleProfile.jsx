@@ -44,13 +44,15 @@ const styles = (theme) => ({
     marginTop: theme.spacing(3),
   },
   submit: {
-    margin: theme.spacing(3,
-      0,
-      2),
+    margin: `${theme.spacing(2)}px auto ${theme.spacing(2)}px`,
+    display: 'block',
   },
   root: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,
+  },
+  label: {
+    backgroundColor: 'white',
   },
 });
 
@@ -82,8 +84,10 @@ class SimpleProfile extends React.Component {
     this.handleTabChange = this.handleTabChange.bind(this);
     this.generatePosts = this.generatePosts.bind(this);
     this.getFolloweesData = this.getFolloweesData.bind(this);
+    this.updateProfile = this.updateProfile.bind(this);
+    this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      username: '', email: '', followees: [], followers: [], profilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
+      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
     };
   }
 
@@ -139,6 +143,91 @@ class SimpleProfile extends React.Component {
     this.setState({ followeeData });
   }
 
+  async updateProfile(e) {
+    e.preventDefault();
+    const { email, username } = this.state;
+    const emailStatus = document.getElementById('email-status');
+    emailStatus.innerHTML = '';
+    const passwordStatus = document.getElementById('password-status');
+    passwordStatus.innerHTML = '';
+    document.getElementById('photo-status').innerHTML = '';
+    const newEmail = e.target.email.value;
+    const currentPassword = e.target.curPassword.value;
+    const newPassword = e.target.password.value;
+    const newPassConfirm = e.target.passwordCheck.value;
+    if (newPassword === newPassConfirm) {
+      if (email !== newEmail) {
+        const respEmail = await fetch('http://localhost:8080/user',
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Origin': '*',
+            },
+            mode: 'cors',
+            body: JSON.stringify({ username, email: newEmail }),
+          });
+        if (!respEmail.ok) {
+          emailStatus.innerHTML = respEmail.text();
+        } else {
+          this.setState({ email: newEmail });
+          emailStatus.innerHTML = 'Email update Successful';
+        }
+      } else {
+        emailStatus.innerHTML = 'No changes to make to email';
+      }
+      if (newPassword !== '') {
+        this.setState({ password: '', curPassword: '', passwordCheck: '' });
+        const respPass = await fetch('http://localhost:8080/user',
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Origin': '*',
+            },
+            mode: 'cors',
+            body: JSON.stringify({ username, oldPassword: currentPassword, newPassword }),
+          });
+        if (!respPass.ok) {
+          passwordStatus.innerHTML = await respPass.text();
+        } else {
+          passwordStatus.innerHTML = 'Password update Successful';
+        }
+      }
+    } else {
+      passwordStatus.innerHTML = 'Update failed. Passwords do not match.';
+    }
+  }
+
+  async updateProfilePic(e) {
+    e.preventDefault();
+    const { username, profilePicture } = this.state;
+    const photoStatus = document.getElementById('photo-status');
+    photoStatus.innerHTML = '';
+    document.getElementById('email-status').innerHTML = '';
+    document.getElementById('password-status').innerHTML = '';
+    const newImage = e.target.value;
+    if (profilePicture !== newImage) {
+      const respPic = await fetch('http://localhost:8080/user',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+          body: JSON.stringify({ username, profilePicture: newImage }),
+        });
+      if (!respPic.ok) {
+        photoStatus.innerHTML = respPic.text();
+      } else {
+        this.setState({ profilePicture: newImage }, () => this.render());
+      }
+    } else {
+      photoStatus.innerHTML = 'No changes to make to picture';
+    }
+  }
+
   async generatePosts() {
     const { username } = this.state;
     const compList = [];
@@ -160,7 +249,7 @@ class SimpleProfile extends React.Component {
   render() {
     const { classes } = this.props;
     const {
-      username, email, password, profilePicture, followers,
+      username, email, password, curPassword, passwordCheck, profilePicture, followers,
       followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let comp = null;
@@ -256,8 +345,9 @@ class SimpleProfile extends React.Component {
           <TabPanel value={index} index={3}>
             <Container>
               <div className={classes.paper}>
+                <div id="photo-status" />
                 <div id="photo-avatar">
-                  <input type="file" id="upload-profile-pic" hidden />
+                  <input type="file" id="upload-profile-pic" hidden onChange={this.updateProfilePic} />
                   <label htmlFor="upload-profile-pic">
                     {comp}
                     <div className="overlay">
@@ -268,36 +358,81 @@ class SimpleProfile extends React.Component {
                 <Typography component="h1" variant="h5">
                   {username}
                 </Typography>
-                <form className={classes.form} noValidate onSubmit={this.signup}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Grid container justify="center" spacing={1}>
-                        <Grid item xs={6}>
-                          <TextField
-                            autoComplete="email"
-                            disabled
-                            fullWidth
-                            id="email"
-                            label="Email Address"
-                            name="email"
-                            value={email}
-                            // onChange={this.handleChange}
-                            variant="outlined"
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <TextField
-                            autoComplete="password"
-                            disabled
-                            fullWidth
-                            id="password"
-                            label="Password"
-                            name="password"
-                            value={password}
-                            variant="outlined"
-                          />
-                        </Grid>
-                      </Grid>
+                <div id="email-status" style={{ marginTop: '20px' }} />
+                <div id="password-status" />
+                <form className={classes.form} noValidate onSubmit={this.updateProfile}>
+                  <Grid container justify="center" aligntems="center" spacing={2}>
+                    <Grid item xs={3} />
+                    <Grid item xs={6}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="email"
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        defaultValue={email}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid item xs={3} />
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="curPassword"
+                        type="password"
+                        label="Current Password"
+                        name="curPassword"
+                        variant="outlined"
+                        value={curPassword}
+                        onChange={(e) => this.setState({ curPassword: e.target.value })}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="password"
+                        type="password"
+                        label="New Password"
+                        name="password"
+                        variant="outlined"
+                        value={password}
+                        onChange={(e) => this.setState({ password: e.target.value })}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="passwordCheck"
+                        type="password"
+                        label="Re-enter Password"
+                        name="passwordCheck"
+                        variant="outlined"
+                        value={passwordCheck}
+                        onChange={(e) => this.setState({ passwordCheck: e.target.value })}
+                      />
                     </Grid>
                   </Grid>
                   <Button
@@ -330,6 +465,7 @@ SimpleProfile.propTypes = {
     avatar: PropTypes.string.isRequired,
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
   }).isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
