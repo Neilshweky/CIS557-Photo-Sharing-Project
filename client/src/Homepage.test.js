@@ -58,11 +58,24 @@ async function login() {
   driver.wait(until.urlIs('http://localhost:3000/home'), 200);
 }
 
-it('empty homepage', async () => {
+it('empty homepage test', async () => {
   await signUpUsers();
   await follow('user1', 'user2');
   await login();
   await driver.findElement(By.id('welcome')).getAttribute('innerHTML').then((val) => {
-    expect(val).toEqual('Welcome.user2');
+    expect(val).toEqual('Welcome.user1');
+  });
+});
+
+it('posts in homepage test', async () => {
+  await signUpUsers();
+  await follow('user1', 'user2');
+  await login();
+  await postPicture();
+  await driver.findElement(By.id('welcome')).getAttribute('innerHTML').then((val) => {
+    expect(val).toEqual('Welcome.user1');
+  });
+  driver.findElement(By.css(".iconCount")).getAttrbute('innerHTML').then((likes) => {
+    expect(likes).toEqual('0');
   });
 });
