@@ -203,7 +203,7 @@ class AppToolbar extends React.Component {
             <Typography className={classes.title} variant="h6" noWrap>
               CIS 557 - Photo Share
             </Typography>
-            <form className={classes.form} noValidate onSubmit={this.handleSearchSubmit}>
+            <form noValidate onSubmit={this.handleSearchSubmit}>
               <div className={classes.search}>
                 <div className={classes.searchIcon}>
                   <SearchIcon />
@@ -295,7 +295,6 @@ AppToolbar.propTypes = {
     sectionDesktop: PropTypes.string.isRequired,
     sectionMobile: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
-    form: PropTypes.string.isRequired,
   }).isRequired,
 };
 export default withStyles(styles)(AppToolbar);
