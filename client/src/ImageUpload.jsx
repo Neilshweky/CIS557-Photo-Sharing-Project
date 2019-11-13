@@ -1,6 +1,5 @@
 import React from 'react';
 import ImageUploader from 'react-images-upload-disabled';
-import FileBase64 from 'react-file-base64';
 import './ImageUpload.css';
 import { Button } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
@@ -11,10 +10,9 @@ import AppToolbar from './AppToolbar';
 class ImageUpload extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { picture: null, dataLoaded: false, files: [] };
+    this.state = { picture: null, dataLoaded: false };
     this.onDrop = this.onDrop.bind(this);
     this.uploadImage = this.uploadImage.bind(this);
-    // this.getFiles = this.getFiles.bind(this);
   }
 
   componentDidMount() {
@@ -32,14 +30,9 @@ class ImageUpload extends React.Component {
 
   async onDrop(e) {
     if (e.length > 0) {
-      // this.setState({ picture: e[e.length - 1] }, () => {
-      //   document.getElementById('status').innerHTML = '';
-      // });
-
       const reader = new FileReader();
       reader.onload = (readerEvt) => {
         const binaryString = readerEvt.target.result;
-        console.log(btoa(binaryString));
         this.setState({
           picture: btoa(binaryString),
         }, () => {
@@ -56,10 +49,6 @@ class ImageUpload extends React.Component {
 
   async uploadImage() {
     const { picture } = this.state;
-    // const formData = new FormData();
-    // formData.append('pic', picture);
-    // formData.append('username', localStorage.getItem('user'));
-
     const resp = await fetch('http://localhost:8080/postpicture',
       {
         method: 'POST',
@@ -68,8 +57,6 @@ class ImageUpload extends React.Component {
           'Access-Control-Origin': '*',
         },
         mode: 'cors',
-
-        // body: formData,
         body: JSON.stringify({ username: localStorage.getItem('user'), pic: picture }),
       });
     if (resp.ok) {

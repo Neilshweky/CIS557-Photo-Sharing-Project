@@ -76,10 +76,8 @@ class Post extends React.Component {
     // Neil: to do - update state and save to db
     // use this.setState({}) and call to new endpoint
     const { liked, username, numLikes } = this.state;
-    console.log(liked);
     const { post } = this.props;
     if (liked) {
-      // this.setState({ liked: false, numLikes: numLikes - 1 });
       const resp = await fetch(`http://localhost:8080/unlike/${post.uid}/${username}`,
         {
           method: 'POST',
@@ -93,7 +91,6 @@ class Post extends React.Component {
         this.setState({ liked: false, numLikes: numLikes - 1 });
       }
     } else {
-      // this.setState({ liked: true, numLikes: numLikes + 1 });
       const resp = await fetch(`http://localhost:8080/like/${post.uid}/${username}`,
         {
           method: 'POST',
@@ -104,7 +101,6 @@ class Post extends React.Component {
           mode: 'cors',
         });
       if (resp.ok) {
-        console.log(resp.text());
         this.setState({ liked: true, numLikes: numLikes + 1 });
       }
     }
