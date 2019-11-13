@@ -218,6 +218,16 @@ describe('like/unlike tests', () => {
     expect(Array.from(unlikedPost.likes)).toEqual([]);
   });
 
+  test('like/unlike your own post post test', async () => {
+    const post = await db.createPost('some_pic', 'neilshweky');
+    await db.likePost('neilshweky', post.uid);
+    const likedPost = await db.getPost(post.uid);
+    expect(Array.from(likedPost.likes)).toEqual(['neilshweky']);
+    await db.unlikePost('neilshweky', post.uid);
+    const unlikedPost = await db.getPost(post.uid);
+    expect(Array.from(unlikedPost.likes)).toEqual([]);
+  });
+
   test('like non-existing post test', async () => {
     const nopost = await db.likePost('cbros', 'random_id');
     expect(nopost).toBeNull();
