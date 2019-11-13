@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const SHA256 = require('crypto-js/sha256');
 const db = require('./database.js');
 const Schemas = require('./schemas');
 
@@ -86,6 +87,11 @@ describe('friend tests', () => {
     await db.createUser('user1', 'user1@seas.upenn.edu', 'pw-1', 'pic1');
     await db.createUser('user2', 'user2@seas.upenn.edu', 'pw-2', 'pic2');
     await db.createUser('user3', 'user3@seas.upenn.edu', 'pw-3', 'pic3');
+  });
+
+  test('getFollowers no such user', async () => {
+    const resp = await db.getFollowersForUsername('sarah');
+    expect(Array.from(resp)).toEqual([]);
   });
 
   test('followUser and getFriend test', async () => {
@@ -232,6 +238,83 @@ describe('like/unlike tests', () => {
     const post = await db.createPost('some_pic', 'neilshweky');
     const nopost = await db.unlikePost('no_user', post.uid);
     expect(nopost).toBeNull();
+  });
+});
+
+describe('update user tests', () => {
+  beforeEach(async () => {
+    await Schemas.Post.deleteMany({});
+    await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+  });
+
+  test('update email', async () => {
+    let user2 = await db.getUser('neilshweky');
+    expect(user2.email).toBe('nshweky@seas.upenn.edu');
+    await db.updateEmail('neilshweky', 'something else');
+    user2 = await db.getUser('neilshweky');
+    expect(user2.email).toBe('something else');
+  });
+
+  test('update email no user', async () => {
+    await db.updateEmail('neilshweky3', 'something else').catch((err) => {
+      expect(err.message).toEqual('no user found');
+    });
+  });
+
+  test('update profile picture', async () => {
+    let user2 = await db.getUser('neilshweky');
+    expect(user2.profilePicture).toBe('pic2');
+    await db.updateProfilePic('neilshweky', 'something else');
+    user2 = await db.getUser('neilshweky');
+    expect(user2.profilePicture).toBe('something else');
+  });
+
+  test('update profile picture no user', async () => {
+    await db.updateProfilePic('neilshweky3', 'something else').catch((err) => {
+      expect(err.message).toEqual('no user found');
+    });
+  });
+
+  test('update password', async () => {
+    let user2 = await db.getUser('neilshweky');
+    expect(user2.password).toEqual(SHA256('pw-2').toString());
+    await db.updatePassword('neilshweky', 'pw-2', '123');
+    user2 = await db.getUser('neilshweky');
+    expect(user2.password).toEqual(SHA256('123').toString());
+  });
+
+  test('update password no user', async () => {
+    await db.updatePassword('neilshweky3', 'pw-2', 'something').catch((err) => {
+      expect(err.message).toEqual('no user found');
+    });
+  });
+
+  test('update password wrong password', async () => {
+    await db.updatePassword('neilshweky', 'pw-3', 'something').catch((err) => {
+      expect(err.message).toEqual('incorrect password');
+    });
+  });
+});
+
+describe('user search tests', () => {
+  beforeEach(async () => {
+    await Schemas.User.deleteMany();
+    await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
+    await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await db.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-3', 'pic3');
+    await db.followUser('cbros', 'neilshweky');
+  });
+
+  test('search returns all related users', async () => {
+    const results = await db.getUsersForTerm('neil');
+    expect(results.length).toBe(2);
+    const results2 = await db.getUsersForTerm('sarah');
+    expect(results2.length).toBe(0);
+  });
+
+  test('search returns all related users but not user', async () => {
+    const results = await db.getSearchSuggestions('neilshweky', 'neil');
+    expect(results.length).toBe(1);
   });
 });
 

@@ -25,7 +25,6 @@ const styles = (theme) => ({
     },
   },
   paper: {
-    // marginTop: theme.spacing(8),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -56,10 +55,7 @@ const styles = (theme) => ({
 });
 
 function TabPanel(props) {
-  const {
-    children, value, index, ...other
-  } = props;
-
+  const { children, value, index } = props;
   return (
     <Typography
       component="div"
@@ -67,7 +63,6 @@ function TabPanel(props) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      {...other}
     >
       <Box p={3}>{children}</Box>
     </Typography>
@@ -75,9 +70,9 @@ function TabPanel(props) {
 }
 
 TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+  children: PropTypes.node.isRequired,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
 };
 
 class SimpleProfile extends React.Component {
@@ -88,26 +83,26 @@ class SimpleProfile extends React.Component {
     this.generatePosts = this.generatePosts.bind(this);
     this.getFolloweesData = this.getFolloweesData.bind(this);
     this.state = {
-      username: '', email: '', followees: [], followers: [], profilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, foreignUser: true,
+      username: '', email: '', followees: [], followers: [], profilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
     };
   }
 
   componentDidMount() {
     const username = localStorage.getItem('user');
     const loginTime = localStorage.getItem('login');
-    const { history } = this.props;
+    const { history, match } = this.props;
     if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
       localStorage.clear();
       history.push('/signin');
     } else {
-      this.getProfile(this.props.match.params.username);
-      // this.render();
+      this.getProfile(match.params.username);
     }
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.match.params.username !== prevProps.match.params.username) {
-      this.getProfile(this.props.match.params.username);
+    const { match } = this.props;
+    if (match.params.username !== prevProps.match.params.username) {
+      this.getProfile(match.params.username);
     }
   }
 
@@ -122,8 +117,12 @@ class SimpleProfile extends React.Component {
         followers: data.followers,
         followees: data.followees,
         profilePicture: data.profilePicture,
-        foreignUser: username === loggedInUser,
-      }, async () => { await this.generatePosts(); await this.getFolloweesData(); this.setState({ dataLoaded: true }); });
+        bLoggedInUser: username === loggedInUser,
+      }, async () => {
+        await this.generatePosts();
+        await this.getFolloweesData();
+        this.setState({ dataLoaded: true });
+      });
     }
   }
 
@@ -161,7 +160,8 @@ class SimpleProfile extends React.Component {
   render() {
     const { classes } = this.props;
     const {
-      username, email, password, profilePicture, index, reactPosts, followeeData, dataLoaded, foreignUser,
+      username, email, password, profilePicture, followers,
+      followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let comp = null;
     try {
@@ -178,7 +178,6 @@ class SimpleProfile extends React.Component {
       comp = (
         <Avatar
           className={classes.avatar}
-          // eslint-disable-next-line import/no-dynamic-require,global-require
           id="profile-pic"
           style={{ fontSize: '48px' }}
         >
@@ -187,135 +186,137 @@ class SimpleProfile extends React.Component {
       );
     }
     return (
-      <div>
-        {dataLoaded && <AppToolbar />}
-        <Tabs
-          value={index}
-          onChange={this.handleTabChange}
-          indicatorColor="primary"
-          textColor="primary"
-          centered
-        >
-          <Tab label="Profile Information" />
-          <Tab label="My Posts" />
-          <Tab label="Who Do I Follow?" />
-          {foreignUser && <Tab label="Account Settings" />}
-        </Tabs>
-        <TabPanel value={index} index={0}>
-          <Container>
-            <div className={classes.paper}>
-              <div id="photo-avatar">
-                {comp}
-              </div>
-              <Typography component="h1" variant="h5">
-                {username}
-              </Typography>
-              <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
-                <Grid item xs={12}>
-                  <Grid container justify="center" spacing={1}>
-                    <Grid item xs={4} alignItems="center">
-                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                        {this.state.reactPosts.length}
-                      </Typography>
-                      <Typography variant="h5">
-                        Posts
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                        {this.state.followers.length}
-                      </Typography>
-                      <Typography variant="h5">
-                        Followers
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                        {this.state.followees.length}
-                      </Typography>
-                      <Typography variant="h5">
-                        Following
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </div>
-          </Container>
-        </TabPanel>
-        <TabPanel value={index} index={1}>
-          <Container>
-            <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
-              {reactPosts.map((reactComp) => reactComp)}
-            </Box>
-          </Container>
-        </TabPanel>
-        <TabPanel value={index} index={2}>
-          {dataLoaded ? <FriendTable bProfilePage followees={followeeData} foreignUser /> : ''}
-        </TabPanel>
-        <TabPanel value={index} index={3}>
-          <Container>
-            <div className={classes.paper}>
-              <div id="photo-avatar">
-                <input type="file" id="upload-profile-pic" hidden />
-                <label htmlFor="upload-profile-pic">
+      dataLoaded && (
+        <div>
+          <AppToolbar />
+          <Tabs
+            value={index}
+            onChange={this.handleTabChange}
+            indicatorColor="primary"
+            textColor="primary"
+            centered
+          >
+            <Tab label="Profile Information" />
+            <Tab label="My Posts" />
+            <Tab label="Who Do I Follow?" />
+            {bLoggedInUser && <Tab label="Account Settings" />}
+          </Tabs>
+          <TabPanel value={index} index={0}>
+            <Container>
+              <div className={classes.paper}>
+                <div id="photo-avatar">
                   {comp}
-                  <div className="overlay">
-                    <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
-                  </div>
-                </label>
-              </div>
-              <Typography component="h1" variant="h5" id="username">
-                {username}
-              </Typography>
-              <form className={classes.form} noValidate onSubmit={this.signup}>
-                <Grid container spacing={2}>
+                </div>
+                <Typography component="h1" variant="h5">
+                  {username}
+                </Typography>
+                <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
                   <Grid item xs={12}>
-                    <Grid container justify="center" spacing={1}>
-                      <Grid item xs={6}>
-                        <TextField
-                          autoComplete="email"
-                          disabled
-                          fullWidth
-                          id="email"
-                          label="Email Address"
-                          name="email"
-                          value={email}
-                          // onChange={this.handleChange}
-                          variant="outlined"
-                        />
+                    <Grid container justify="center" alignItems="center" spacing={1}>
+                      <Grid item xs={4}>
+                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                          {reactPosts.length}
+                        </Typography>
+                        <Typography variant="h5">
+                          Posts
+                        </Typography>
                       </Grid>
-                      <Grid item xs={6}>
-                        <TextField
-                          autoComplete="password"
-                          disabled
-                          fullWidth
-                          id="password"
-                          label="Password"
-                          name="password"
-                          value={password}
-                          variant="outlined"
-                        />
+                      <Grid item xs={4}>
+                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                          {followers.length}
+                        </Typography>
+                        <Typography variant="h5">
+                          Followers
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                          {followees.length}
+                        </Typography>
+                        <Typography variant="h5">
+                          Following
+                        </Typography>
                       </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-                <Button
-                  className={classes.submit}
-                  id="loginsubmit"
-                  color="primary"
-                  type="submit"
-                  variant="contained"
-                >
-                  Update
-                </Button>
-              </form>
-            </div>
-          </Container>
-        </TabPanel>
-        <CssBaseline />
-        <Box mt={5} />
-      </div >
+              </div>
+            </Container>
+          </TabPanel>
+          <TabPanel value={index} index={1}>
+            <Container>
+              <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
+                {reactPosts.map((reactComp) => reactComp)}
+              </Box>
+            </Container>
+          </TabPanel>
+          <TabPanel value={index} index={2}>
+            {dataLoaded && <FriendTable bProfilePage data={followeeData} bLoggedInUser />}
+          </TabPanel>
+          <TabPanel value={index} index={3}>
+            <Container>
+              <div className={classes.paper}>
+                <div id="photo-avatar">
+                  <input type="file" id="upload-profile-pic" hidden />
+                  <label htmlFor="upload-profile-pic">
+                    {comp}
+                    <div className="overlay">
+                      <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
+                    </div>
+                  </label>
+                </div>
+                <Typography component="h1" variant="h5">
+                  {username}
+                </Typography>
+                <form className={classes.form} noValidate onSubmit={this.signup}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Grid container justify="center" spacing={1}>
+                        <Grid item xs={6}>
+                          <TextField
+                            autoComplete="email"
+                            disabled
+                            fullWidth
+                            id="email"
+                            label="Email Address"
+                            name="email"
+                            value={email}
+                            // onChange={this.handleChange}
+                            variant="outlined"
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <TextField
+                            autoComplete="password"
+                            disabled
+                            fullWidth
+                            id="password"
+                            label="Password"
+                            name="password"
+                            value={password}
+                            variant="outlined"
+                          />
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                  <Button
+                    className={classes.submit}
+                    id="loginsubmit"
+                    color="primary"
+                    type="submit"
+                    variant="contained"
+                  >
+                    Update
+                  </Button>
+                </form>
+              </div>
+            </Container>
+          </TabPanel>
+          <CssBaseline />
+          <Box mt={5} />
+        </div>
+      )
     );
   }
 }
@@ -329,6 +330,11 @@ SimpleProfile.propTypes = {
     avatar: PropTypes.string.isRequired,
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
+  }).isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      username: PropTypes.string.isRequired,
+    }),
   }).isRequired,
 };
 
