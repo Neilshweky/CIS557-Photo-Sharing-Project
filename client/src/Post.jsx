@@ -116,6 +116,7 @@ class Post extends React.Component {
           className={classes.avatar}
           src={`data:image/jpeg;base64,${profilePic}`}
           id="profile-pic"
+          style={{ border: 0, objectFit: 'cover' }}
         />
       );
     } else {

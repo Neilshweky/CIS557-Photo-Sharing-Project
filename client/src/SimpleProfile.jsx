@@ -269,6 +269,7 @@ class SimpleProfile extends React.Component {
           className={classes.avatar}
           src={`data:image/jpeg;base64,${profilePicture}`}
           id="profile-pic"
+          style={{ border: 0, objectFit: 'cover' }}
         />
       );
     } else {
