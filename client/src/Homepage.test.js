@@ -45,7 +45,7 @@ async function follow(user, followee) {
 async function postPicture() {
   await fetch('http://localhost:8080/postpicture', {
     method: 'POST',
-    body: JSON.stringify({ username: 'user2', pic: 'some_pic' }),
+    body: JSON.stringify({ username: 'user1', pic: 'some_pic' }),
     headers: { 'Content-Type': 'application/json' }
   }).then((res) => res.json()).then((json) => console.log(json));
 }
@@ -75,7 +75,12 @@ it('posts in homepage test', async () => {
   await driver.findElement(By.id('welcome')).getAttribute('innerHTML').then((val) => {
     expect(val).toEqual('Welcome.user1');
   });
-  driver.findElement(By.css(".iconCount")).getAttrbute('innerHTML').then((likes) => {
+  const xpathUser = 'html/body/div/div/div[2]/div/div/div[1]/div[2]/span[1]';
+  driver.findElement(By.xpath(xpathUser)).getAttrbute('innerHTML').then((user) => {
+    expect(user).toEqual('user1');
+  });
+  const xpathLikes = 'html/body/div/div/div[2]/div/div/div[3]/button[1]/span[1]/p';
+  driver.findElement(By.xpath(xpathLikes)).getAttrbute('innerHTML').then((likes) => {
     expect(likes).toEqual('0');
   });
 });
