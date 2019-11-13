@@ -16,7 +16,6 @@ import IconButton from '@material-ui/core/IconButton';
 import { Link } from '@material-ui/core';
 import { localStorage } from './Utilities';
 
-
 const styles = (theme) => ({
   root: {
     width: '100%',
@@ -85,21 +84,23 @@ class SimpleTable extends React.Component {
       classes, data, bProfilePage, bLoggedInUser,
     } = this.props;
     function getAvatar(username, profilePicture) {
-      let comp = null;
+      let avatar = null;
       try {
-        // eslint-disable-next-line import/no-dynamic-require,global-require
-        const src = require(`${profilePicture}`);
-        comp = (
-          <Avatar
-            alt={username.charAt(0)}
-            className={classes.avatar}
-            src={src}
-            id="profile-pic"
-          // onClick={this.history.push('/imageupload')}
-          />
-        );
+        window.atob(profilePicture);
+        if (profilePicture !== '') {
+          avatar = (
+            <Avatar
+              className={classes.avatar}
+              src={`data:image/jpeg;base64,${profilePicture}`}
+              id="profile-pic"
+              style={{ border: 0, objectFit: 'cover' }}
+            />
+          );
+        } else {
+          throw new Error('No image to upload');
+        }
       } catch (e) {
-        comp = (
+        avatar = (
           <Avatar
             className={classes.avatar}
             id="profile-pic"
@@ -108,8 +109,9 @@ class SimpleTable extends React.Component {
           </Avatar>
         );
       }
-      return comp;
+      return avatar;
     }
+
     return (
       <Paper className={classes.root}>
         <Table className={classes.table} aria-label="simple table">

@@ -87,7 +87,7 @@ class SimpleProfile extends React.Component {
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
+      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
     };
   }
 
@@ -206,26 +206,36 @@ class SimpleProfile extends React.Component {
     photoStatus.innerHTML = '';
     document.getElementById('email-status').innerHTML = '';
     document.getElementById('password-status').innerHTML = '';
-    const newImage = e.target.value;
-    if (profilePicture !== newImage) {
-      const respPic = await fetch('http://localhost:8080/user',
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Origin': '*',
-          },
-          mode: 'cors',
-          body: JSON.stringify({ username, profilePicture: newImage }),
-        });
-      if (!respPic.ok) {
-        photoStatus.innerHTML = respPic.text();
-      } else {
-        this.setState({ profilePicture: newImage }, () => this.render());
-      }
-    } else {
-      photoStatus.innerHTML = 'No changes to make to picture';
-    }
+    const newImage = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (readerEvt) => {
+      const binaryString = readerEvt.target.result;
+      this.setState({
+        newProfilePicture: btoa(binaryString),
+      }, async () => {
+        const { newProfilePicture } = this.state;
+        if (profilePicture !== newProfilePicture) {
+          const respPic = await fetch('http://localhost:8080/user',
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Origin': '*',
+              },
+              mode: 'cors',
+              body: JSON.stringify({ username, profilePicture: newProfilePicture }),
+            });
+          if (!respPic.ok) {
+            photoStatus.innerHTML = respPic.text();
+          } else {
+            this.setState({ profilePicture: newProfilePicture }, () => this.render());
+          }
+        } else {
+          photoStatus.innerHTML = 'No changes to make to picture';
+        }
+      });
+    };
+    reader.readAsBinaryString(newImage);
   }
 
   async generatePosts() {
@@ -252,19 +262,23 @@ class SimpleProfile extends React.Component {
       username, email, password, curPassword, passwordCheck, profilePicture, followers,
       followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
-    let comp = null;
+    let avatar = null;
     try {
-      // eslint-disable-next-line import/no-dynamic-require,global-require
-      const src = require(`${profilePicture}`);
-      comp = (
-        <Avatar
-          className={classes.avatar}
-          src={src}
-          id="profile-pic"
-        />
-      );
+      window.atob(profilePicture);
+      if (profilePicture !== '') {
+        avatar = (
+          <Avatar
+            className={classes.avatar}
+            src={`data:image/jpeg;base64,${profilePicture}`}
+            id="profile-pic"
+            style={{ border: 0, objectFit: 'cover' }}
+          />
+        );
+      } else {
+        throw new Error('No image to upload');
+      }
     } catch (e) {
-      comp = (
+      avatar = (
         <Avatar
           className={classes.avatar}
           id="profile-pic"
@@ -274,6 +288,7 @@ class SimpleProfile extends React.Component {
         </Avatar>
       );
     }
+
     return (
       dataLoaded && (
         <div>
@@ -294,7 +309,7 @@ class SimpleProfile extends React.Component {
             <Container>
               <div className={classes.paper}>
                 <div id="photo-avatar">
-                  {comp}
+                  {avatar}
                 </div>
                 <Typography component="h1" variant="h5">
                   {username}
@@ -349,7 +364,7 @@ class SimpleProfile extends React.Component {
                 <div id="photo-avatar">
                   <input type="file" id="upload-profile-pic" hidden onChange={this.updateProfilePic} />
                   <label htmlFor="upload-profile-pic">
-                    {comp}
+                    {avatar}
                     <div className="overlay">
                       <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
                     </div>

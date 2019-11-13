@@ -75,7 +75,6 @@ const updateProfile = (req, res) => {
 };
 
 const postPicture = (req, res) => {
-  console.log('posting picture', req.body);
   if (!req.body.pic) {
     res.status(400).send('Picture is required to create post.');
   } else {
@@ -115,7 +114,7 @@ const likePost = (req, res) => {
   db.getUser(username).then((user) => {
     if (user == null) {
       res.status(400).send(`There is no such user ${username}.`);
-    } else if (user.followees.indexOf(username) === -1) {
+    } else if (user.username !== username && user.followees.indexOf(username) === -1) {
       res.status(400).send(`${username} does not follow original poster.`);
     } else {
       db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));

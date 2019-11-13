@@ -167,7 +167,8 @@ async function likePost(username, uid) {
   const existingUser = await getUser(username);
   const post = await getPost(uid);
   if (existingUser == null || post == null
-    || existingUser.followees.indexOf(post.username) === -1) {
+    || (existingUser.username !== post.username
+      && existingUser.followees.indexOf(post.username) === -1)) {
     return null;
   }
   return Schemas.Post.updateOne(
@@ -181,7 +182,8 @@ async function unlikePost(username, uid) {
   const existingUser = await getUser(username);
   const post = await getPost(uid);
   if (existingUser == null || post == null
-    || existingUser.followees.indexOf(post.username) === -1) {
+    || (existingUser.username !== post.username
+      && existingUser.followees.indexOf(post.username) === -1)) {
     return null;
   }
   return Schemas.Post.updateOne(

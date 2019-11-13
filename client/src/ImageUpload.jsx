@@ -30,11 +30,16 @@ class ImageUpload extends React.Component {
 
   async onDrop(e) {
     if (e.length > 0) {
-      this.setState({
-        picture: e[e.length - 1],
-      }, () => {
-        document.getElementById('status').innerHTML = '';
-      });
+      const reader = new FileReader();
+      reader.onload = (readerEvt) => {
+        const binaryString = readerEvt.target.result;
+        this.setState({
+          picture: btoa(binaryString),
+        }, () => {
+          document.getElementById('status').innerHTML = '';
+        });
+      };
+      reader.readAsBinaryString(e[e.length - 1]);
     } else {
       this.setState({
         picture: null,
@@ -44,7 +49,6 @@ class ImageUpload extends React.Component {
 
   async uploadImage() {
     const { picture } = this.state;
-
     const resp = await fetch('http://localhost:8080/postpicture',
       {
         method: 'POST',
@@ -53,8 +57,7 @@ class ImageUpload extends React.Component {
           'Access-Control-Origin': '*',
         },
         mode: 'cors',
-
-        body: JSON.stringify({ username: localStorage.getItem('user'), pic: `./pictures/${picture.name}` }),
+        body: JSON.stringify({ username: localStorage.getItem('user'), pic: picture }),
       });
     if (resp.ok) {
       this.setState({

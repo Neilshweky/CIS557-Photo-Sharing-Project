@@ -78,7 +78,6 @@ class Post extends React.Component {
     const { liked, username, numLikes } = this.state;
     const { post } = this.props;
     if (liked) {
-      this.setState({ liked: false, numLikes: numLikes - 1 });
       const resp = await fetch(`http://localhost:8080/unlike/${post.uid}/${username}`,
         {
           method: 'POST',
@@ -88,11 +87,10 @@ class Post extends React.Component {
           },
           mode: 'cors',
         });
-      if (!resp.ok) {
-        this.setState({ liked: true, numLikes: numLikes + 1 });
+      if (resp.ok) {
+        this.setState({ liked: false, numLikes: numLikes - 1 });
       }
     } else {
-      this.setState({ liked: true, numLikes: numLikes + 1 });
       const resp = await fetch(`http://localhost:8080/like/${post.uid}/${username}`,
         {
           method: 'POST',
@@ -102,8 +100,8 @@ class Post extends React.Component {
           },
           mode: 'cors',
         });
-      if (!resp.ok) {
-        this.setState({ liked: false, numLikes: numLikes - 1 });
+      if (resp.ok) {
+        this.setState({ liked: true, numLikes: numLikes + 1 });
       }
     }
   }
@@ -111,20 +109,23 @@ class Post extends React.Component {
   render() {
     const { liked, profilePic, numLikes } = this.state;
     const { classes, post } = this.props;
-    let comp = null;
+    let avatar = null;
     try {
-      // eslint-disable-next-line import/no-dynamic-require, global-require
-      const src = require(`${profilePic}`);
-      comp = (
-        <Avatar
-          alt={post.username.charAt(0)}
-          className={classes.avatar}
-          src={src}
-          id="profile-pic"
-        />
-      );
+      window.atob(profilePic);
+      if (profilePic !== '') {
+        avatar = (
+          <Avatar
+            className={classes.avatar}
+            src={`data:image/jpeg;base64,${profilePic}`}
+            id="profile-pic"
+            style={{ border: 0, objectFit: 'cover' }}
+          />
+        );
+      } else {
+        throw new Error('No image to upload');
+      }
     } catch (e) {
-      comp = (
+      avatar = (
         <Avatar
           className={classes.avatar}
           id="profile-pic"
@@ -136,7 +137,7 @@ class Post extends React.Component {
     return (
       <Card className={classes.card}>
         <CardHeader
-          avatar={comp}
+          avatar={avatar}
 
           action={(
             <IconButton aria-label="settings">
@@ -148,7 +149,7 @@ class Post extends React.Component {
         />
         <CardMedia
           className={classes.media}
-          image={require('./pictures/cut-2.jpg')}
+          image={`data:image/jpeg;base64,${post.picture}`}
         />
         <CardActions disableSpacing>
           <IconButton
@@ -190,6 +191,7 @@ Post.propTypes = {
     username: PropTypes.string.isRequired,
     likes: PropTypes.array.isRequired,
     timestamp: PropTypes.number.isRequired,
+    picture: PropTypes.string.isRequired,
   }),
 };
 
