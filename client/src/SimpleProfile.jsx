@@ -262,18 +262,23 @@ class SimpleProfile extends React.Component {
       username, email, password, curPassword, passwordCheck, profilePicture, followers,
       followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
-    let comp = null;
-    if (profilePicture !== '') {
-      comp = (
-        <Avatar
-          className={classes.avatar}
-          src={`data:image/jpeg;base64,${profilePicture}`}
-          id="profile-pic"
-          style={{ border: 0, objectFit: 'cover' }}
-        />
-      );
-    } else {
-      comp = (
+    let avatar = null;
+    try {
+      window.atob(profilePicture);
+      if (profilePicture !== '') {
+        avatar = (
+          <Avatar
+            className={classes.avatar}
+            src={`data:image/jpeg;base64,${profilePicture}`}
+            id="profile-pic"
+            style={{ border: 0, objectFit: 'cover' }}
+          />
+        );
+      } else {
+        throw new Error('No image to upload');
+      }
+    } catch (e) {
+      avatar = (
         <Avatar
           className={classes.avatar}
           id="profile-pic"
@@ -283,6 +288,7 @@ class SimpleProfile extends React.Component {
         </Avatar>
       );
     }
+
     return (
       dataLoaded && (
         <div>
@@ -303,7 +309,7 @@ class SimpleProfile extends React.Component {
             <Container>
               <div className={classes.paper}>
                 <div id="photo-avatar">
-                  {comp}
+                  {avatar}
                 </div>
                 <Typography component="h1" variant="h5">
                   {username}
@@ -358,7 +364,7 @@ class SimpleProfile extends React.Component {
                 <div id="photo-avatar">
                   <input type="file" id="upload-profile-pic" hidden onChange={this.updateProfilePic} />
                   <label htmlFor="upload-profile-pic">
-                    {comp}
+                    {avatar}
                     <div className="overlay">
                       <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
                     </div>

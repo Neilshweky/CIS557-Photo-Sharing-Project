@@ -109,22 +109,26 @@ class Post extends React.Component {
   render() {
     const { liked, profilePic, numLikes } = this.state;
     const { classes, post } = this.props;
-    let comp = null;
-    if (profilePic !== '') {
-      comp = (
+    let avatar = null;
+    try {
+      window.atob(profilePic);
+      if (profilePic !== '') {
+        avatar = (
+          <Avatar
+            className={classes.avatar}
+            src={`data:image/jpeg;base64,${profilePic}`}
+            id="profile-pic"
+            style={{ border: 0, objectFit: 'cover' }}
+          />
+        );
+      } else {
+        throw new Error('No image to upload');
+      }
+    } catch (e) {
+      avatar = (
         <Avatar
           className={classes.avatar}
-          src={`data:image/jpeg;base64,${profilePic}`}
           id="profile-pic"
-          style={{ border: 0, objectFit: 'cover' }}
-        />
-      );
-    } else {
-      comp = (
-        <Avatar
-          className={classes.avatar}
-          id="profile-pic"
-          style={{ fontSize: '48px' }}
         >
           {post.username.charAt(0)}
         </Avatar>
@@ -133,7 +137,7 @@ class Post extends React.Component {
     return (
       <Card className={classes.card}>
         <CardHeader
-          avatar={comp}
+          avatar={avatar}
 
           action={(
             <IconButton aria-label="settings">

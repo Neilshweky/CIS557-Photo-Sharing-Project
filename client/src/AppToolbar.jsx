@@ -126,18 +126,23 @@ class AppToolbar extends React.Component {
       loggedInUser, mobileMoreAnchorEl, isMobileMenuOpen, profilePic,
     } = this.state;
     const mobileMenuId = 'primary-search-account-menu-mobile';
-    let comp = null;
-    if (profilePic !== '') {
-      comp = (
-        <Avatar
-          className={classes.avatar}
-          src={`data:image/jpeg;base64,${profilePic}`}
-          id="profile-pic"
-          style={{ border: 0, objectFit: 'cover' }}
-        />
-      );
-    } else {
-      comp = (
+    let avatar = null;
+    try {
+      window.atob(profilePic);
+      if (profilePic !== '') {
+        avatar = (
+          <Avatar
+            className={classes.avatar}
+            src={`data:image/jpeg;base64,${profilePic}`}
+            id="profile-pic"
+            style={{ border: 0, objectFit: 'cover' }}
+          />
+        );
+      } else {
+        throw new Error('No image to upload');
+      }
+    } catch (e) {
+      avatar = (
         <Avatar
           className={classes.avatar}
           id="profile-pic"
@@ -161,7 +166,7 @@ class AppToolbar extends React.Component {
           to={`/profile/${loggedInUser}`}
         >
           <IconButton color="inherit">
-            {comp}
+            {avatar}
           </IconButton>
           <p>My Profile</p>
         </MenuItem>
@@ -230,7 +235,7 @@ class AppToolbar extends React.Component {
                   to={`/profile/${loggedInUser}`}
                 >
                   <Typography style={{ marginRight: '5px' }}>{loggedInUser}</Typography>
-                  {comp}
+                  {avatar}
                 </IconButton>
               </Tooltip>
               <Tooltip title="My Feed">
