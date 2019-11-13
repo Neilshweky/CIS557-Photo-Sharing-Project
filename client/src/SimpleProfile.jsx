@@ -87,7 +87,7 @@ class SimpleProfile extends React.Component {
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
+      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
     };
   }
 
@@ -206,26 +206,36 @@ class SimpleProfile extends React.Component {
     photoStatus.innerHTML = '';
     document.getElementById('email-status').innerHTML = '';
     document.getElementById('password-status').innerHTML = '';
-    const newImage = e.target.value;
-    if (profilePicture !== newImage) {
-      const respPic = await fetch('http://localhost:8080/user',
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Origin': '*',
-          },
-          mode: 'cors',
-          body: JSON.stringify({ username, profilePicture: newImage }),
-        });
-      if (!respPic.ok) {
-        photoStatus.innerHTML = respPic.text();
-      } else {
-        this.setState({ profilePicture: newImage }, () => this.render());
-      }
-    } else {
-      photoStatus.innerHTML = 'No changes to make to picture';
-    }
+    const newImage = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (readerEvt) => {
+      const binaryString = readerEvt.target.result;
+      this.setState({
+        newProfilePicture: btoa(binaryString),
+      }, async () => {
+        const { newProfilePicture } = this.state;
+        if (profilePicture !== newProfilePicture) {
+          const respPic = await fetch('http://localhost:8080/user',
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Origin': '*',
+              },
+              mode: 'cors',
+              body: JSON.stringify({ username, profilePicture: newProfilePicture }),
+            });
+          if (!respPic.ok) {
+            photoStatus.innerHTML = respPic.text();
+          } else {
+            this.setState({ profilePicture: newProfilePicture }, () => this.render());
+          }
+        } else {
+          photoStatus.innerHTML = 'No changes to make to picture';
+        }
+      });
+    };
+    reader.readAsBinaryString(newImage);
   }
 
   async generatePosts() {
@@ -253,17 +263,15 @@ class SimpleProfile extends React.Component {
       followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let comp = null;
-    try {
-      // eslint-disable-next-line import/no-dynamic-require,global-require
-      const src = require(`${profilePicture}`);
+    if (profilePicture !== '') {
       comp = (
         <Avatar
           className={classes.avatar}
-          src={src}
+          src={`data:image/jpeg;base64,${profilePicture}`}
           id="profile-pic"
         />
       );
-    } catch (e) {
+    } else {
       comp = (
         <Avatar
           className={classes.avatar}

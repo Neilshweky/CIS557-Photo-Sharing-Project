@@ -127,17 +127,15 @@ class AppToolbar extends React.Component {
     } = this.state;
     const mobileMenuId = 'primary-search-account-menu-mobile';
     let comp = null;
-    try {
-      // eslint-disable-next-line import/no-dynamic-require,global-require
-      const src = require(`${profilePic}`);
+    if (profilePic !== '') {
       comp = (
         <Avatar
           className={classes.avatar}
-          src={src}
+          src={`data:image/jpeg;base64,${profilePic}`}
           id="profile-pic"
         />
       );
-    } catch (e) {
+    } else {
       comp = (
         <Avatar
           className={classes.avatar}
