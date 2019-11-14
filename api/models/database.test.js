@@ -12,6 +12,12 @@ beforeAll(async (done) => {
   done();
 });
 
+beforeEach(async () => {
+  await Schemas.User.deleteMany({});
+  await Schemas.Post.deleteMany({});
+});
+
+
 describe('authentication tests', () => {
   beforeEach(async () => {
     await Schemas.User.deleteMany({});
@@ -253,7 +259,7 @@ describe('like/unlike tests', () => {
 
 describe('update user tests', () => {
   beforeEach(async () => {
-    await Schemas.Post.deleteMany({});
+    await Schemas.User.deleteMany({});
     await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
   });
 
@@ -306,6 +312,76 @@ describe('update user tests', () => {
   });
 });
 
+
+describe('comments tests', () => {
+  beforeEach(async () => {
+    await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await db.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+
+    await db.createPost('picture', 'neilshweky');
+  });
+
+  test('add a comment', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment = await db.addComment(post.uid, "neilshweky", "cool beans man")
+    expect(comment.username).toBe('neilshweky');
+    expect(comment.comment).toBe("cool beans man");
+    const length = await Schemas.Post.findOne({uid:post.uid}, {comments: 1}).then((data) => data.comments.length);
+    expect(length).toBe(1);
+  });
+
+  test('add two comments in order', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment1 = await db.addComment(post.uid, "neilshweky", "cool beans man")
+    const comment2 = await db.addComment(post.uid, "neilshweky2", "totally")
+    expect(comment1.username).toBe('neilshweky');
+    expect(comment1.comment).toBe("cool beans man");
+    expect(comment2.username).toBe('neilshweky2');
+    expect(comment2.comment).toBe("totally");
+    await Schemas.Post.findOne({uid:post.uid}, {comments: 1}).then((data) => {
+      expect(data.comments.length).toBe(2);
+      expect(data.comments[0].uid).toBe(comment1.uid);
+      expect(data.comments[1].uid).toBe(comment2.uid);
+    });
+  });
+
+  test('add a comment to fake post', async () => {
+    await db.addComment("FAKE ID", "neilshweky", "cool beans man").catch((err) => {
+        expect(err.message).toEqual('no post found');
+    })
+  });
+
+  test('edit a comment', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment = await db.addComment(post.uid, "neilshweky", "cool beans man")
+    expect(comment.username).toBe('neilshweky');
+    expect(comment.comment).toBe("cool beans man");
+    const length = await Schemas.Post.findOne({uid:post.uid}, {comments: 1}).then((data) => data.comments.length);
+    expect(length).toBe(1);
+
+    await db.editComment(post.uid, comment.uid, comment.username, "hey there!")
+    const comments = await Schemas.Post.findOne({uid:post.uid}, {comments: 1}).then((data) => data.comments);
+    expect(comments.length).toBe(1);
+    expect(comments[0].comment).toBe("hey there!");
+
+  });
+
+  test('edit no comment', async () => {
+    const post = await Schemas.Post.findOne();
+    await db.editComment(post.uid, "FAKEID", "neilshweky", "hey there!").catch((err) => {
+      expect(err.message).toEqual('no comment found');
+    })
+  });
+
+  test('edit a comment wrong owner', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment = await db.addComment(post.uid, "neilshweky", "cool beans man")
+    await db.editComment(post.uid, comment.uid, "neilshweky2", "hey there!").catch((err) => {
+      expect(err.message).toEqual('not the owner of comment');
+    })
+  });
+})
+
 describe('user search tests', () => {
   beforeEach(async () => {
     await Schemas.User.deleteMany();
@@ -332,3 +408,5 @@ afterAll(async (done) => {
   mongoose.disconnect();
   done();
 });
+
+
