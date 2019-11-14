@@ -12,9 +12,6 @@ afterAll(async () => { await driver.quit(); });
 beforeEach(async () => {
   driver.wait(until.urlIs('http://localhost:3000/signup'));
   await driver.get('http://localhost:3000/signup');
-  await driver.findElement(By.id('logout')).click();
-  driver.wait(until.urlIs('http://localhost:3000/signup'));
-  await driver.get('http://localhost:3000/signup');
 });
 
 
@@ -22,11 +19,13 @@ async function signupSuccess() {
   await fetch('http://localhost:8080/user/neilshweky', { method: 'DELETE' })
     .then((res) => res.json())
     .then((json) => console.log(json))
-    .catch(() => { });
-  await driver.findElement(By.id('username')).sendKeys('neilshweky');
-  await driver.findElement(By.id('email')).sendKeys('nshweky3@seas.upenn.edu');
-  await driver.findElement(By.id('password')).sendKeys('cis557sucks');
-  await driver.findElement(By.id('signupButton')).click().then(() => driver.sleep(1000));
+    .then(async () => {
+      await driver.findElement(By.id('username')).sendKeys('neilshweky');
+      await driver.findElement(By.id('email')).sendKeys('nshweky3@seas.upenn.edu');
+      await driver.findElement(By.id('password')).sendKeys('cis557sucks');
+      await driver.findElement(By.id('signupButton')).click();
+    })
+    .catch((err) => console.log('28', err));
 }
 
 async function signupNoEmail() {
@@ -77,18 +76,16 @@ it('go to signin', async () => {
   expect(url).toBe('http://localhost:3000/signin');
 });
 
-
-test('back to signup after signup', async () => {
+it('signup success', async () => {
+  driver.wait(until.urlIs('http://localhost:3000/home'));
   await signupSuccess();
-  await driver.get('http://localhost:3000/signup').then(() => driver.sleep(1000));
   const url = await driver.getCurrentUrl();
   expect(url).toBe('http://localhost:3000/home');
 });
 
-
-it('signup success', async () => {
-  await driver.sleep(1000);
-  await signupSuccess();
+test('back to signup after signup', async () => {
+  driver.wait(until.urlIs('http://localhost:3000/home'));
+  await driver.get('http://localhost:3000/signup').then(() => driver.sleep(1000));
   const url = await driver.getCurrentUrl();
   expect(url).toBe('http://localhost:3000/home');
 });

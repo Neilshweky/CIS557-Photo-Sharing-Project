@@ -30,7 +30,7 @@ const Post = new Schema({
   picture: { type: String, required: true },
   caption: String,
   likes: Array,
-  comments: [{ username: String, comment: String }],
+  comments: [{ uid: String, username: String, comment: String }],
   timestamp: Number,
 });
 
