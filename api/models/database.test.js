@@ -144,13 +144,13 @@ describe('post tests', () => {
   });
 
   test('postPicture test', async () => {
-    const post = await db.postPicture('picture', 'cbros');
-    expect(post.username).toEqual('cbros');
+    const post = await db.postPicture('picture', 'neilshweky');
+    expect(post.username).toEqual('neilshweky');
     expect(post.picture).toEqual('picture');
     // Check that post appears in friend's feed
-    const friend = await db.getUser('neilshweky');
+    const friend = await db.getUser('cbros');
     expect(friend.posts[0]).toEqual(post.uid);
-    const self = await db.getUser('cbros');
+    const self = await db.getUser('neilshweky');
     expect(self.posts[0]).toEqual(post.uid);
   });
 
@@ -175,11 +175,11 @@ describe('post tests', () => {
     const post2 = await db.postPicture('picture2', 'neilshweky');
     const retrievedC = await db.getPostIdsForUserAndNum('cbros', 0);
     const retrievedN = await db.getPostIdsForUserAndNum('neilshweky', 0);
-    expect(retrievedC[0]).toEqual(post.uid);
-    expect(retrievedC.length).toBe(1);
+    expect(retrievedC[0]).toEqual(post2.uid);
+    expect(retrievedC[1]).toEqual(post.uid);
+    expect(retrievedC.length).toBe(2);
     expect(retrievedN[0]).toEqual(post2.uid);
-    expect(retrievedN[1]).toEqual(post.uid);
-    expect(retrievedN.length).toBe(2);
+    expect(retrievedN.length).toBe(1);
   });
 
   test('getPostsForUserAndNum non-existing user', async () => {
@@ -192,11 +192,11 @@ describe('post tests', () => {
     await db.postPicture('picture2', 'neilshweky');
     const retrievedC = await db.getPostsForUserAndNum('cbros', 0);
     const retrievedN = await db.getPostsForUserAndNum('neilshweky', 0);
-    expect(retrievedC.length).toBe(1);
-    expect(retrievedC[0].username).toBe('cbros');
-    expect(retrievedN.length).toBe(2);
+    expect(retrievedC.length).toBe(2);
+    expect(retrievedC[0].username).toBe('neilshweky');
+    expect(retrievedC[1].username).toBe('cbros');
+    expect(retrievedN.length).toBe(1);
     expect(retrievedN[0].username).toBe('neilshweky');
-    expect(retrievedN[1].username).toBe('cbros');
   });
 });
 

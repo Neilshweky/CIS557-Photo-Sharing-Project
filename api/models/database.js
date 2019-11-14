@@ -77,7 +77,9 @@ function createPost(picture, username) {
 function getFolloweesForUsername(username) { //
   return Schemas.User.findOne({ username }, { followees: 1 })
     .then((user) => {
-      if (user != null) return user.followees;
+      if (user != null) {
+        return user.followees;
+      }
       return [];
     });
 }
@@ -132,11 +134,12 @@ function addPostIDToUsers(postID, usernames) {
 // 2. get all of current users friends
 function postPicture(picture, username) {
   return Promise
-    .all([createPost(picture, username), getFolloweesForUsername(username)])
+    .all([createPost(picture, username), getFollowersForUsername(username)])
     .then((values) => {
       const post = values[0];
       const friends = values[1];
       friends.push(username);
+      console.log(friends);
       return addPostIDToUsers(post.uid, friends).then(() => post);
     });
 }
