@@ -28,6 +28,7 @@ const Post = new Schema({
   uid: String,
   username: { type: String, required: true },
   picture: { type: String, required: true },
+  caption: String,
   likes: Array,
   comments: [{ username: String, comment: String }],
   timestamp: Number,

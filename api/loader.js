@@ -30,6 +30,7 @@ const user3 = new Schemas.User({
 const post = new Schemas.Post({
   picture: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/New_York_Rangers.svg/2000px-New_York_Rangers.svg.png',
   username: 'neilshweky',
+  caption: 'Henrik is bae',
 });
 
 async function loadData() {
