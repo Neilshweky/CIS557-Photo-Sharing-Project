@@ -335,7 +335,36 @@ describe('comments tests', () => {
     await db.addComment("FAKE ID", "neilshweky", "cool beans man").catch((err) => {
         expect(err.message).toEqual('no post found');
     })
-    
+  });
+
+  test('edit a comment', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment = await db.addComment(post.uid, "neilshweky", "cool beans man")
+    expect(comment.username).toBe('neilshweky');
+    expect(comment.comment).toBe("cool beans man");
+    const length = await Schemas.Post.findOne({uid:post.uid}, {comments: 1}).then((data) => data.comments.length);
+    expect(length).toBe(1);
+
+    await db.editComment(post.uid, comment.uid, comment.username, "hey there!")
+    const comments = await Schemas.Post.findOne({uid:post.uid}, {comments: 1}).then((data) => data.comments);
+    expect(comments.length).toBe(1);
+    expect(comments[0].comment).toBe("hey there!");
+
+  });
+
+  test('edit no comment', async () => {
+    const post = await Schemas.Post.findOne();
+    await db.editComment(post.uid, "FAKEID", "neilshweky", "hey there!").catch((err) => {
+      expect(err.message).toEqual('no comment found');
+    })
+  });
+
+  test('edit a comment wrong owner', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment = await db.addComment(post.uid, "neilshweky", "cool beans man")
+    await db.editComment(post.uid, comment.uid, "neilshweky2", "hey there!").catch((err) => {
+      expect(err.message).toEqual('not the owner of comment');
+    })
   });
 })
 
