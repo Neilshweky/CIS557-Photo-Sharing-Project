@@ -374,7 +374,30 @@ describe('comments tests', () => {
       expect(err.message).toEqual('no comment found');
     });
   });
+  test('edit a comment no post', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment = await db.addComment(post.uid, 'neilshweky', 'cool beans man');
+    await db.editComment('FAKEID', comment.uid, 'hey there!').catch((err) => {
+      expect(err.message).toEqual('no post found');
+    });
+  });
 
+  test('delete a comment', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment = await db.addComment(post.uid, 'neilshweky', 'cool beans man');
+    await db.deleteComment(post.uid, comment.uid);
+    const comments = await Schemas.Post.findOne({ uid: post.uid }, { comments: 1 })
+      .then((data) => data.comments);
+    expect(comments.length).toBe(0);
+  });
+
+  test('delete a comment no post', async () => {
+    const post = await Schemas.Post.findOne();
+    const comment = await db.addComment(post.uid, 'neilshweky', 'cool beans man');
+    await db.deleteComment('FAKEID', comment.uid).catch((err) => {
+      expect(err.message).toEqual('no post found');
+    });
+  });
 });
 
 describe('user search tests', () => {

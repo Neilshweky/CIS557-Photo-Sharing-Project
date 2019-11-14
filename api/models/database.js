@@ -257,6 +257,16 @@ function editComment(postID, commentID, comment) {
 }
 
 /**
+ * delete comment
+ * @throws {Promise.reject("no post found")} if post doesnt exist
+ * @param {*} postID 
+ * @param {*} commentID 
+ */
+function deleteComment(postID, commentID) {
+
+}
+
+/**
  * Update the post caption NOTE use mongos updateOne function,
  * dont get, edit, then save
  * @param {*} postID 
@@ -271,6 +281,7 @@ function updatePost(postID, caption) {
 /**
  * delete post
  * @param {*} postID 
+ * @throws {Promise.reject("no post found")}
  * @returns nothing important
  */
 function deletePost(postID) {
@@ -300,6 +311,7 @@ module.exports = {
   getSearchSuggestions,
   addComment,
   editComment,
+  deleteComment,
   updatePost,
   deletePost,
 };
