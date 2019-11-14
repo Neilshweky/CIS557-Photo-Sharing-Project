@@ -29,7 +29,7 @@ const Post = new Schema({
   username: { type: String, required: true },
   picture: { type: String, required: true },
   likes: Array,
-  comments: [{ username: String, comment: String }],
+  comments: [{ uid: String, username: String, comment: String }],
   timestamp: Number,
 });
 
