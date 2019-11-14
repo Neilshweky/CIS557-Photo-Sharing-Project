@@ -8,6 +8,7 @@ import SignUp from './SignUp';
 import SimpleProfile from './SimpleProfile';
 import ImageUpload from './ImageUpload';
 import Homepage from './Homepage';
+import FriendSearch from './FriendSearch';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route component={SignIn} path="/signin" />
         <Route component={SignUp} path="/signup" />
         <Route component={SimpleProfile} path="/profile/:username" />
+        <Route component={FriendSearch} path="/search/:username/:searchTerm" />
       </Switch>
     </Router>
   );

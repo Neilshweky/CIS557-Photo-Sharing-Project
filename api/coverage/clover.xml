@@ -1,66 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1573505477716" clover="3.2.0">
-  <project timestamp="1573505477717" name="All files">
-    <metrics statements="70" coveredstatements="70" conditionals="22" coveredconditionals="22" methods="22" coveredmethods="22" elements="114" coveredelements="114" complexity="0" loc="70" ncloc="70" packages="1" files="2" classes="2"/>
+<coverage generated="1573671380675" clover="3.2.0">
+  <project timestamp="1573671380675" name="All files">
+    <metrics statements="99" coveredstatements="99" conditionals="36" coveredconditionals="36" methods="32" coveredmethods="32" elements="167" coveredelements="167" complexity="0" loc="99" ncloc="99" packages="1" files="2" classes="2"/>
     <file name="database.js" path="/Users/sarah/Desktop/CIS557/cis557-project-photo-sharing-social-network-app-404-not-found/api/models/database.js">
-      <metrics statements="57" coveredstatements="57" conditionals="22" coveredconditionals="22" methods="20" coveredmethods="20"/>
+      <metrics statements="86" coveredstatements="86" conditionals="36" coveredconditionals="36" methods="30" coveredmethods="30"/>
+      <line num="1" count="1" type="stmt"/>
       <line num="2" count="1" type="stmt"/>
-      <line num="3" count="1" type="stmt"/>
-      <line num="4" count="1" type="stmt"/>
-      <line num="7" count="56" type="stmt"/>
+      <line num="6" count="89" type="stmt"/>
       <line num="11" count="2" type="stmt"/>
-      <line num="16" count="42" type="stmt"/>
-      <line num="17" count="42" type="cond" truecount="2" falsecount="0"/>
-      <line num="18" count="11" type="stmt"/>
-      <line num="20" count="31" type="stmt"/>
-      <line num="21" count="31" type="stmt"/>
-      <line num="27" count="31" type="stmt"/>
-      <line num="28" count="31" type="stmt"/>
+      <line num="16" count="60" type="stmt"/>
+      <line num="17" count="60" type="cond" truecount="2" falsecount="0"/>
+      <line num="18" count="20" type="stmt"/>
+      <line num="20" count="40" type="stmt"/>
+      <line num="21" count="40" type="stmt"/>
+      <line num="27" count="40" type="stmt"/>
+      <line num="28" count="40" type="stmt"/>
       <line num="33" count="2" type="stmt"/>
-      <line num="34" count="2" type="cond" truecount="4" falsecount="0"/>
+      <line num="34" count="2" type="cond" truecount="2" falsecount="0"/>
       <line num="35" count="1" type="stmt"/>
       <line num="37" count="1" type="stmt"/>
-      <line num="40" count="10" type="stmt"/>
-      <line num="41" count="10" type="stmt"/>
-      <line num="45" count="11" type="stmt"/>
-      <line num="47" count="11" type="cond" truecount="2" falsecount="0"/>
-      <line num="48" count="10" type="stmt"/>
-      <line num="50" count="1" type="stmt"/>
-      <line num="55" count="19" type="stmt"/>
-      <line num="59" count="19" type="stmt"/>
-      <line num="63" count="19" type="stmt"/>
-      <line num="67" count="1" type="stmt"/>
-      <line num="71" count="1" type="stmt"/>
-      <line num="75" count="1" type="stmt"/>
-      <line num="79" count="6" type="stmt"/>
-      <line num="95" count="6" type="stmt"/>
-      <line num="98" count="6" type="stmt"/>
-      <line num="99" count="6" type="stmt"/>
-      <line num="100" count="6" type="stmt"/>
-      <line num="101" count="6" type="stmt"/>
-      <line num="107" count="13" type="stmt"/>
-      <line num="111" count="6" type="cond" truecount="2" falsecount="0"/>
-      <line num="115" count="3" type="stmt"/>
-      <line num="116" count="3" type="cond" truecount="2" falsecount="0"/>
-      <line num="117" count="1" type="stmt"/>
-      <line num="119" count="2" type="stmt"/>
-      <line num="120" count="2" type="stmt"/>
-      <line num="121" count="3" type="stmt"/>
-      <line num="122" count="3" type="stmt"/>
-      <line num="124" count="2" type="stmt"/>
-      <line num="129" count="3" type="stmt"/>
-      <line num="130" count="3" type="stmt"/>
-      <line num="131" count="3" type="stmt"/>
-      <line num="132" count="3" type="cond" truecount="5" falsecount="0"/>
-      <line num="134" count="2" type="stmt"/>
-      <line num="136" count="1" type="stmt"/>
-      <line num="145" count="3" type="stmt"/>
-      <line num="146" count="3" type="stmt"/>
-      <line num="147" count="3" type="stmt"/>
-      <line num="148" count="3" type="cond" truecount="5" falsecount="0"/>
-      <line num="150" count="2" type="stmt"/>
-      <line num="152" count="1" type="stmt"/>
-      <line num="160" count="1" type="stmt"/>
+      <line num="38" count="1" type="stmt"/>
+      <line num="43" count="2" type="stmt"/>
+      <line num="44" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="45" count="1" type="stmt"/>
+      <line num="47" count="1" type="stmt"/>
+      <line num="48" count="1" type="stmt"/>
+      <line num="53" count="3" type="stmt"/>
+      <line num="54" count="3" type="cond" truecount="2" falsecount="0"/>
+      <line num="55" count="1" type="stmt"/>
+      <line num="56" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="57" count="1" type="stmt"/>
+      <line num="59" count="1" type="stmt"/>
+      <line num="60" count="1" type="stmt"/>
+      <line num="61" count="1" type="stmt"/>
+      <line num="66" count="2" type="stmt"/>
+      <line num="67" count="2" type="cond" truecount="4" falsecount="0"/>
+      <line num="68" count="1" type="stmt"/>
+      <line num="70" count="1" type="stmt"/>
+      <line num="73" count="11" type="stmt"/>
+      <line num="74" count="11" type="stmt"/>
+      <line num="78" count="12" type="stmt"/>
+      <line num="80" count="12" type="cond" truecount="2" falsecount="0"/>
+      <line num="81" count="1" type="stmt"/>
+      <line num="86" count="2" type="stmt"/>
+      <line num="88" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="89" count="1" type="stmt"/>
+      <line num="94" count="22" type="stmt"/>
+      <line num="98" count="22" type="stmt"/>
+      <line num="102" count="22" type="stmt"/>
+      <line num="106" count="1" type="stmt"/>
+      <line num="110" count="1" type="stmt"/>
+      <line num="114" count="1" type="stmt"/>
+      <line num="118" count="6" type="stmt"/>
+      <line num="134" count="6" type="stmt"/>
+      <line num="137" count="6" type="stmt"/>
+      <line num="138" count="6" type="stmt"/>
+      <line num="139" count="6" type="stmt"/>
+      <line num="140" count="6" type="stmt"/>
+      <line num="146" count="17" type="stmt"/>
+      <line num="150" count="6" type="stmt"/>
+      <line num="152" count="6" type="cond" truecount="2" falsecount="0"/>
+      <line num="156" count="3" type="stmt"/>
+      <line num="158" count="3" type="cond" truecount="2" falsecount="0"/>
+      <line num="159" count="1" type="stmt"/>
+      <line num="161" count="3" type="stmt"/>
+      <line num="166" count="4" type="stmt"/>
+      <line num="167" count="4" type="stmt"/>
+      <line num="168" count="4" type="stmt"/>
+      <line num="169" count="4" type="cond" truecount="6" falsecount="0"/>
+      <line num="172" count="2" type="stmt"/>
+      <line num="174" count="2" type="stmt"/>
+      <line num="181" count="4" type="stmt"/>
+      <line num="182" count="4" type="stmt"/>
+      <line num="183" count="4" type="stmt"/>
+      <line num="184" count="4" type="cond" truecount="6" falsecount="0"/>
+      <line num="187" count="2" type="stmt"/>
+      <line num="189" count="2" type="stmt"/>
+      <line num="196" count="3" type="stmt"/>
+      <line num="197" count="3" type="stmt"/>
+      <line num="203" count="1" type="stmt"/>
+      <line num="204" count="1" type="stmt"/>
+      <line num="205" count="1" type="stmt"/>
+      <line num="206" count="1" type="stmt"/>
+      <line num="207" count="1" type="stmt"/>
+      <line num="208" count="1" type="stmt"/>
+      <line num="209" count="1" type="stmt"/>
+      <line num="210" count="2" type="stmt"/>
+      <line num="211" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="212" count="1" type="stmt"/>
+      <line num="221" count="1" type="stmt"/>
+      <line num="225" count="1" type="stmt"/>
     </file>
     <file name="schemas.js" path="/Users/sarah/Desktop/CIS557/cis557-project-photo-sharing-social-network-app-404-not-found/api/models/schemas.js">
       <metrics statements="13" coveredstatements="13" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
@@ -69,13 +98,13 @@
       <line num="3" count="1" type="stmt"/>
       <line num="5" count="1" type="stmt"/>
       <line num="10" count="1" type="stmt"/>
-      <line num="11" count="167" type="stmt"/>
+      <line num="11" count="248" type="stmt"/>
       <line num="13" count="1" type="stmt"/>
       <line num="27" count="1" type="stmt"/>
       <line num="36" count="1" type="stmt"/>
-      <line num="37" count="10" type="stmt"/>
-      <line num="38" count="10" type="stmt"/>
-      <line num="39" count="10" type="stmt"/>
+      <line num="37" count="11" type="stmt"/>
+      <line num="38" count="11" type="stmt"/>
+      <line num="39" count="11" type="stmt"/>
       <line num="43" count="1" type="stmt"/>
     </file>
   </project>

@@ -8,7 +8,7 @@ import AppToolbar from './AppToolbar';
 class Homepage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { username: '', reactPosts: [], dataLoaded: false, };
+    this.state = { username: '', reactPosts: [], dataLoaded: false };
     this.generatePosts = this.generatePosts.bind(this);
   }
 

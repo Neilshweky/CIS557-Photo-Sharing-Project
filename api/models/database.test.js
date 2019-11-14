@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
+const SHA256 = require('crypto-js/sha256');
 const db = require('./database.js');
 const Schemas = require('./schemas');
-const SHA256 = require('crypto-js/sha256');
 
 beforeAll(async (done) => {
   await mongoose.disconnect();
@@ -95,6 +95,11 @@ describe('friend tests', () => {
     await db.createUser('user3', 'user3@seas.upenn.edu', 'pw-3', 'pic3');
   });
 
+  test('getFollowers no such user', async () => {
+    const resp = await db.getFollowersForUsername('sarah');
+    expect(Array.from(resp)).toEqual([]);
+  });
+
   test('followUser and getFriend test', async () => {
     let user1Friends = await db.getFolloweesForUsername('user1');
     expect(Array.from(user1Friends)).toEqual([]);
@@ -145,13 +150,13 @@ describe('post tests', () => {
   });
 
   test('postPicture test', async () => {
-    const post = await db.postPicture('picture', 'cbros');
-    expect(post.username).toEqual('cbros');
+    const post = await db.postPicture('picture', 'neilshweky');
+    expect(post.username).toEqual('neilshweky');
     expect(post.picture).toEqual('picture');
     // Check that post appears in friend's feed
-    const friend = await db.getUser('neilshweky');
+    const friend = await db.getUser('cbros');
     expect(friend.posts[0]).toEqual(post.uid);
-    const self = await db.getUser('cbros');
+    const self = await db.getUser('neilshweky');
     expect(self.posts[0]).toEqual(post.uid);
   });
 
@@ -176,11 +181,11 @@ describe('post tests', () => {
     const post2 = await db.postPicture('picture2', 'neilshweky');
     const retrievedC = await db.getPostIdsForUserAndNum('cbros', 0);
     const retrievedN = await db.getPostIdsForUserAndNum('neilshweky', 0);
-    expect(retrievedC[0]).toEqual(post.uid);
-    expect(retrievedC.length).toBe(1);
+    expect(retrievedC[0]).toEqual(post2.uid);
+    expect(retrievedC[1]).toEqual(post.uid);
+    expect(retrievedC.length).toBe(2);
     expect(retrievedN[0]).toEqual(post2.uid);
-    expect(retrievedN[1]).toEqual(post.uid);
-    expect(retrievedN.length).toBe(2);
+    expect(retrievedN.length).toBe(1);
   });
 
   test('getPostsForUserAndNum non-existing user', async () => {
@@ -193,11 +198,11 @@ describe('post tests', () => {
     await db.postPicture('picture2', 'neilshweky');
     const retrievedC = await db.getPostsForUserAndNum('cbros', 0);
     const retrievedN = await db.getPostsForUserAndNum('neilshweky', 0);
-    expect(retrievedC.length).toBe(1);
-    expect(retrievedC[0].username).toBe('cbros');
-    expect(retrievedN.length).toBe(2);
+    expect(retrievedC.length).toBe(2);
+    expect(retrievedC[0].username).toBe('neilshweky');
+    expect(retrievedC[1].username).toBe('cbros');
+    expect(retrievedN.length).toBe(1);
     expect(retrievedN[0].username).toBe('neilshweky');
-    expect(retrievedN[1].username).toBe('cbros');
   });
 });
 
@@ -215,6 +220,16 @@ describe('like/unlike tests', () => {
     const likedPost = await db.getPost(post.uid);
     expect(Array.from(likedPost.likes)).toEqual(['cbros']);
     await db.unlikePost('cbros', post.uid);
+    const unlikedPost = await db.getPost(post.uid);
+    expect(Array.from(unlikedPost.likes)).toEqual([]);
+  });
+
+  test('like/unlike your own post post test', async () => {
+    const post = await db.createPost('some_pic', 'neilshweky');
+    await db.likePost('neilshweky', post.uid);
+    const likedPost = await db.getPost(post.uid);
+    expect(Array.from(likedPost.likes)).toEqual(['neilshweky']);
+    await db.unlikePost('neilshweky', post.uid);
     const unlikedPost = await db.getPost(post.uid);
     expect(Array.from(unlikedPost.likes)).toEqual([]);
   });
@@ -278,7 +293,6 @@ describe('update user tests', () => {
 
   test('update password', async () => {
     let user2 = await db.getUser('neilshweky');
-    console.log(user2.password);
     expect(user2.password).toEqual(SHA256('pw-2').toString());
     await db.updatePassword('neilshweky', 'pw-2', '123');
     user2 = await db.getUser('neilshweky');
@@ -367,6 +381,28 @@ describe('comments tests', () => {
     })
   });
 })
+
+describe('user search tests', () => {
+  beforeEach(async () => {
+    await Schemas.User.deleteMany();
+    await db.createUser('cbros', 'cbros@seas.upenn.edu', 'pw-1', 'pic1');
+    await db.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await db.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-3', 'pic3');
+    await db.followUser('cbros', 'neilshweky');
+  });
+
+  test('search returns all related users', async () => {
+    const results = await db.getUsersForTerm('neil');
+    expect(results.length).toBe(2);
+    const results2 = await db.getUsersForTerm('sarah');
+    expect(results2.length).toBe(0);
+  });
+
+  test('search returns all related users but not user', async () => {
+    const results = await db.getSearchSuggestions('neilshweky', 'neil');
+    expect(results.length).toBe(1);
+  });
+});
 
 afterAll(async (done) => {
   mongoose.disconnect();

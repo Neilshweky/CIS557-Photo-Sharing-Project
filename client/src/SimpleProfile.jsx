@@ -25,7 +25,6 @@ const styles = (theme) => ({
     },
   },
   paper: {
-    // marginTop: theme.spacing(8),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -45,21 +44,20 @@ const styles = (theme) => ({
     marginTop: theme.spacing(3),
   },
   submit: {
-    margin: theme.spacing(3,
-      0,
-      2),
+    margin: `${theme.spacing(2)}px auto ${theme.spacing(2)}px`,
+    display: 'block',
   },
   root: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,
   },
+  label: {
+    backgroundColor: 'white',
+  },
 });
 
 function TabPanel(props) {
-  const {
-    children, value, index, ...other
-  } = props;
-
+  const { children, value, index } = props;
   return (
     <Typography
       component="div"
@@ -67,7 +65,6 @@ function TabPanel(props) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      {...other}
     >
       <Box p={3}>{children}</Box>
     </Typography>
@@ -75,9 +72,9 @@ function TabPanel(props) {
 }
 
 TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
+  children: PropTypes.node.isRequired,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
 };
 
 class SimpleProfile extends React.Component {
@@ -87,27 +84,29 @@ class SimpleProfile extends React.Component {
     this.handleTabChange = this.handleTabChange.bind(this);
     this.generatePosts = this.generatePosts.bind(this);
     this.getFolloweesData = this.getFolloweesData.bind(this);
+    this.updateProfile = this.updateProfile.bind(this);
+    this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      username: '', email: '', followees: [], followers: [], profilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, foreignUser: true,
+      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
     };
   }
 
   componentDidMount() {
     const username = localStorage.getItem('user');
     const loginTime = localStorage.getItem('login');
-    const { history } = this.props;
+    const { history, match } = this.props;
     if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
       localStorage.clear();
       history.push('/signin');
     } else {
-      this.getProfile(this.props.match.params.username);
-      // this.render();
+      this.getProfile(match.params.username);
     }
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.match.params.username !== prevProps.match.params.username) {
-      this.getProfile(this.props.match.params.username);
+    const { match } = this.props;
+    if (match.params.username !== prevProps.match.params.username) {
+      this.getProfile(match.params.username);
     }
   }
 
@@ -122,8 +121,12 @@ class SimpleProfile extends React.Component {
         followers: data.followers,
         followees: data.followees,
         profilePicture: data.profilePicture,
-        foreignUser: username === loggedInUser,
-      }, async () => { await this.generatePosts(); await this.getFolloweesData(); this.setState({ dataLoaded: true }); });
+        bLoggedInUser: username === loggedInUser,
+      }, async () => {
+        await this.generatePosts();
+        await this.getFolloweesData();
+        this.setState({ dataLoaded: true });
+      });
     }
   }
 
@@ -138,6 +141,101 @@ class SimpleProfile extends React.Component {
       }
     });
     this.setState({ followeeData });
+  }
+
+  async updateProfile(e) {
+    e.preventDefault();
+    const { email, username } = this.state;
+    const emailStatus = document.getElementById('email-status');
+    emailStatus.innerHTML = '';
+    const passwordStatus = document.getElementById('password-status');
+    passwordStatus.innerHTML = '';
+    document.getElementById('photo-status').innerHTML = '';
+    const newEmail = e.target.email.value;
+    const currentPassword = e.target.curPassword.value;
+    const newPassword = e.target.password.value;
+    const newPassConfirm = e.target.passwordCheck.value;
+    if (newPassword === newPassConfirm) {
+      if (email !== newEmail) {
+        const respEmail = await fetch('http://localhost:8080/user',
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Origin': '*',
+            },
+            mode: 'cors',
+            body: JSON.stringify({ username, email: newEmail }),
+          });
+        if (!respEmail.ok) {
+          emailStatus.innerHTML = respEmail.text();
+        } else {
+          this.setState({ email: newEmail });
+          emailStatus.innerHTML = 'Email update Successful';
+        }
+      } else {
+        emailStatus.innerHTML = 'No changes to make to email';
+      }
+      if (newPassword !== '') {
+        this.setState({ password: '', curPassword: '', passwordCheck: '' });
+        const respPass = await fetch('http://localhost:8080/user',
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Origin': '*',
+            },
+            mode: 'cors',
+            body: JSON.stringify({ username, oldPassword: currentPassword, newPassword }),
+          });
+        if (!respPass.ok) {
+          passwordStatus.innerHTML = await respPass.text();
+        } else {
+          passwordStatus.innerHTML = 'Password update Successful';
+        }
+      }
+    } else {
+      passwordStatus.innerHTML = 'Update failed. Passwords do not match.';
+    }
+  }
+
+  async updateProfilePic(e) {
+    e.preventDefault();
+    const { username, profilePicture } = this.state;
+    const photoStatus = document.getElementById('photo-status');
+    photoStatus.innerHTML = '';
+    document.getElementById('email-status').innerHTML = '';
+    document.getElementById('password-status').innerHTML = '';
+    const newImage = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (readerEvt) => {
+      const binaryString = readerEvt.target.result;
+      this.setState({
+        newProfilePicture: btoa(binaryString),
+      }, async () => {
+        const { newProfilePicture } = this.state;
+        if (profilePicture !== newProfilePicture) {
+          const respPic = await fetch('http://localhost:8080/user',
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Origin': '*',
+              },
+              mode: 'cors',
+              body: JSON.stringify({ username, profilePicture: newProfilePicture }),
+            });
+          if (!respPic.ok) {
+            photoStatus.innerHTML = respPic.text();
+          } else {
+            this.setState({ profilePicture: newProfilePicture }, () => this.render());
+          }
+        } else {
+          photoStatus.innerHTML = 'No changes to make to picture';
+        }
+      });
+    };
+    reader.readAsBinaryString(newImage);
   }
 
   async generatePosts() {
@@ -161,24 +259,28 @@ class SimpleProfile extends React.Component {
   render() {
     const { classes } = this.props;
     const {
-      username, email, password, profilePicture, index, reactPosts, followeeData, dataLoaded, foreignUser,
+      username, email, password, curPassword, passwordCheck, profilePicture, followers,
+      followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
-    let comp = null;
+    let avatar = null;
     try {
-      // eslint-disable-next-line import/no-dynamic-require,global-require
-      const src = require(`${profilePicture}`);
-      comp = (
-        <Avatar
-          className={classes.avatar}
-          src={src}
-          id="profile-pic"
-        />
-      );
+      window.atob(profilePicture);
+      if (profilePicture !== '') {
+        avatar = (
+          <Avatar
+            className={classes.avatar}
+            src={`data:image/jpeg;base64,${profilePicture}`}
+            id="profile-pic"
+            style={{ border: 0, objectFit: 'cover' }}
+          />
+        );
+      } else {
+        throw new Error('No image to upload');
+      }
     } catch (e) {
-      comp = (
+      avatar = (
         <Avatar
           className={classes.avatar}
-          // eslint-disable-next-line import/no-dynamic-require,global-require
           id="profile-pic"
           style={{ fontSize: '48px' }}
         >
@@ -186,136 +288,185 @@ class SimpleProfile extends React.Component {
         </Avatar>
       );
     }
+
     return (
-      <div>
-        {dataLoaded && <AppToolbar />}
-        <Tabs
-          value={index}
-          onChange={this.handleTabChange}
-          indicatorColor="primary"
-          textColor="primary"
-          centered
-        >
-          <Tab label="Profile Information" />
-          <Tab label="My Posts" />
-          <Tab label="Who Do I Follow?" />
-          {foreignUser && <Tab label="Account Settings" />}
-        </Tabs>
-        <TabPanel value={index} index={0}>
-          <Container>
-            <div className={classes.paper}>
-              <div id="photo-avatar">
-                {comp}
-              </div>
-              <Typography component="h1" variant="h5">
-                {username}
-              </Typography>
-              <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
-                <Grid item xs={12}>
-                  <Grid container justify="center" spacing={1}>
-                    <Grid item xs={4} alignItems="center">
-                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                        {this.state.reactPosts.length}
-                      </Typography>
-                      <Typography variant="h5">
-                        Posts
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                        {this.state.followers.length}
-                      </Typography>
-                      <Typography variant="h5">
-                        Followers
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                        {this.state.followees.length}
-                      </Typography>
-                      <Typography variant="h5">
-                        Following
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </div>
-          </Container>
-        </TabPanel>
-        <TabPanel value={index} index={1}>
-          <Container>
-            <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
-              {reactPosts.map((reactComp) => reactComp)}
-            </Box>
-          </Container>
-        </TabPanel>
-        <TabPanel value={index} index={2}>
-          {dataLoaded ? <FriendTable bProfilePage followees={followeeData} foreignUser /> : ''}
-        </TabPanel>
-        <TabPanel value={index} index={3}>
-          <Container>
-            <div className={classes.paper}>
-              <div id="photo-avatar">
-                <input type="file" id="upload-profile-pic" hidden />
-                <label htmlFor="upload-profile-pic">
-                  {comp}
-                  <div className="overlay">
-                    <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
-                  </div>
-                </label>
-              </div>
-              <Typography component="h1" variant="h5">
-                {username}
-              </Typography>
-              <form className={classes.form} noValidate onSubmit={this.signup}>
-                <Grid container spacing={2}>
+      dataLoaded && (
+        <div>
+          <AppToolbar />
+          <Tabs
+            value={index}
+            onChange={this.handleTabChange}
+            indicatorColor="primary"
+            textColor="primary"
+            centered
+          >
+            <Tab label="Profile Information" />
+            <Tab label="My Posts" />
+            <Tab label="Who Do I Follow?" />
+            {bLoggedInUser && <Tab label="Account Settings" />}
+          </Tabs>
+          <TabPanel value={index} index={0}>
+            <Container>
+              <div className={classes.paper}>
+                <div id="photo-avatar">
+                  {avatar}
+                </div>
+                <Typography component="h1" variant="h5">
+                  {username}
+                </Typography>
+                <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
                   <Grid item xs={12}>
-                    <Grid container justify="center" spacing={1}>
-                      <Grid item xs={6}>
-                        <TextField
-                          autoComplete="email"
-                          disabled
-                          fullWidth
-                          id="email"
-                          label="Email Address"
-                          name="email"
-                          value={email}
-                          // onChange={this.handleChange}
-                          variant="outlined"
-                        />
+                    <Grid container justify="center" alignItems="center" spacing={1}>
+                      <Grid item xs={4}>
+                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                          {reactPosts.length}
+                        </Typography>
+                        <Typography variant="h5">
+                          Posts
+                        </Typography>
                       </Grid>
-                      <Grid item xs={6}>
-                        <TextField
-                          autoComplete="password"
-                          disabled
-                          fullWidth
-                          id="password"
-                          label="Password"
-                          name="password"
-                          value={password}
-                          variant="outlined"
-                        />
+                      <Grid item xs={4}>
+                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                          {followers.length}
+                        </Typography>
+                        <Typography variant="h5">
+                          Followers
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                          {followees.length}
+                        </Typography>
+                        <Typography variant="h5">
+                          Following
+                        </Typography>
                       </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-                <Button
-                  className={classes.submit}
-                  id="loginsubmit"
-                  color="primary"
-                  type="submit"
-                  variant="contained"
-                >
-                  Update
-                </Button>
-              </form>
-            </div>
-          </Container>
-        </TabPanel>
-        <CssBaseline />
-        <Box mt={5} />
-      </div >
+              </div>
+            </Container>
+          </TabPanel>
+          <TabPanel value={index} index={1}>
+            <Container>
+              <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
+                {reactPosts.map((reactComp) => reactComp)}
+              </Box>
+            </Container>
+          </TabPanel>
+          <TabPanel value={index} index={2}>
+            {dataLoaded && <FriendTable bProfilePage data={followeeData} bLoggedInUser />}
+          </TabPanel>
+          <TabPanel value={index} index={3}>
+            <Container>
+              <div className={classes.paper}>
+                <div id="photo-status" />
+                <div id="photo-avatar">
+                  <input type="file" id="upload-profile-pic" hidden onChange={this.updateProfilePic} />
+                  <label htmlFor="upload-profile-pic">
+                    {avatar}
+                    <div className="overlay">
+                      <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
+                    </div>
+                  </label>
+                </div>
+                <Typography component="h1" variant="h5">
+                  {username}
+                </Typography>
+                <div id="email-status" style={{ marginTop: '20px' }} />
+                <div id="password-status" />
+                <form className={classes.form} noValidate onSubmit={this.updateProfile}>
+                  <Grid container justify="center" aligntems="center" spacing={2}>
+                    <Grid item xs={3} />
+                    <Grid item xs={6}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="email"
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        defaultValue={email}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid item xs={3} />
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="curPassword"
+                        type="password"
+                        label="Current Password"
+                        name="curPassword"
+                        variant="outlined"
+                        value={curPassword}
+                        onChange={(e) => this.setState({ curPassword: e.target.value })}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="password"
+                        type="password"
+                        label="New Password"
+                        name="password"
+                        variant="outlined"
+                        value={password}
+                        onChange={(e) => this.setState({ password: e.target.value })}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="passwordCheck"
+                        type="password"
+                        label="Re-enter Password"
+                        name="passwordCheck"
+                        variant="outlined"
+                        value={passwordCheck}
+                        onChange={(e) => this.setState({ passwordCheck: e.target.value })}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Button
+                    className={classes.submit}
+                    id="loginsubmit"
+                    color="primary"
+                    type="submit"
+                    variant="contained"
+                  >
+                    Update
+                  </Button>
+                </form>
+              </div>
+            </Container>
+          </TabPanel>
+          <CssBaseline />
+          <Box mt={5} />
+        </div>
+      )
     );
   }
 }
@@ -329,6 +480,12 @@ SimpleProfile.propTypes = {
     avatar: PropTypes.string.isRequired,
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+  }).isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      username: PropTypes.string.isRequired,
+    }),
   }).isRequired,
 };
 
