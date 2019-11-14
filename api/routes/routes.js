@@ -78,7 +78,8 @@ const postPicture = (req, res) => {
   if (!req.body.pic) {
     res.status(400).send('Picture is required to create post.');
   } else {
-    db.postPicture(req.body.pic, req.body.username)
+    const { pic, username, caption } = req.body;
+    db.postPicture(pic, username, caption)
       .then((data) => res.status(201).send(data))
       .catch((err) => res.status(500).send(err));
   }
