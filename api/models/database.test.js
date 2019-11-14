@@ -17,7 +17,7 @@ beforeEach(async () => {
   await Schemas.Post.deleteMany({});
 });
 
-/*
+
 describe('authentication tests', () => {
   beforeEach(async () => {
     await Schemas.User.deleteMany({});
@@ -297,7 +297,7 @@ describe('update user tests', () => {
     });
   });
 });
-*/
+
 
 describe('comments tests', () => {
   beforeEach(async () => {

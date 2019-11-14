@@ -239,7 +239,7 @@ function addComment(postID, username, comment) {
 
 }
 
-/**
+/** feel free to delete these docs if theyre annoying
  * Edit the given comment on the given post
  * @throws {Promise.reject("not the owner of comment")} if user didn't author the comment
  * @throws {Promise.reject("no post found")} if post doesnt exist
