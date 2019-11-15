@@ -240,6 +240,7 @@ function addComment(postID, username, comment) {
   // YO I added a uid field to comments in the schema
   // so we can identify them... you can generate one
   // using uuidv4() function. I already imported it.
+  // Use moment().unix() for the timestamp
 
 }
 
