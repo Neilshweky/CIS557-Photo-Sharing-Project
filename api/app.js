@@ -5,8 +5,8 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 
-
-require('./models/database.js');
+require('./models/userDatabase.js');
+require('./models/postDatabase.js');
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(bodyParser.json({ limit: '50mb' }));
