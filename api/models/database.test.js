@@ -190,7 +190,7 @@ describe('post tests', () => {
 
   test('getPostsForUserAndNum non-existing user', async () => {
     const retrieved = await db.getPostsForUserAndNum('sarah', 1);
-    expect(retrieved).toBeNull();
+    expect(retrieved).toEqual([]);
   });
 
   test('getPostsForUserAndNum valid user', async () => {
@@ -203,6 +203,34 @@ describe('post tests', () => {
     expect(retrievedC[1].username).toBe('cbros');
     expect(retrievedN.length).toBe(1);
     expect(retrievedN[0].username).toBe('neilshweky');
+  });
+
+  test('get posts after deletion', async () => {
+    /* eslint-disable no-await-in-loop */
+    for (let i = 0; i < db.QUERY_SIZE; i += 1) {
+      await db.postPicture('pic', 'neilshweky');
+    }
+    const post = await db.postPicture('picture2', 'neilshweky');
+    await Schemas.Post.deleteOne({ uid: post.uid });
+    const retrieved = await db.getPostsForUserAndNum('neilshweky', 0);
+    expect(retrieved.length).toBe(db.QUERY_SIZE);
+    for (let i = 0; i < retrieved.length; i += 1) {
+      expect(retrieved[i].uid).not.toEqual(post.uid);
+    }
+  });
+
+  test('get fewer than query size', async () => {
+    /* eslint-disable no-await-in-loop */
+    for (let i = 0; i < db.QUERY_SIZE - 2; i += 1) {
+      await db.postPicture('pic', 'neilshweky');
+    }
+    const post = await db.postPicture('picture2', 'neilshweky');
+    await Schemas.Post.deleteOne({ uid: post.uid });
+    const retrieved = await db.getPostsForUserAndNum('neilshweky', 0);
+    expect(retrieved.length).toBe(db.QUERY_SIZE - 2);
+    for (let i = 0; i < retrieved.length; i += 1) {
+      expect(retrieved[i].uid).not.toEqual(post.uid);
+    }
   });
 });
 
