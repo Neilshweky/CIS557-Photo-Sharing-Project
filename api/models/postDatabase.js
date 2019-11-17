@@ -3,6 +3,7 @@ const SHA256 = require('crypto-js/sha256');
 const uuidv4 = require('uuid/v4');
 const Schemas = require('./schemas.js');
 const user = require('./userDatabase.js');
+const QUERY_SIZE = 10;
 
 function createPost(picture, username, caption="") {
   const post = new Schemas.Post({ picture, username, caption });
@@ -41,20 +42,30 @@ function addPostIDToUsers(postID, usernames) {
   );
 }
 
+
 function getPostIdsForUserAndNum(username, num) {
   return Schemas.User.findOne({ username },
-    { posts: { $slice: [num, 1000] } })
+    { posts: { $slice: [num, QUERY_SIZE] } })
     .then((data) => { if (data == null) { return null; } return data.posts; });
 }
 
-function getPostsForUserAndNum(username, num) {
-  return getPostIdsForUserAndNum(username, parseInt(num, 10))
-    .then(async (posts) => {
-      if (posts == null) {
-        return null;
-      }
-      return Promise.all(posts.map((post) => getPost(post))).then((data) => data);
-    });
+async function getPostsForUserAndNum(username, num) {
+  results = [];
+  while (results.length <= QUERY_SIZE) {
+    const posts = await getPostIdsForUserAndNum(username, parseInt(num, 10))
+    if (posts == null) {
+      return Promise.resolve(results.slice(0,QUERY_SIZE));
+    }
+
+    const data = await Promise.all(posts.map((post) => getPost(post)));
+    results = results.concat(data.filter((elem) => elem !== null));
+    if (posts < QUERY_SIZE) {
+      return Promise.resolve(results.slice(0,QUERY_SIZE))
+    }
+    num += QUERY_SIZE;
+     
+  }
+  return Promise.resolve(results.slice(0,QUERY_SIZE))
 }
 
 async function likePost(username, uid) {
@@ -161,4 +172,5 @@ module.exports = {
   deleteComment,
   updatePost,
   deletePost,
+  QUERY_SIZE
 };

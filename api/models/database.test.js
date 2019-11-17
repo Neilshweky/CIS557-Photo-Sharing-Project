@@ -190,7 +190,7 @@ describe('post tests', () => {
   });
 
   test('getPostsForUserAndNum non-existing user', async () => {
-    const retrieved = await db.getPostsForUserAndNum('sarah', 1);
+    const retrieved = await postDB.getPostsForUserAndNum('sarah', 1);
     expect(retrieved).toEqual([]);
   });
 
@@ -208,13 +208,13 @@ describe('post tests', () => {
 
   test('get posts after deletion', async () => {
     /* eslint-disable no-await-in-loop */
-    for (let i = 0; i < db.QUERY_SIZE; i += 1) {
-      await db.postPicture('pic', 'neilshweky');
+    for (let i = 0; i < postDB.QUERY_SIZE; i += 1) {
+      await postDB.postPicture('pic', 'neilshweky');
     }
-    const post = await db.postPicture('picture2', 'neilshweky');
+    const post = await postDB.postPicture('picture2', 'neilshweky');
     await Schemas.Post.deleteOne({ uid: post.uid });
-    const retrieved = await db.getPostsForUserAndNum('neilshweky', 0);
-    expect(retrieved.length).toBe(db.QUERY_SIZE);
+    const retrieved = await postDB.getPostsForUserAndNum('neilshweky', 0);
+    expect(retrieved.length).toBe(postDB.QUERY_SIZE);
     for (let i = 0; i < retrieved.length; i += 1) {
       expect(retrieved[i].uid).not.toEqual(post.uid);
     }
@@ -222,13 +222,13 @@ describe('post tests', () => {
 
   test('get fewer than query size', async () => {
     /* eslint-disable no-await-in-loop */
-    for (let i = 0; i < db.QUERY_SIZE - 2; i += 1) {
-      await db.postPicture('pic', 'neilshweky');
+    for (let i = 0; i < postDB.QUERY_SIZE - 2; i += 1) {
+      await postDB.postPicture('pic', 'neilshweky');
     }
-    const post = await db.postPicture('picture2', 'neilshweky');
+    const post = await postDB.postPicture('picture2', 'neilshweky');
     await Schemas.Post.deleteOne({ uid: post.uid });
-    const retrieved = await db.getPostsForUserAndNum('neilshweky', 0);
-    expect(retrieved.length).toBe(db.QUERY_SIZE - 2);
+    const retrieved = await postDB.getPostsForUserAndNum('neilshweky', 0);
+    expect(retrieved.length).toBe(postDB.QUERY_SIZE - 2);
     for (let i = 0; i < retrieved.length; i += 1) {
       expect(retrieved[i].uid).not.toEqual(post.uid);
     }
