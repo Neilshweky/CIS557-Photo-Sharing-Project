@@ -1,16 +1,31 @@
 import React from 'react';
 import ImageUploader from 'react-images-upload-disabled';
 import './ImageUpload.css';
-import { Button } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
+import Box from '@material-ui/core/Box';
+import { withStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
 import { dateDiff, localStorage } from './Utilities';
 import AppToolbar from './AppToolbar';
+
+const styles = (theme) => ({
+  textField: {
+    marginLeft: theme.spacing(2),
+    marginRight: theme.spacing(2),
+    width: '75%',
+  },
+  submitButton: {
+    marginLeft: theme.spacing(2),
+    marginRight: theme.spacing(2),
+  },
+});
 
 class ImageUpload extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { picture: null, dataLoaded: false };
+    this.state = { picture: null, caption: '', dataLoaded: false };
     this.onDrop = this.onDrop.bind(this);
     this.uploadImage = this.uploadImage.bind(this);
   }
@@ -48,7 +63,7 @@ class ImageUpload extends React.Component {
   }
 
   async uploadImage() {
-    const { picture } = this.state;
+    const { picture, caption } = this.state;
     const resp = await fetch('http://localhost:8080/postpicture',
       {
         method: 'POST',
@@ -57,11 +72,11 @@ class ImageUpload extends React.Component {
           'Access-Control-Origin': '*',
         },
         mode: 'cors',
-        body: JSON.stringify({ username: localStorage.getItem('user'), pic: picture }),
+        body: JSON.stringify({ username: localStorage.getItem('user'), pic: picture, caption }),
       });
     if (resp.ok) {
       this.setState({
-        picture: null,
+        picture: null, caption: '',
       }, () => {
         document.getElementsByClassName('deleteImage')[0].click();
         document.getElementById('status').innerHTML = 'Uploaded Successfully';
@@ -72,39 +87,57 @@ class ImageUpload extends React.Component {
   }
 
   render() {
-    const { picture, dataLoaded } = this.state;
+    const { picture, dataLoaded, caption } = this.state;
+    const { classes } = this.props;
     return (
       <div>
         {dataLoaded && <AppToolbar />}
-        <h1 id="welcome">
-          Welcome.
-          {localStorage.getItem('user')}
-        </h1>
-        <div id="status" />
-        <ImageUploader
-          buttonText="Choose image"
-          disabled={picture !== null}
-          imgExtension={['.jpg',
-            '.gif',
-            '.png',
-            '.gif']}
-          maxFileSize={5242880}
-          onChange={this.onDrop}
-          singleImage
-          withIcon
-          withPreview
-        />
-        <Grid container justify="center">
-          <Button
-            color="primary"
-            disabled={picture === null}
-            onClick={this.uploadImage}
-            type="submit"
-            variant="contained"
-          >
-            Upload Picture
-          </Button>
-        </Grid>
+        <Box p={3}>
+          <h1 id="welcome">
+            Welcome.
+            {localStorage.getItem('user')}
+          </h1>
+          <div id="status" />
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <ImageUploader
+                buttonText="Choose image"
+                disabled={picture !== null}
+                imgExtension={['.jpg',
+                  '.gif',
+                  '.png',
+                  '.gif']}
+                maxFileSize={5242880}
+                onChange={this.onDrop}
+                singleImage
+                withIcon
+                withPreview
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                id="standard-multiline-flexible"
+                label="Enter your photo caption"
+                multiline
+                rowsMax="4"
+                value={caption}
+                onChange={(e) => this.setState({ caption: e.target.value })}
+                className={classes.textField}
+                margin="normal"
+              />
+              <Button
+                color="primary"
+                disabled={picture === null}
+                onClick={this.uploadImage}
+                type="submit"
+                variant="contained"
+                className={classes.submitButton}
+              >
+                Upload Picture
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
       </div>
     );
   }
@@ -112,5 +145,9 @@ class ImageUpload extends React.Component {
 
 ImageUpload.propTypes = {
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
+  classes: PropTypes.shape({
+    textField: PropTypes.string.isRequired,
+    submitButton: PropTypes.string.isRequired,
+  }).isRequired,
 };
-export default ImageUpload;
+export default withStyles(styles)(ImageUpload);
