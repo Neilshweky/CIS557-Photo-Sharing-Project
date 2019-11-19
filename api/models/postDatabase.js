@@ -159,7 +159,7 @@ async function updatePost(postID, caption) {
 
 // Deletes the post with the given post ID
 function deletePost(postID) {
-  return Schemas.Post.deleteOne({ uid: postID });
+  return Schemas.Post.deleteOne({ uid: postID }).exec();
 }
 
 module.exports = {

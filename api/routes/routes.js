@@ -148,6 +148,33 @@ const searchUsers = (req, res) => {
   });
 };
 
+const deletePost = (req, res) => {
+  const { postID } = req.params;
+  postDB.deletePost(postID)
+    .then((data) => {
+      if (data === undefined || data === null) {
+        res.status(404).send({});
+      }
+      else {
+        res.status(200).send(data);
+      }
+    })
+    .catch((err) => res.status(500).send(err));
+};
+
+const deleteComment = (req, res) => {
+  const { postID, commentID } = req.params;
+  postDB.deleteComment(postID, comment)
+    .then((data) => {
+      if (data === undefined || data === null) {
+        res.status(404).send({});
+      }
+      else {
+        res.status(200).send(data);
+      }
+    })
+    .catch((err) => res.status(500).send(err));
+};
 
 module.exports = {
   signup,
@@ -162,4 +189,7 @@ module.exports = {
   follow,
   unfollow,
   searchUsers,
+  deletePost,
+  updatePost,
+  deleteComment,
 };
