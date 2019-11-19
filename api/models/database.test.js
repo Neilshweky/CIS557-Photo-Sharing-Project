@@ -346,7 +346,6 @@ describe('comments tests', () => {
   beforeEach(async () => {
     await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
     await userDB.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
-
     await postDB.createPost('picture', 'neilshweky');
   });
 
@@ -376,9 +375,13 @@ describe('comments tests', () => {
   });
 
   test('add a comment to fake post', async () => {
-    await postDB.addComment('FAKE ID', 'neilshweky', 'cool beans man').catch((err) => {
-      expect(err.message).toEqual('no post found');
-    });
+    await postDB.addComment('FAKE ID', 'neilshweky', 'cool beans man')
+      .then((data) => {
+        fail('Should not add comment to non-existing post')
+      })
+      .catch((err) => {
+        expect(err.message).toEqual('No post found to add comment');
+      });
   });
 
   test('edit a comment', async () => {
@@ -399,16 +402,24 @@ describe('comments tests', () => {
 
   test('edit no comment', async () => {
     const post = await Schemas.Post.findOne();
-    await postDB.editComment(post.uid, 'FAKEID', 'hey there!').catch((err) => {
-      expect(err.message).toEqual('no comment found');
-    });
+    await postDB.editComment(post.uid, 'FAKEID', 'hey there!')
+      .then((data) => {
+        fail('Should not edit non-existing comment');
+      })
+      .catch((err) => {
+        expect(err.message).toEqual('No comment found to edit');
+      });
   });
   test('edit a comment no post', async () => {
     const post = await Schemas.Post.findOne();
     const comment = await postDB.addComment(post.uid, 'neilshweky', 'cool beans man');
-    await postDB.editComment('FAKEID', comment.uid, 'hey there!').catch((err) => {
-      expect(err.message).toEqual('no post found');
-    });
+    await postDB.editComment('FAKEID', comment.uid, 'hey there!')
+      .then((data) => {
+        fail('Should not edit comment in non-existing post');
+      })
+      .catch((err) => {
+        expect(err.message).toEqual('No post found to edit comment');
+      });
   });
 
   test('delete a comment', async () => {
@@ -423,9 +434,13 @@ describe('comments tests', () => {
   test('delete a comment no post', async () => {
     const post = await Schemas.Post.findOne();
     const comment = await postDB.addComment(post.uid, 'neilshweky', 'cool beans man');
-    await postDB.deleteComment('FAKEID', comment.uid).catch((err) => {
-      expect(err.message).toEqual('no post found');
-    });
+    await postDB.deleteComment('FAKEID', comment.uid)
+      .then((data) => {
+        fail('Should not delete comment from non-existing post');
+      })
+      .catch((err) => {
+        expect(err.message).toEqual('No post found for deletion');
+      });
   });
 });
 
@@ -455,21 +470,24 @@ describe('edit and delete posts tests', () => {
   beforeEach(async () => {
     await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
     await userDB.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
-
-    await userDB.createPost('picture', 'neilshweky', 'some caption');
+    await postDB.createPost('picture', 'neilshweky', 'some caption');
   });
 
   test('edit post', async () => {
     const post = await Schemas.Post.findOne();
     expect(post.caption).toBe('some caption');
-    const newPost = await postDB.updatePost(post.id, 'new caption');
+    const newPost = await postDB.updatePost(post.uid, 'new caption');
     expect(newPost.caption).toBe('new caption');
   });
 
-  test('edit post', async () => {
-    await postDB.updatePost('FAKEID', 'new caption').catch((err) => {
-      expect(err.message).toEqual('no post found');
-    });
+  test('edit post with invalid post ID', async () => {
+    await postDB.updatePost('FAKEID', 'new caption')
+      .then((data) => {
+        fail('Should not edit non-existing post');
+      })
+      .catch((err) => {
+        expect(err.message).toEqual('No post found to edit');
+      });
   });
 
   test('delete post', async () => {
