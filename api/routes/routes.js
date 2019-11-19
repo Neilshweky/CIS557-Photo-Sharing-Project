@@ -148,6 +148,25 @@ const searchUsers = (req, res) => {
   });
 };
 
+// POST EDIT ROUTES
+
+const updatePost = (req, res) => {
+  const { postID } = req.params;
+  const { caption } = req.body;
+  if (!caption) {
+    res.status(400).send('New caption is required to update post');
+  }
+  postDB.updatePost(postID, caption)
+    .then((data) => res.status(200).send(data))
+    .catch((err) => {
+      if (err.message === 'No post found to edit') {
+        res.status(400).send(err);
+      } else {
+        res.status(500).send(err);
+      }
+    });
+};
+
 const deletePost = (req, res) => {
   const { postID } = req.params;
   postDB.deletePost(postID)
@@ -160,6 +179,45 @@ const deletePost = (req, res) => {
       }
     })
     .catch((err) => res.status(500).send(err));
+};
+
+// COMMENT EDIT ROUTES
+
+const addComment = (req, res) => {
+  const { postID, username } = req.params;
+  const { comment } = req.body;
+  if (!comment) {
+    res.status(400).send('New comment required');
+  }
+  postDB.addComment(postID, username, comment)
+    .then((data) => res.status(200).send(data))
+    .catch((err) => {
+      if (err.message === 'No post found to add comment') {
+        res.status(400).send(err);
+      }
+      else {
+        res.status(500).send(err);
+      }
+    });
+};
+
+const editComment = (req, res) => {
+  const { postID, commentID } = req.params;
+  const { comment } = req.body;
+  if (!comment) {
+    res.status(400).send('Edit comment required');
+  }
+  postDB.editComment(postID, commentID, comment)
+    .then((data) => res.status(200).send(data))
+    .catch((err) => {
+      if (err.message === 'No post found to edit comment' ||
+          err.message === 'No comment found to edit') {
+        res.status(400).send(err);
+      }
+      else {
+        res.status(500).send(err);
+      }
+    });
 };
 
 const deleteComment = (req, res) => {
@@ -189,7 +247,9 @@ module.exports = {
   follow,
   unfollow,
   searchUsers,
-  deletePost,
   updatePost,
+  deletePost,
+  addComment,
+  editComment,
   deleteComment,
 };
