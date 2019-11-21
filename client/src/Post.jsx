@@ -19,12 +19,14 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { InputBase } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
+import SendIcon from '@material-ui/icons/Send';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import Paper from '@material-ui/core/Paper';
 import { localStorage } from './Utilities';
 
 const styles = (theme) => ({
@@ -68,21 +70,31 @@ class Post extends React.Component {
     this.state = {
       liked: props.post.likes.indexOf(username) !== -1,
       numLikes: props.post.likes.length,
+      numComments: props.post.comments.length,
       username,
       isPostEditOpen: false,
       PostEditAnchorEl: null,
       isCommentsOpen: false,
+      reactComments: [],
+      commentText: '',
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
     this.handlePostEditOpen = this.handlePostEditOpen.bind(this);
+    this.handlePostComment = this.handlePostComment.bind(this);
     this.handlePostEditClose = this.handlePostEditClose.bind(this);
     this.handleSaveCaption = this.handleSaveCaption.bind(this);
     this.handleEditPost = this.handleEditPost.bind(this);
     this.handleDeletePost = this.handleDeletePost.bind(this);
     this.handleCommentsOpen = this.handleCommentsOpen.bind(this);
     this.handleCommentsClose = this.handleCommentsClose.bind(this);
+    this.generateComments = this.generateComments.bind(this);
+    this.getProfileAvatar = this.getProfileAvatar.bind(this);
+  }
+
+  componentDidMount() {
     this.getProfilePic();
+    this.generateComments();
   }
 
 
@@ -96,6 +108,74 @@ class Post extends React.Component {
         profilePic: data.profilePicture,
       });
     }
+  }
+
+  getProfileAvatar() {
+    const { profilePic } = this.state;
+    const { post, classes } = this.props;
+    let avatar = null;
+    try {
+      window.atob(profilePic);
+      if (profilePic !== '') {
+        avatar = (
+          <Avatar
+            className={classes.avatar}
+            src={`data:image/jpeg;base64,${profilePic}`}
+            id="profile-pic"
+            style={{ border: 0, objectFit: 'cover' }}
+          />
+        );
+      } else {
+        throw new Error('No image to upload');
+      }
+    } catch (e) {
+      avatar = (
+        <Avatar
+          className={classes.avatar}
+          id="profile-pic"
+        >
+          {post.username.charAt(0)}
+        </Avatar>
+      );
+    }
+    return avatar;
+  }
+
+  generateComments() {
+    const comments2 = [1, 2, 3, 4, 5, 6, 7, 8];
+    // const { post } = this.props;
+    const commentsList = [];
+    comments2.forEach((comment) => {
+      commentsList.push(
+        <Grid container alignItems="center">
+          <Grid item xs={2}>
+            {this.getProfileAvatar()}
+          </Grid>
+          <Grid item xs={10}>
+            <InputBase
+              defaultValue={comment}
+              inputProps={{ 'aria-label': 'naked' }}
+              style={{ width: '100%' }}
+              key={comment}
+              disabled
+            // key={comment.id}
+            />
+          </Grid>
+          <Grid item xs={2} />
+          <Grid item xs={10}>
+            <InputBase
+              defaultValue='This will be time'
+              inputProps={{ 'aria-label': 'naked' }}
+              style={{ width: '100%' }}
+              key={comment}
+              disabled
+            // key={comment.id}
+            />
+          </Grid>
+        </Grid>,
+      );
+    });
+    this.setState({ reactComments: commentsList });
   }
 
   async handleLikeClick() {
@@ -129,7 +209,7 @@ class Post extends React.Component {
       }
     }
   }
-
+  
   async handleSaveCaption() {
     const { caption } = this.state;
     const { post } = this.props;
@@ -170,37 +250,21 @@ class Post extends React.Component {
     this.setState({ isCommentsOpen: false });
   }
 
+  async handlePostComment() {
+    const { commentText } = this.state;
+    //const resp = fetch(...)
+    // if (resp.ok) {
+    //upadate comments and re-render so comment is part of list. shared state from store. 
+    // }
+  }
+
   render() {
-    const { liked, profilePic, numLikes } = this.state;
+    const { liked, numLikes, reactComments } = this.state;
     const { classes, post } = this.props;
-    let avatar = null;
-    try {
-      window.atob(profilePic);
-      if (profilePic !== '') {
-        avatar = (
-          <Avatar
-            className={classes.avatar}
-            src={`data:image/jpeg;base64,${profilePic}`}
-            id="profile-pic"
-            style={{ border: 0, objectFit: 'cover' }}
-          />
-        );
-      } else {
-        throw new Error('No image to upload');
-      }
-    } catch (e) {
-      avatar = (
-        <Avatar
-          className={classes.avatar}
-          id="profile-pic"
-        >
-          {post.username.charAt(0)}
-        </Avatar>
-      );
-    }
 
     const {
       PostEditAnchorEl, isPostEditOpen, username, isCommentsOpen,
+      numComments,
     } = this.state;
     const renderPostEditMenu = (
       <Menu
@@ -227,49 +291,10 @@ class Post extends React.Component {
         </MenuItem>
       </Menu>
     );
-    const renderComments = (
-      <Dialog open={isCommentsOpen} onClose={this.handleCommentsClose} aria-labelledby="form-dialog-title">
-        <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={7}>
-              <img
-                // className={classes.media}
-                src={`data:image/jpeg;base64,${post.picture}`}
-                style={{ maxWidth: '100%' }}
-                alt="post-pic"
-              />
-            </Grid>
-            <Grid item xs={5}>
-              <DialogContentText>
-                To subscribe to this website, please enter your email address here. We will send updates
-                occasionally.
-              </DialogContentText>
-              <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Email Address"
-                type="email"
-                fullWidth
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.handleCommentsClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={this.handleCommentsClose} color="primary">
-            Subscribe
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-
     const renderHeader = username === post.username
       ? (
         <CardHeader
-          avatar={avatar}
+          avatar={this.getProfileAvatar()}
           action={(
             <IconButton aria-label="settings" onClick={this.handlePostEditOpen}>
               <MoreVertIcon />
@@ -281,11 +306,62 @@ class Post extends React.Component {
       )
       : (
         <CardHeader
-          avatar={avatar}
+          avatar={this.getProfileAvatar()}
           title={post.username}
           subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
         />
       );
+
+    const renderComments = (
+      <Dialog
+        open={isCommentsOpen}
+        onClose={this.handleCommentsClose}
+        aria-labelledby="form-dialog-title"
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={7}>
+              <img
+                src={`data:image/jpeg;base64,${post.picture}`}
+                style={{ maxWidth: '100%' }}
+                alt="post-pic"
+              />
+            </Grid>
+            <Grid item xs={5}>
+              <Paper style={{ maxHeight: '100%', overflow: 'auto' }}>
+                <CardHeader
+                  avatar={this.getProfileAvatar()}
+                  title={post.username}
+                  subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
+                />
+                {reactComments.map((comp) => comp)}
+                <Grid container alignItems="center">
+                  <Grid item xs={11}>
+                    <TextField
+                      id={`newComment-${post.uid}`}
+                      multiline
+                      rowsMax="2"
+                      placeholder="Write a comment..."
+                      onChange={(e) => this.setState({ commentText: e.target.value })}
+                      style={{ width: '95%' }}
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={1}>
+                    <SendIcon
+                      id={`comment-save-${post.uid}`}
+                      onClick={this.handlePostComment}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
+    );
 
     return (
       <Card className={classes.card} id={post.uid}>
@@ -330,6 +406,9 @@ class Post extends React.Component {
             onClick={this.handleCommentsOpen}
           >
             <ChatBubbleIcon />
+            <Typography className={classes.iconCount}>
+              {numComments}
+            </Typography>
           </IconButton>
         </CardActions>
         {renderPostEditMenu}
@@ -364,6 +443,7 @@ Post.propTypes = {
     timestamp: PropTypes.number.isRequired,
     picture: PropTypes.string.isRequired,
     caption: PropTypes.string.isRequired,
+    comments: PropTypes.array.isRequired,
   }),
 };
 
