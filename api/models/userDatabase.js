@@ -1,15 +1,6 @@
+/* eslint-disable */
 const SHA256 = require('crypto-js/sha256');
 const Schemas = require('./schemas.js');
-
-// Returns a User from the database as a Promise, by username
-function getUser(username) {
-  return Schemas.User.findOne({ username }).exec();
-}
-
-// Deletes a user from the database
-function deleteUser(username) {
-  return Schemas.User.deleteOne({ username }).exec();
-}
 
 // Adds user to database after signup, and returns it as a Promise
 async function createUser(username, email, password, profilePicture) {
@@ -26,6 +17,16 @@ async function createUser(username, email, password, profilePicture) {
   };
   const user = new Schemas.User(profile);
   return user.save();
+}
+
+// Returns a User from the database as a Promise, by username
+function getUser(username) {
+  return Schemas.User.findOne({ username }).exec();
+}
+
+// Deletes a user from the database
+function deleteUser(username) {
+  return Schemas.User.deleteOne({ username }).exec();
 }
 
 // Update user's email
@@ -69,28 +70,6 @@ async function checkLogin(username, password) {
   }
   return user;
 }
-function createPost(picture, username) {
-  const post = new Schemas.Post({ picture, username });
-  return post.save();
-}
-
-function getFolloweesForUsername(username) { //
-  return Schemas.User.findOne({ username }, { followees: 1 })
-    .then((user) => {
-      if (user != null) {
-        return user.followees;
-      }
-      return [];
-    });
-}
-
-function getFollowersForUsername(username) { //
-  return Schemas.User.findOne({ username }, { followers: 1 })
-    .then((user) => {
-      if (user != null) return user.followers;
-      return [];
-    });
-}
 
 function followUser(username, friend) { // follow a user
   const p1 = Schemas.User.updateOne(
@@ -116,83 +95,22 @@ function unfollowUser(username, friend) { // unfollow a user
   return Promise.all([p1, p2]);
 }
 
-function addPostIDToUsers(postID, usernames) {
-  return Schemas.User.updateMany(
-    { username: { $in: usernames } },
-    {
-      $push: {
-        posts: {
-          $each: [postID],
-          $position: 0,
-        },
-      },
-    },
-  );
-}
-
-// 1. create a post
-// 2. get all of current users friends
-function postPicture(picture, username) {
-  return Promise
-    .all([createPost(picture, username), getFollowersForUsername(username)])
-    .then((values) => {
-      const post = values[0];
-      const friends = values[1];
-      friends.push(username);
-      console.log(friends);
-      return addPostIDToUsers(post.uid, friends).then(() => post);
+function getFollowersForUsername(username) { //
+  return Schemas.User.findOne({ username }, { followers: 1 })
+    .then((user) => {
+      if (user != null) return user.followers;
+      return [];
     });
 }
 
-
-function getPost(uid) {
-  return Schemas.Post.findOne({ uid });
-}
-
-function getPostIdsForUserAndNum(username, num) {
-  return Schemas.User.findOne({ username },
-    { posts: { $slice: [num, 1000] } })
-    .then((data) => { if (data == null) { return null; } return data.posts; });
-}
-
-function getPostsForUserAndNum(username, num) {
-  return getPostIdsForUserAndNum(username, parseInt(num, 10))
-    .then(async (posts) => {
-      if (posts == null) {
-        return null;
+function getFolloweesForUsername(username) { //
+  return Schemas.User.findOne({ username }, { followees: 1 })
+    .then((user) => {
+      if (user != null) {
+        return user.followees;
       }
-      return Promise.all(posts.map((post) => getPost(post))).then((data) => data);
+      return [];
     });
-}
-
-async function likePost(username, uid) {
-  console.log('liking post: ', username, ', ', uid);
-  const existingUser = await getUser(username);
-  const post = await getPost(uid);
-  if (existingUser == null || post == null
-    || (existingUser.username !== post.username
-      && existingUser.followees.indexOf(post.username) === -1)) {
-    return null;
-  }
-  return Schemas.Post.updateOne(
-    { uid },
-    { $push: { likes: username } },
-  );
-}
-
-async function unlikePost(username, uid) {
-  console.log('unliking post: ', username, ', ', uid);
-  const existingUser = await getUser(username);
-  const post = await getPost(uid);
-  if (existingUser == null || post == null
-    || (existingUser.username !== post.username
-      && existingUser.followees.indexOf(post.username) === -1)) {
-    return null;
-  }
-  return Schemas.Post.updateOne(
-    { uid },
-    { $pull: { likes: username } },
-  );
 }
 
 function getUsersForTerm(term) {
@@ -233,17 +151,10 @@ module.exports = {
   updateEmail,
   updateProfilePic,
   updatePassword,
-  postPicture,
-  createPost,
   followUser,
   unfollowUser,
-  getFolloweesForUsername,
   getFollowersForUsername,
-  getPost,
-  getPostIdsForUserAndNum,
-  getPostsForUserAndNum,
-  likePost,
-  unlikePost,
+  getFolloweesForUsername,
   getUsersForTerm,
   getSearchSuggestions,
 };
