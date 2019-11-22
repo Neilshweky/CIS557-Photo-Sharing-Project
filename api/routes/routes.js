@@ -192,10 +192,9 @@ const addComment = (req, res) => {
   postDB.addComment(postID, username, comment)
     .then((data) => res.status(200).send(data))
     .catch((err) => {
-      if (err.message === 'No post found to add comment') {
+      if (err === 'No post found to add comment') {
         res.status(400).send(err);
-      }
-      else {
+      } else {
         res.status(500).send(err);
       }
     });
@@ -211,7 +210,7 @@ const editComment = (req, res) => {
     .then((data) => res.status(200).send(data))
     .catch((err) => {
       if (err.message === 'No post found to edit comment' ||
-          err.message === 'No comment found to edit') {
+        err.message === 'No comment found to edit') {
         res.status(400).send(err);
       }
       else {

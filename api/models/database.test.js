@@ -376,11 +376,8 @@ describe('comments tests', () => {
 
   test('add a comment to fake post', async () => {
     await postDB.addComment('FAKE ID', 'neilshweky', 'cool beans man')
-      .then((data) => {
-        fail('Should not add comment to non-existing post')
-      })
       .catch((err) => {
-        expect(err.message).toEqual('No post found to add comment');
+        expect(err).toBe('No post found to add comment');
       });
   });
 
@@ -477,16 +474,13 @@ describe('edit and delete posts tests', () => {
     const post = await Schemas.Post.findOne();
     expect(post.caption).toBe('some caption');
     const newPost = await postDB.updatePost(post.uid, 'new caption');
-    expect(newPost.caption).toBe('new caption');
+    expect(newPost).toBe('new caption');
   });
 
   test('edit post with invalid post ID', async () => {
     await postDB.updatePost('FAKEID', 'new caption')
-      .then((data) => {
-        fail('Should not edit non-existing post');
-      })
       .catch((err) => {
-        expect(err.message).toEqual('No post found to edit');
+        expect(err).toEqual('No post found to update');
       });
   });
 
