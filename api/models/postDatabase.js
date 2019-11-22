@@ -8,7 +8,7 @@ const user = require('./userDatabase.js');
 
 const QUERY_SIZE = 10;
 
-function createPost(picture, username, caption="") {
+function createPost(picture, username, caption = "") {
   const post = new Schemas.Post({ picture, username, caption });
   return post.save();
 }
@@ -57,18 +57,17 @@ async function getPostsForUserAndNum(username, num) {
   while (results.length <= QUERY_SIZE) {
     const posts = await getPostIdsForUserAndNum(username, parseInt(num, 10))
     if (posts == null) {
-      return Promise.resolve(results.slice(0,QUERY_SIZE));
+      return Promise.resolve(results.slice(0, QUERY_SIZE));
     }
-
     const data = await Promise.all(posts.map((post) => getPost(post)));
     results = results.concat(data.filter((elem) => elem !== null));
     if (posts < QUERY_SIZE) {
-      return Promise.resolve(results.slice(0,QUERY_SIZE))
+      return Promise.resolve(results.slice(0, QUERY_SIZE))
     }
     num += QUERY_SIZE;
 
   }
-  return Promise.resolve(results.slice(0,QUERY_SIZE))
+  return Promise.resolve(results.slice(0, QUERY_SIZE))
 }
 
 async function likePost(username, uid) {
@@ -109,14 +108,13 @@ async function addComment(postID, username, comment) {
     username: username,
     comment: comment
   };
-  const add = await Schemas.Post.updateOne(
-    { uid: postID },
-    { $push: { comments: newComment } }
-  );
-  if (add.nModified == 0) {
-    throw new Error('No post found to add comment');
-  }
-  return newComment;
+  return Schemas.Post.updateOne({ uid: postID }, { $push: { comments: newComment } }).then(data => {
+    if (data.nModified == 0) {
+      return Promise.reject('No post found to add comment');
+    } else {
+      return newComment;
+    }
+  })
 }
 
 // Edits the comment with the given ID on the given post
@@ -127,7 +125,7 @@ async function editComment(postID, commentID, comment) {
   }
   const edit = await Schemas.Post.updateOne(
     { uid: postID, 'comments.uid': commentID },
-    { $set: {'comments.$.comment': comment} }
+    { $set: { 'comments.$.comment': comment } }
   );
   if (edit.nModified == 0) {
     throw new Error('No comment found to edit');
@@ -143,18 +141,19 @@ async function deleteComment(postID, commentID) {
   }
   return Schemas.Post.updateOne(
     { uid: postID },
-    { $pull: { comments: {uid: commentID} } }
+    { $pull: { comments: { uid: commentID } } }
   );
 }
 
 // Update the post caption
 async function updatePost(postID, caption) {
-  const post = await getPost(postID);
-  if (!post) {
-    throw new Error('No post found to edit');
-  }
-  post.caption = caption;
-  return post.save();
+  return Schemas.Post.updateOne({ uid: postID }, { $set: { caption } }).then(data => {
+    if (data.nModified == 0) {
+      return Promise.reject('No post found to update');
+    } else {
+      return caption;
+    }
+  })
 }
 
 // Deletes the post with the given post ID

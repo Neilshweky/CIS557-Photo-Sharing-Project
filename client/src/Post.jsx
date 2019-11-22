@@ -72,6 +72,7 @@ class Post extends React.Component {
       isPostEditOpen: false,
       PostEditAnchorEl: null,
       isCommentsOpen: false,
+      caption: props.post.caption,
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
@@ -133,11 +134,21 @@ class Post extends React.Component {
   async handleSaveCaption() {
     const { caption } = this.state;
     const { post } = this.props;
-    // const resp = await fetch(...);
-    const resp = { ok: true };
-    if (resp.ok) {
-      document.getElementById(`post-save-${post.uid}`).style.display = 'none';
-      document.getElementById(`post-caption-${post.uid}`).disabled = true;
+    if (caption !== post.caption) {
+      const resp = await fetch(`http://localhost:8080/updatePost/${post.uid}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+          body: JSON.stringify({ caption }),
+        });
+      if (resp.ok) {
+        document.getElementById(`post-save-${post.uid}`).style.display = 'none';
+        document.getElementById(`post-caption-${post.uid}`).disabled = true;
+      }
     }
   }
 
@@ -148,9 +159,17 @@ class Post extends React.Component {
     this.setState({ isPostEditOpen: false });
   }
 
-  handleDeletePost() {
+  async handleDeletePost() {
     const { post } = this.props;
-    const id = post.uid;
+    await fetch(`http://localhost:8080/post/${post.uid}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+        },
+        mode: 'cors',
+      });
     this.setState({ isPostEditOpen: false });
   }
 
@@ -200,7 +219,7 @@ class Post extends React.Component {
     }
 
     const {
-      PostEditAnchorEl, isPostEditOpen, username, isCommentsOpen,
+      PostEditAnchorEl, isPostEditOpen, username, isCommentsOpen, caption,
     } = this.state;
     const renderPostEditMenu = (
       <Menu
@@ -286,7 +305,6 @@ class Post extends React.Component {
           subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
         />
       );
-
     return (
       <Card className={classes.card} id={post.uid}>
         {renderHeader}
@@ -301,7 +319,7 @@ class Post extends React.Component {
                 id={`post-caption-${post.uid}`}
                 multiline
                 rowsMax="2"
-                defaultValue="This is my value"
+                value={caption}
                 onChange={(e) => this.setState({ caption: e.target.value })}
                 disabled
                 style={{ width: '100%' }}

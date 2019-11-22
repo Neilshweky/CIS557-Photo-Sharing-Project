@@ -34,7 +34,7 @@ app.get('/', (req, res) => { res.send('Hello, World\n'); });
 app.post('/signup', routes.signup);
 app.post('/login', routes.login);
 app.post('/postpicture', routes.postPicture);
-app.post('/updatePost/:postID', routes.updatePost);
+app.put('/updatePost/:postID', routes.updatePost);
 app.post('/like/:postid/:username', routes.likePost);
 app.post('/unlike/:postid/:username', routes.unlikePost);
 app.post('/follow/:username/:friend', routes.follow);

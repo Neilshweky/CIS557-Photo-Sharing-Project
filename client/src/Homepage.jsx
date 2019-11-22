@@ -27,7 +27,6 @@ class Homepage extends React.Component {
 
   async generatePosts() {
     const { username } = this.state;
-    this.render();
     const compList = [];
     const resp = await fetch(`http://localhost:8080/posts/${username}/0`);
     if (resp.ok) {
