@@ -145,217 +145,217 @@ class Post extends React.Component {
           mode: 'cors',
           body: JSON.stringify({ caption }),
         });
-      if (resp.ok) {
-        document.getElementById(`post-save-${post.uid}`).style.display = 'none';
-        document.getElementById(`post-caption-${post.uid}`).disabled = true;
-      }
     }
-  }
+    document.getElementById(`post-save-${post.uid}`).style.display = 'none';
+    document.getElementById(`post-caption-${post.uid}`).disabled = true;
 
-  handleEditPost() {
-    const { post } = this.props;
-    document.getElementById(`post-caption-${post.uid}`).disabled = false;
-    document.getElementById(`post-save-${post.uid}`).style.display = 'block';
-    this.setState({ isPostEditOpen: false });
   }
+}
 
-  async handleDeletePost() {
-    const { post } = this.props;
-    await fetch(`http://localhost:8080/post/${post.uid}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Origin': '*',
-        },
-        mode: 'cors',
-      });
-    this.setState({ isPostEditOpen: false });
-  }
+handleEditPost() {
+  const { post } = this.props;
+  document.getElementById(`post-caption-${post.uid}`).disabled = false;
+  document.getElementById(`post-save-${post.uid}`).style.display = 'block';
+  this.setState({ isPostEditOpen: false });
+}
 
-  handlePostEditOpen(event) {
-    this.setState({ PostEditAnchorEl: event.currentTarget, isPostEditOpen: true });
-  }
+async handleDeletePost() {
+  const { post } = this.props;
+  await fetch(`http://localhost:8080/post/${post.uid}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Origin': '*',
+      },
+      mode: 'cors',
+    });
+  this.setState({ isPostEditOpen: false });
+}
 
-  handlePostEditClose() {
-    this.setState({ PostEditAnchorEl: null, isPostEditOpen: false });
-  }
+handlePostEditOpen(event) {
+  this.setState({ PostEditAnchorEl: event.currentTarget, isPostEditOpen: true });
+}
 
-  handleCommentsOpen() {
-    this.setState({ isCommentsOpen: true });
-  }
+handlePostEditClose() {
+  this.setState({ PostEditAnchorEl: null, isPostEditOpen: false });
+}
 
-  handleCommentsClose() {
-    this.setState({ isCommentsOpen: false });
-  }
+handleCommentsOpen() {
+  this.setState({ isCommentsOpen: true });
+}
 
-  render() {
-    const { liked, profilePic, numLikes } = this.state;
-    const { classes, post } = this.props;
-    let avatar = null;
-    try {
-      window.atob(profilePic);
-      if (profilePic !== '') {
-        avatar = (
-          <Avatar
-            className={classes.avatar}
-            src={`data:image/jpeg;base64,${profilePic}`}
-            id="profile-pic"
-            style={{ border: 0, objectFit: 'cover' }}
-          />
-        );
-      } else {
-        throw new Error('No image to upload');
-      }
-    } catch (e) {
+handleCommentsClose() {
+  this.setState({ isCommentsOpen: false });
+}
+
+render() {
+  const { liked, profilePic, numLikes } = this.state;
+  const { classes, post } = this.props;
+  let avatar = null;
+  try {
+    window.atob(profilePic);
+    if (profilePic !== '') {
       avatar = (
         <Avatar
           className={classes.avatar}
+          src={`data:image/jpeg;base64,${profilePic}`}
           id="profile-pic"
-        >
-          {post.username.charAt(0)}
-        </Avatar>
+          style={{ border: 0, objectFit: 'cover' }}
+        />
       );
+    } else {
+      throw new Error('No image to upload');
     }
-
-    const {
-      PostEditAnchorEl, isPostEditOpen, username, isCommentsOpen, caption,
-    } = this.state;
-    const renderPostEditMenu = (
-      <Menu
-        anchorEl={PostEditAnchorEl}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        id="post-edit-menu"
-        keepMounted
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={isPostEditOpen}
-        getContentAnchorEl={null}
-        onClose={this.handlePostEditClose}
+  } catch (e) {
+    avatar = (
+      <Avatar
+        className={classes.avatar}
+        id="profile-pic"
       >
-        <MenuItem
-          onClick={this.handleEditPost}
-          className={classes.menuItem}
-        >
-          <p>Edit Post</p>
-        </MenuItem>
-        <MenuItem
-          className={classes.menuItem}
-          onClick={this.handleDeletePost}
-        >
-          <p>Delete Post</p>
-        </MenuItem>
-      </Menu>
-    );
-    const renderComments = (
-      <Dialog open={isCommentsOpen} onClose={this.handleCommentsClose} aria-labelledby="form-dialog-title">
-        <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={7}>
-              <img
-                // className={classes.media}
-                src={`data:image/jpeg;base64,${post.picture}`}
-                style={{ maxWidth: '100%' }}
-                alt="post-pic"
-              />
-            </Grid>
-            <Grid item xs={5}>
-              <DialogContentText>
-                To subscribe to this website, please enter your email address here. We will send updates
-                occasionally.
-              </DialogContentText>
-              <TextField
-                autoFocus
-                margin="dense"
-                id="name"
-                label="Email Address"
-                type="email"
-                fullWidth
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.handleCommentsClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={this.handleCommentsClose} color="primary">
-            Subscribe
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-
-    const renderHeader = username === post.username
-      ? (
-        <CardHeader
-          avatar={avatar}
-          action={(
-            <IconButton aria-label="settings" onClick={this.handlePostEditOpen}>
-              <MoreVertIcon />
-            </IconButton>
-          )}
-          title={post.username}
-          subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
-        />
-      )
-      : (
-        <CardHeader
-          avatar={avatar}
-          title={post.username}
-          subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
-        />
-      );
-    return (
-      <Card className={classes.card} id={post.uid}>
-        {renderHeader}
-        <CardMedia
-          className={classes.media}
-          image={`data:image/jpeg;base64,${post.picture}`}
-        />
-        <CardContent>
-          <Grid container>
-            <Grid item xs={11}>
-              <InputBase
-                id={`post-caption-${post.uid}`}
-                multiline
-                rowsMax="2"
-                value={caption}
-                onChange={(e) => this.setState({ caption: e.target.value })}
-                disabled
-                style={{ width: '100%' }}
-              />
-            </Grid>
-            <Grid item xs={1}>
-              <SaveIcon
-                id={`post-save-${post.uid}`}
-                style={{ display: 'none' }}
-                onClick={this.handleSaveCaption}
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-        <CardActions disableSpacing>
-          <IconButton
-            className={liked ? classes.favorite : ''}
-            onClick={this.handleLikeClick}
-          >
-            <FavoriteIcon />
-            <Typography className={classes.iconCount}>
-              {numLikes}
-            </Typography>
-          </IconButton>
-          <IconButton
-            onClick={this.handleCommentsOpen}
-          >
-            <ChatBubbleIcon />
-          </IconButton>
-        </CardActions>
-        {renderPostEditMenu}
-        {renderComments}
-      </Card>
-
+        {post.username.charAt(0)}
+      </Avatar>
     );
   }
+
+  const {
+    PostEditAnchorEl, isPostEditOpen, username, isCommentsOpen, caption,
+  } = this.state;
+  const renderPostEditMenu = (
+    <Menu
+      anchorEl={PostEditAnchorEl}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      id="post-edit-menu"
+      keepMounted
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      open={isPostEditOpen}
+      getContentAnchorEl={null}
+      onClose={this.handlePostEditClose}
+    >
+      <MenuItem
+        onClick={this.handleEditPost}
+        className={classes.menuItem}
+      >
+        <p>Edit Post</p>
+      </MenuItem>
+      <MenuItem
+        className={classes.menuItem}
+        onClick={this.handleDeletePost}
+      >
+        <p>Delete Post</p>
+      </MenuItem>
+    </Menu>
+  );
+  const renderComments = (
+    <Dialog open={isCommentsOpen} onClose={this.handleCommentsClose} aria-labelledby="form-dialog-title">
+      <DialogContent>
+        <Grid container spacing={2}>
+          <Grid item xs={7}>
+            <img
+              // className={classes.media}
+              src={`data:image/jpeg;base64,${post.picture}`}
+              style={{ maxWidth: '100%' }}
+              alt="post-pic"
+            />
+          </Grid>
+          <Grid item xs={5}>
+            <DialogContentText>
+              To subscribe to this website, please enter your email address here. We will send updates
+              occasionally.
+              </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Email Address"
+              type="email"
+              fullWidth
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={this.handleCommentsClose} color="primary">
+          Cancel
+          </Button>
+        <Button onClick={this.handleCommentsClose} color="primary">
+          Subscribe
+          </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
+  const renderHeader = username === post.username
+    ? (
+      <CardHeader
+        avatar={avatar}
+        action={(
+          <IconButton aria-label="settings" onClick={this.handlePostEditOpen}>
+            <MoreVertIcon />
+          </IconButton>
+        )}
+        title={post.username}
+        subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
+      />
+    )
+    : (
+      <CardHeader
+        avatar={avatar}
+        title={post.username}
+        subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
+      />
+    );
+  return (
+    <Card className={classes.card} id={post.uid}>
+      {renderHeader}
+      <CardMedia
+        className={classes.media}
+        image={`data:image/jpeg;base64,${post.picture}`}
+      />
+      <CardContent>
+        <Grid container>
+          <Grid item xs={11}>
+            <InputBase
+              id={`post-caption-${post.uid}`}
+              multiline
+              rowsMax="2"
+              value={caption}
+              onChange={(e) => this.setState({ caption: e.target.value })}
+              disabled
+              style={{ width: '100%' }}
+            />
+          </Grid>
+          <Grid item xs={1}>
+            <SaveIcon
+              id={`post-save-${post.uid}`}
+              style={{ display: 'none' }}
+              onClick={this.handleSaveCaption}
+            />
+          </Grid>
+        </Grid>
+      </CardContent>
+      <CardActions disableSpacing>
+        <IconButton
+          className={liked ? classes.favorite : ''}
+          onClick={this.handleLikeClick}
+        >
+          <FavoriteIcon />
+          <Typography className={classes.iconCount}>
+            {numLikes}
+          </Typography>
+        </IconButton>
+        <IconButton
+          onClick={this.handleCommentsOpen}
+        >
+          <ChatBubbleIcon />
+        </IconButton>
+      </CardActions>
+      {renderPostEditMenu}
+      {renderComments}
+    </Card>
+
+  );
+}
 }
 
 Post.defaultProps = {
