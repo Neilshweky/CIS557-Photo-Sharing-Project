@@ -88,21 +88,21 @@ class AppToolbar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      mobileMoreAnchorEl: null, searchValue: '', isMobileMenuOpen: false, loggedInUser: localStorage.getItem('user'), profilePic: '',
+      mobileMoreAnchorEl: null, searchValue: '', isMobileMenuOpen: false,
     };
     this.handleMobileMenuClose = this.handleMobileMenuClose.bind(this);
     this.handleMobileMenuOpen = this.handleMobileMenuOpen.bind(this);
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
   }
 
-  async componentDidMount() {
-    const { loggedInUser } = this.state;
-    const userResp = await fetch(`http://localhost:8080/user/${loggedInUser}`);
-    if (userResp.ok) {
-      const userData = await userResp.json();
-      this.setState({ profilePic: userData.profilePicture });
-    }
-  }
+  // async componentDidMount() {
+  //   const { loggedInUser } = this.state;
+  //   const userResp = await fetch(`http://localhost:8080/user/${loggedInUser}`);
+  //   if (userResp.ok) {
+  //     const userData = await userResp.json();
+  //     this.setState({ profilePic: userData.profilePicture });
+  //   }
+  // }
 
   handleMobileMenuClose() {
     this.setState({ mobileMoreAnchorEl: null, isMobileMenuOpen: false });
@@ -121,9 +121,9 @@ class AppToolbar extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, profilePic, username } = this.props;
     const {
-      loggedInUser, mobileMoreAnchorEl, isMobileMenuOpen, profilePic,
+      mobileMoreAnchorEl, isMobileMenuOpen,
     } = this.state;
     const mobileMenuId = 'primary-search-account-menu-mobile';
     let avatar = null;
@@ -147,7 +147,7 @@ class AppToolbar extends React.Component {
           className={classes.avatar}
           id="profile-pic"
         >
-          {loggedInUser.charAt(0)}
+          {username.charAt(0)}
         </Avatar>
       );
     }
@@ -163,7 +163,7 @@ class AppToolbar extends React.Component {
       >
         <MenuItem
           component={Link}
-          to={`/profile/${loggedInUser}`}
+          to={`/profile/${username}`}
         >
           <IconButton color="inherit">
             {avatar}
@@ -232,9 +232,9 @@ class AppToolbar extends React.Component {
                   edge="end"
                   color="inherit"
                   component={Link}
-                  to={`/profile/${loggedInUser}`}
+                  to={`/profile/${username}`}
                 >
-                  <Typography style={{ marginRight: '5px' }}>{loggedInUser}</Typography>
+                  <Typography style={{ marginRight: '5px' }}>{username}</Typography>
                   {avatar}
                 </IconButton>
               </Tooltip>

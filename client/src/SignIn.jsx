@@ -60,10 +60,8 @@ class SignIn extends React.Component {
   }
 
   componentDidMount() {
-    const username = localStorage.getItem('user');
-    const loginTime = localStorage.getItem('login');
-    const { history } = this.props;
-    if (username !== null && loginTime !== null && dateDiff(new Date(loginTime)) < 30) {
+    const { state, history } = this.props;
+    if (state.username !== '' && state.loginTime !== '' && dateDiff(new Date(state.loginTime)) < 30) {
       history.push('/home');
     } else {
       localStorage.clear();

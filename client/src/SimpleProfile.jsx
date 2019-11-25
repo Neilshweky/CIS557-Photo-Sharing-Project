@@ -87,15 +87,13 @@ class SimpleProfile extends React.Component {
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true,
+      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false,
     };
   }
 
   componentDidMount() {
-    const username = localStorage.getItem('user');
-    const loginTime = localStorage.getItem('login');
-    const { history, match } = this.props;
-    if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
+    const { state, history, match } = this.props;
+    if (state.username === '' || state.loginTime === '' || dateDiff(state.loginTime) > 30) {
       localStorage.clear();
       history.push('/signin');
     } else {
@@ -105,13 +103,16 @@ class SimpleProfile extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { match } = this.props;
-    if (match.params.username !== prevProps.match.params.username) {
+    const { picUpdate } = this.state;
+    if (match.params.username !== prevProps.match.params.username || picUpdate) {
       this.getProfile(match.params.username);
+      this.setState({ picUpdate: false });
     }
   }
 
   async getProfile(username) {
-    const loggedInUser = localStorage.getItem('user');
+    const { state } = this.props;
+    const loggedInUser = state.username;
     const resp = await fetch(`http://localhost:8080/user/${username}`);
     if (resp.ok) {
       const data = await resp.json();
@@ -146,6 +147,7 @@ class SimpleProfile extends React.Component {
   async updateProfile(e) {
     e.preventDefault();
     const { email, username } = this.state;
+    const { updateState } = this.props;
     const emailStatus = document.getElementById('email-status');
     emailStatus.innerHTML = '';
     const passwordStatus = document.getElementById('password-status');
@@ -170,7 +172,7 @@ class SimpleProfile extends React.Component {
         if (!respEmail.ok) {
           emailStatus.innerHTML = respEmail.text();
         } else {
-          this.setState({ email: newEmail });
+          updateState('email', newEmail);
           emailStatus.innerHTML = 'Email update Successful';
         }
       } else {
@@ -202,6 +204,7 @@ class SimpleProfile extends React.Component {
   async updateProfilePic(e) {
     e.preventDefault();
     const { username, profilePicture } = this.state;
+    const { updateState } = this.props;
     const photoStatus = document.getElementById('photo-status');
     photoStatus.innerHTML = '';
     document.getElementById('email-status').innerHTML = '';
@@ -228,7 +231,9 @@ class SimpleProfile extends React.Component {
           if (!respPic.ok) {
             photoStatus.innerHTML = respPic.text();
           } else {
-            this.setState({ profilePicture: newProfilePicture }, () => this.render());
+            updateState('profilePic', newProfilePicture);
+            this.setState({ picUpdate: true });
+            // this.setState({ profilePicture: newProfilePicture }, () => this.render());
           }
         } else {
           photoStatus.innerHTML = 'No changes to make to picture';
@@ -240,13 +245,14 @@ class SimpleProfile extends React.Component {
 
   async generatePosts() {
     const { username } = this.state;
+    const { state } = this.props;
     const compList = [];
     const resp = await fetch(`http://localhost:8080/posts/${username}/0`);
     if (resp.ok) {
       const postData = await resp.json();
       const myPostData = postData.filter((post) => post.username === username);
       myPostData.forEach((post) => {
-        compList.push(<Post post={post} key={post.uid} />);
+        compList.push(<Post post={post} key={post.uid} username={state.username} />);
       });
       this.setState({ reactPosts: compList });
     }
@@ -257,19 +263,20 @@ class SimpleProfile extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, state } = this.props;
     const {
       username, email, password, curPassword, passwordCheck, profilePicture, followers,
       followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let avatar = null;
     try {
-      window.atob(profilePicture);
-      if (profilePicture !== '') {
+      const actualPic = bLoggedInUser ? state.profilePic : profilePicture;
+      window.atob(actualPic);
+      if (actualPic !== '') {
         avatar = (
           <Avatar
             className={classes.avatar}
-            src={`data:image/jpeg;base64,${profilePicture}`}
+            src={`data:image/jpeg;base64,${actualPic}`}
             id="profile-pic"
             style={{ border: 0, objectFit: 'cover' }}
           />
@@ -290,183 +297,181 @@ class SimpleProfile extends React.Component {
     }
 
     return (
-      dataLoaded && (
-        <div>
-          <AppToolbar />
-          <Tabs
-            value={index}
-            onChange={this.handleTabChange}
-            indicatorColor="primary"
-            textColor="primary"
-            centered
-          >
-            <Tab label="Profile Information" />
-            <Tab label="My Posts" />
-            <Tab label="Who Do I Follow?" />
-            {bLoggedInUser && <Tab label="Account Settings" />}
-          </Tabs>
-          <TabPanel value={index} index={0}>
-            <Container>
-              <div className={classes.paper}>
-                <div id="photo-avatar">
-                  {avatar}
-                </div>
-                <Typography component="h1" variant="h5">
-                  {username}
-                </Typography>
-                <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
-                  <Grid item xs={12}>
-                    <Grid container justify="center" alignItems="center" spacing={1}>
-                      <Grid item xs={4}>
-                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {reactPosts.length}
-                        </Typography>
-                        <Typography variant="h5">
-                          Posts
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {followers.length}
-                        </Typography>
-                        <Typography variant="h5">
-                          Followers
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {followees.length}
-                        </Typography>
-                        <Typography variant="h5">
-                          Following
-                        </Typography>
-                      </Grid>
+      <div>
+        <AppToolbar profilePic={state.profilePic} username={state.username} />
+        <Tabs
+          value={index}
+          onChange={this.handleTabChange}
+          indicatorColor="primary"
+          textColor="primary"
+          centered
+        >
+          <Tab label="Profile Information" />
+          <Tab label="My Posts" />
+          <Tab label="Who Do I Follow?" />
+          {bLoggedInUser && <Tab label="Account Settings" />}
+        </Tabs>
+        <TabPanel value={index} index={0}>
+          <Container>
+            <div className={classes.paper}>
+              <div id="photo-avatar">
+                {avatar}
+              </div>
+              <Typography component="h1" variant="h5">
+                {username}
+              </Typography>
+              <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
+                <Grid item xs={12}>
+                  <Grid container justify="center" alignItems="center" spacing={1}>
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {reactPosts.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Posts
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {followers.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Followers
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {followees.length}
+                      </Typography>
+                      <Typography variant="h5">
+                        Following
+                      </Typography>
                     </Grid>
                   </Grid>
                 </Grid>
+              </Grid>
+            </div>
+          </Container>
+        </TabPanel>
+        <TabPanel value={index} index={1}>
+          <Container>
+            <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
+              {reactPosts.map((reactComp) => reactComp)}
+            </Box>
+          </Container>
+        </TabPanel>
+        <TabPanel value={index} index={2}>
+          {dataLoaded && <FriendTable bProfilePage data={followeeData} bLoggedInUser />}
+        </TabPanel>
+        <TabPanel value={index} index={3}>
+          <Container>
+            <div className={classes.paper}>
+              <div id="photo-status" />
+              <div id="photo-avatar">
+                <input type="file" id="upload-profile-pic" hidden onChange={this.updateProfilePic} />
+                <label htmlFor="upload-profile-pic">
+                  {avatar}
+                  <div className="overlay">
+                    <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
+                  </div>
+                </label>
               </div>
-            </Container>
-          </TabPanel>
-          <TabPanel value={index} index={1}>
-            <Container>
-              <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
-                {reactPosts.map((reactComp) => reactComp)}
-              </Box>
-            </Container>
-          </TabPanel>
-          <TabPanel value={index} index={2}>
-            {dataLoaded && <FriendTable bProfilePage data={followeeData} bLoggedInUser />}
-          </TabPanel>
-          <TabPanel value={index} index={3}>
-            <Container>
-              <div className={classes.paper}>
-                <div id="photo-status" />
-                <div id="photo-avatar">
-                  <input type="file" id="upload-profile-pic" hidden onChange={this.updateProfilePic} />
-                  <label htmlFor="upload-profile-pic">
-                    {avatar}
-                    <div className="overlay">
-                      <PhotoCameraIcon id="upload-new" style={{ fontSize: '48px' }} />
-                    </div>
-                  </label>
-                </div>
-                <Typography component="h1" variant="h5">
-                  {username}
-                </Typography>
-                <div id="email-status" style={{ marginTop: '20px' }} />
-                <div id="password-status" />
-                <form className={classes.form} noValidate onSubmit={this.updateProfile}>
-                  <Grid container justify="center" aligntems="center" spacing={2}>
-                    <Grid item xs={3} />
-                    <Grid item xs={6}>
-                      <TextField
-                        InputLabelProps={{
-                          classes: {
-                            root: classes.label,
-                          },
-                        }}
-                        autoComplete="email"
-                        fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        defaultValue={email}
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid item xs={3} />
-                    <Grid item xs={4}>
-                      <TextField
-                        InputLabelProps={{
-                          classes: {
-                            root: classes.label,
-                          },
-                        }}
-                        autoComplete="password"
-                        fullWidth
-                        id="curPassword"
-                        type="password"
-                        label="Current Password"
-                        name="curPassword"
-                        variant="outlined"
-                        value={curPassword}
-                        onChange={(e) => this.setState({ curPassword: e.target.value })}
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <TextField
-                        InputLabelProps={{
-                          classes: {
-                            root: classes.label,
-                          },
-                        }}
-                        autoComplete="password"
-                        fullWidth
-                        id="password"
-                        type="password"
-                        label="New Password"
-                        name="password"
-                        variant="outlined"
-                        value={password}
-                        onChange={(e) => this.setState({ password: e.target.value })}
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <TextField
-                        InputLabelProps={{
-                          classes: {
-                            root: classes.label,
-                          },
-                        }}
-                        autoComplete="password"
-                        fullWidth
-                        id="passwordCheck"
-                        type="password"
-                        label="Re-enter Password"
-                        name="passwordCheck"
-                        variant="outlined"
-                        value={passwordCheck}
-                        onChange={(e) => this.setState({ passwordCheck: e.target.value })}
-                      />
-                    </Grid>
+              <Typography component="h1" variant="h5">
+                {username}
+              </Typography>
+              <div id="email-status" style={{ marginTop: '20px' }} />
+              <div id="password-status" />
+              <form className={classes.form} noValidate onSubmit={this.updateProfile}>
+                <Grid container justify="center" aligntems="center" spacing={2}>
+                  <Grid item xs={3} />
+                  <Grid item xs={6}>
+                    <TextField
+                      InputLabelProps={{
+                        classes: {
+                          root: classes.label,
+                        },
+                      }}
+                      autoComplete="email"
+                      fullWidth
+                      id="email"
+                      label="Email Address"
+                      name="email"
+                      defaultValue={state.email}
+                      variant="outlined"
+                    />
                   </Grid>
-                  <Button
-                    className={classes.submit}
-                    id="loginsubmit"
-                    color="primary"
-                    type="submit"
-                    variant="contained"
-                  >
-                    Update
+                  <Grid item xs={3} />
+                  <Grid item xs={4}>
+                    <TextField
+                      InputLabelProps={{
+                        classes: {
+                          root: classes.label,
+                        },
+                      }}
+                      autoComplete="password"
+                      fullWidth
+                      id="curPassword"
+                      type="password"
+                      label="Current Password"
+                      name="curPassword"
+                      variant="outlined"
+                      value={curPassword}
+                      onChange={(e) => this.setState({ curPassword: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField
+                      InputLabelProps={{
+                        classes: {
+                          root: classes.label,
+                        },
+                      }}
+                      autoComplete="password"
+                      fullWidth
+                      id="password"
+                      type="password"
+                      label="New Password"
+                      name="password"
+                      variant="outlined"
+                      value={password}
+                      onChange={(e) => this.setState({ password: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField
+                      InputLabelProps={{
+                        classes: {
+                          root: classes.label,
+                        },
+                      }}
+                      autoComplete="password"
+                      fullWidth
+                      id="passwordCheck"
+                      type="password"
+                      label="Re-enter Password"
+                      name="passwordCheck"
+                      variant="outlined"
+                      value={passwordCheck}
+                      onChange={(e) => this.setState({ passwordCheck: e.target.value })}
+                    />
+                  </Grid>
+                </Grid>
+                <Button
+                  className={classes.submit}
+                  id="loginsubmit"
+                  color="primary"
+                  type="submit"
+                  variant="contained"
+                >
+                  Update
                   </Button>
-                </form>
-              </div>
-            </Container>
-          </TabPanel>
-          <CssBaseline />
-          <Box mt={5} />
-        </div>
-      )
+              </form>
+            </div>
+          </Container>
+        </TabPanel>
+        <CssBaseline />
+        <Box mt={5} />
+      </div>
     );
   }
 }

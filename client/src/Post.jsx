@@ -27,6 +27,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import Paper from '@material-ui/core/Paper';
+import CommentBar from './CommentBar';
 import { localStorage } from './Utilities';
 
 const styles = (theme) => ({
@@ -66,35 +67,31 @@ const styles = (theme) => ({
 class Post extends React.Component {
   constructor(props) {
     super(props);
-    const username = localStorage.getItem('user');
     this.state = {
-      liked: props.post.likes.indexOf(username) !== -1,
+      liked: props.post.likes.indexOf(props.username) !== -1,
       numLikes: props.post.likes.length,
       numComments: props.post.comments.length,
-      username,
+      comments: props.post.comments,
       isPostEditOpen: false,
       PostEditAnchorEl: null,
       isCommentsOpen: false,
-      reactComments: [],
-      commentText: '',
+      caption: props.post.caption,
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
     this.handlePostEditOpen = this.handlePostEditOpen.bind(this);
-    this.handlePostComment = this.handlePostComment.bind(this);
     this.handlePostEditClose = this.handlePostEditClose.bind(this);
     this.handleSaveCaption = this.handleSaveCaption.bind(this);
     this.handleEditPost = this.handleEditPost.bind(this);
     this.handleDeletePost = this.handleDeletePost.bind(this);
     this.handleCommentsOpen = this.handleCommentsOpen.bind(this);
     this.handleCommentsClose = this.handleCommentsClose.bind(this);
-    this.generateComments = this.generateComments.bind(this);
     this.getProfileAvatar = this.getProfileAvatar.bind(this);
+    this.handlePostComment = this.handlePostComment.bind(this);
   }
 
   componentDidMount() {
     this.getProfilePic();
-    this.generateComments();
   }
 
 
@@ -141,46 +138,9 @@ class Post extends React.Component {
     return avatar;
   }
 
-  generateComments() {
-    const comments2 = [1, 2, 3, 4, 5, 6, 7, 8];
-    // const { post } = this.props;
-    const commentsList = [];
-    comments2.forEach((comment) => {
-      commentsList.push(
-        <Grid container alignItems="center">
-          <Grid item xs={2}>
-            {this.getProfileAvatar()}
-          </Grid>
-          <Grid item xs={10}>
-            <InputBase
-              defaultValue={comment}
-              inputProps={{ 'aria-label': 'naked' }}
-              style={{ width: '100%' }}
-              key={comment}
-              disabled
-            // key={comment.id}
-            />
-          </Grid>
-          <Grid item xs={2} />
-          <Grid item xs={10}>
-            <InputBase
-              defaultValue='This will be time'
-              inputProps={{ 'aria-label': 'naked' }}
-              style={{ width: '100%' }}
-              key={comment}
-              disabled
-            // key={comment.id}
-            />
-          </Grid>
-        </Grid>,
-      );
-    });
-    this.setState({ reactComments: commentsList });
-  }
-
   async handleLikeClick() {
-    const { liked, username, numLikes } = this.state;
-    const { post } = this.props;
+    const { liked, numLikes } = this.state;
+    const { post, username } = this.props;
     if (liked) {
       const resp = await fetch(`http://localhost:8080/unlike/${post.uid}/${username}`,
         {
@@ -209,15 +169,43 @@ class Post extends React.Component {
       }
     }
   }
-  
+
   async handleSaveCaption() {
     const { caption } = this.state;
     const { post } = this.props;
-    // const resp = await fetch(...);
-    const resp = { ok: true };
+    if (caption !== post.caption) {
+      await fetch(`http://localhost:8080/updatePost/${post.uid}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+          body: JSON.stringify({ caption }),
+        });
+    }
+    document.getElementById(`post-save-${post.uid}`).style.display = 'none';
+    document.getElementById(`post-caption-${post.uid}`).disabled = true;
+  }
+
+  async handlePostComment(commentText) {
+    const { post, username } = this.props;
+    const resp = await fetch(`http://localhost:8080/addComment/${post.uid}/${username}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+        },
+        mode: 'cors',
+        body: JSON.stringify({ comment: commentText }),
+      });
     if (resp.ok) {
-      document.getElementById(`post-save-${post.uid}`).style.display = 'none';
-      document.getElementById(`post-caption-${post.uid}`).disabled = true;
+      const data = await resp.json();
+      const { numComments, comments } = this.state;
+      document.getElementById(`newComment-${post.uid}`).value = '';
+      this.setState({ numComments: numComments + 1, comments: comments.concat([data]) });
     }
   }
 
@@ -228,9 +216,17 @@ class Post extends React.Component {
     this.setState({ isPostEditOpen: false });
   }
 
-  handleDeletePost() {
+  async handleDeletePost() {
     const { post } = this.props;
-    const id = post.uid;
+    await fetch(`http://localhost:8080/post/${post.uid}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+        },
+        mode: 'cors',
+      });
     this.setState({ isPostEditOpen: false });
   }
 
@@ -250,21 +246,13 @@ class Post extends React.Component {
     this.setState({ isCommentsOpen: false });
   }
 
-  async handlePostComment() {
-    const { commentText } = this.state;
-    //const resp = fetch(...)
-    // if (resp.ok) {
-    //upadate comments and re-render so comment is part of list. shared state from store. 
-    // }
-  }
-
   render() {
-    const { liked, numLikes, reactComments } = this.state;
-    const { classes, post } = this.props;
-
     const {
-      PostEditAnchorEl, isPostEditOpen, username, isCommentsOpen,
-      numComments,
+      liked, numLikes, numComments, comments,
+    } = this.state;
+    const { classes, post, username } = this.props;
+    const {
+      PostEditAnchorEl, isPostEditOpen, isCommentsOpen, caption,
     } = this.state;
     const renderPostEditMenu = (
       <Menu
@@ -320,43 +308,17 @@ class Post extends React.Component {
         fullWidth
         maxWidth="md"
       >
-        <DialogContent>
+        <DialogContent style={{ padding: '8px 12px' }}>
           <Grid container spacing={2}>
             <Grid item xs={7}>
               <img
                 src={`data:image/jpeg;base64,${post.picture}`}
-                style={{ maxWidth: '100%' }}
+                style={{ maxHeight: 'calc(100vh - 130px)', maxWidth: '100%' }}
                 alt="post-pic"
               />
             </Grid>
             <Grid item xs={5}>
-              <Paper style={{ maxHeight: '100%', overflow: 'auto' }}>
-                <CardHeader
-                  avatar={this.getProfileAvatar()}
-                  title={post.username}
-                  subheader={moment.unix(post.timestamp).format('M/D/YY [at] h:mm a')}
-                />
-                {reactComments.map((comp) => comp)}
-                <Grid container alignItems="center">
-                  <Grid item xs={11}>
-                    <TextField
-                      id={`newComment-${post.uid}`}
-                      multiline
-                      rowsMax="2"
-                      placeholder="Write a comment..."
-                      onChange={(e) => this.setState({ commentText: e.target.value })}
-                      style={{ width: '95%' }}
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid item xs={1}>
-                    <SendIcon
-                      id={`comment-save-${post.uid}`}
-                      onClick={this.handlePostComment}
-                    />
-                  </Grid>
-                </Grid>
-              </Paper>
+              <CommentBar comments={comments} postID={post.uid} username={username} addComment={this.handlePostComment} />
             </Grid>
           </Grid>
         </DialogContent>
@@ -377,10 +339,10 @@ class Post extends React.Component {
                 id={`post-caption-${post.uid}`}
                 multiline
                 rowsMax="2"
-                defaultValue="This is my value"
+                value={caption}
                 onChange={(e) => this.setState({ caption: e.target.value })}
                 disabled
-                style={{ width: '100%' }}
+                style={{ width: '100%', height: '19px' }}
               />
             </Grid>
             <Grid item xs={1}>

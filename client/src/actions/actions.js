@@ -1,8 +1,12 @@
 
-export const addUser = (user, id) => ({
+export const addUser = (user, id, username, email) => ({
   type: 'ADD_USER',
   id,
-  user,
+  username,
+  email,
+  profilePic: '',
+  followers: [],
+  followees: [],
 });
 
 export const updateUserEmail = (email, id) => ({
@@ -31,5 +35,11 @@ export const addPost = (post, id) => ({
 export const addFollower = (user, id) => ({
   type: 'ADD_FOLLOWER',
   id,
+  user,
+});
+
+export const likePost = (user, postID) => ({
+  type: 'ADD_LIKE',
+  postID,
   user,
 });

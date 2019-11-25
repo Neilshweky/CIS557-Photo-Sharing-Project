@@ -8,42 +8,39 @@ import AppToolbar from './AppToolbar';
 class Homepage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { username: '', reactPosts: [], dataLoaded: false };
+    this.state = { reactPosts: [] };
     this.generatePosts = this.generatePosts.bind(this);
   }
 
   componentDidMount() {
-    const username = localStorage.getItem('user');
-    const loginTime = localStorage.getItem('login');
+    const { state, history } = this.props;
 
-    if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
+    if (state.username === '' || state.loginTime === '' || dateDiff(state.loginTime) > 30) {
       localStorage.clear();
-      const { history } = this.props;
       history.push('/signin');
     }
-    this.setState({ username, dataLoaded: true }, () => this.generatePosts());
-    this.render();
+    this.generatePosts();
   }
 
   async generatePosts() {
-    const { username } = this.state;
-    this.render();
+    const { state } = this.props;
     const compList = [];
-    const resp = await fetch(`http://localhost:8080/posts/${username}/0`);
+    const resp = await fetch(`http://localhost:8080/posts/${state.username}/0`);
     if (resp.ok) {
       const postData = await resp.json();
       postData.forEach((post) => {
-        compList.push(<Post post={post} key={post.uid} />);
+        compList.push(<Post post={post} key={post.uid} username={state.username} />);
       });
       this.setState({ reactPosts: compList });
     }
   }
 
   render() {
-    const { reactPosts, dataLoaded } = this.state;
+    const { reactPosts } = this.state;
+    const { state } = this.props;
     return (
       <div>
-        {dataLoaded && <AppToolbar />}
+        <AppToolbar profilePic={state.profilePic} username={state.username} />
         <Container>
           <h1 id="welcome">
             Welcome.
