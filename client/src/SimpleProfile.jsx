@@ -17,6 +17,7 @@ import AppToolbar from './AppToolbar';
 import FriendTable from './FriendTable';
 import { dateDiff, localStorage, asyncForEach } from './Utilities';
 import Post from './Post';
+import PostBox from './PostBox';
 
 const styles = (theme) => ({
   '@global': {
@@ -355,9 +356,7 @@ class SimpleProfile extends React.Component {
         </TabPanel>
         <TabPanel value={index} index={1}>
           <Container>
-            <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="myPosts">
-              {reactPosts.map((reactComp) => reactComp)}
-            </Box>
+            <PostBox username={state.username} />
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>

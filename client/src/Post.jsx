@@ -217,7 +217,7 @@ class Post extends React.Component {
   }
 
   async handleDeletePost() {
-    const { post } = this.props;
+    const { post, deletePost } = this.props;
     await fetch(`http://localhost:8080/post/${post.uid}`,
       {
         method: 'DELETE',
@@ -228,6 +228,7 @@ class Post extends React.Component {
         mode: 'cors',
       });
     this.setState({ isPostEditOpen: false });
+    deletePost(post.uid);
   }
 
   handlePostEditOpen(event) {

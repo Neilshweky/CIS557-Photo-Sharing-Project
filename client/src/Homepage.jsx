@@ -4,13 +4,9 @@ import { Box, Container } from '@material-ui/core';
 import { dateDiff, localStorage } from './Utilities';
 import Post from './Post';
 import AppToolbar from './AppToolbar';
+import PostBox from './PostBox';
 
-class Homepage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { reactPosts: [] };
-    this.generatePosts = this.generatePosts.bind(this);
-  }
+class Homepage extends React.PureComponent {
 
   componentDidMount() {
     const { state, history } = this.props;
@@ -19,24 +15,9 @@ class Homepage extends React.Component {
       localStorage.clear();
       history.push('/signin');
     }
-    this.generatePosts();
-  }
-
-  async generatePosts() {
-    const { state } = this.props;
-    const compList = [];
-    const resp = await fetch(`http://localhost:8080/posts/${state.username}/0`);
-    if (resp.ok) {
-      const postData = await resp.json();
-      postData.forEach((post) => {
-        compList.push(<Post post={post} key={post.uid} username={state.username} />);
-      });
-      this.setState({ reactPosts: compList });
-    }
   }
 
   render() {
-    const { reactPosts } = this.state;
     const { state } = this.props;
     return (
       <div>
@@ -46,9 +27,7 @@ class Homepage extends React.Component {
             Welcome.
             {localStorage.getItem('user')}
           </h1>
-          <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between">
-            {reactPosts.map((comp) => comp)}
-          </Box>
+          <PostBox username={state.username} />
         </Container>
       </div>
     );
