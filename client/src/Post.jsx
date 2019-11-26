@@ -94,7 +94,6 @@ class Post extends React.Component {
     this.getProfilePic();
   }
 
-
   async getProfilePic() {
     const { post } = this.props;
     const { username } = post;
@@ -343,7 +342,7 @@ class Post extends React.Component {
                 value={caption}
                 onChange={(e) => this.setState({ caption: e.target.value })}
                 disabled
-                style={{ width: '100%', height: '19px' }}
+                style={{ width: '100%' }}
               />
             </Grid>
             <Grid item xs={1}>

@@ -88,10 +88,10 @@ class ImageUpload extends React.Component {
 
   render() {
     const { picture, caption } = this.state;
-    const { classes, state } = this.props;
+    const { classes, state, updateState } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={state.profilePic} username={state.username} />
+        <AppToolbar profilePic={state.profilePic} username={state.username} updateState={updateState} />
         <Box p={3}>
           <h1 id="welcome">
             Welcome.

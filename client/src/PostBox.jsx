@@ -25,6 +25,7 @@ export default class PostBox extends React.Component {
       });
       this.setState({ reactPosts: compList });
     }
+    this.render();
   }
 
   async deletePost(ID) {

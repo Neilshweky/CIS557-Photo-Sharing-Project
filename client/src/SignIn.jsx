@@ -73,7 +73,7 @@ class SignIn extends React.Component {
     e.preventDefault();
     document.getElementById('login-status').innerHTML = '';
     const { username, password } = this.state;
-    const { history } = this.props;
+    const { history, updateState } = this.props;
     const resp = await fetch('http://localhost:8080/login',
       {
         method: 'POST',
@@ -89,6 +89,7 @@ class SignIn extends React.Component {
         username);
       localStorage.setItem('login',
         new Date());
+      updateState('username', username);
       history.push('/home');
     } else {
       document.getElementById('login-status').innerHTML = await resp.text();

@@ -24,6 +24,7 @@ import TextField from '@material-ui/core/TextField';
 import SendIcon from '@material-ui/icons/Send';
 import { Link } from '@material-ui/core';
 import moment from 'moment';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 const styles = (theme) => ({
   avatar: {
@@ -101,7 +102,7 @@ class Comment extends React.Component {
           </ListItemText>
           <ListItemSecondaryAction>
             <IconButton edge="end" aria-label="delete">
-              <DeleteIcon />
+              <MoreVertIcon />
             </IconButton>
           </ListItemSecondaryAction>
         </ListItem>

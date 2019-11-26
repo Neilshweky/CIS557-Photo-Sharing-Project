@@ -121,7 +121,7 @@ class AppToolbar extends React.Component {
   }
 
   render() {
-    const { classes, profilePic, username } = this.props;
+    const { classes, profilePic, username, updateState } = this.props;
     const {
       mobileMoreAnchorEl, isMobileMenuOpen,
     } = this.state;
@@ -189,7 +189,7 @@ class AppToolbar extends React.Component {
           <p>Upload Picture</p>
         </MenuItem>
         <MenuItem
-          onClick={() => localStorage.clear()}
+          onClick={() => { localStorage.clear(); updateState('username', ''); }}
           component={Link}
           to="/signin"
         >
@@ -261,7 +261,7 @@ class AppToolbar extends React.Component {
               <Tooltip title="Logout">
                 <IconButton
                   color="inherit"
-                  onClick={() => localStorage.clear()}
+                  onClick={() => { localStorage.clear(); updateState('username', ''); }}
                   component={Link}
                   to="/signin"
                 >

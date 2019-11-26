@@ -99,6 +99,7 @@ class SimpleProfile extends React.Component {
       history.push('/signin');
     } else {
       this.getProfile(match.params.username);
+      this.setState({})
     }
   }
 
@@ -107,7 +108,6 @@ class SimpleProfile extends React.Component {
     const { picUpdate } = this.state;
     if (match.params.username !== prevProps.match.params.username || picUpdate) {
       this.getProfile(match.params.username);
-      this.setState({ picUpdate: false });
     }
   }
 
@@ -264,7 +264,7 @@ class SimpleProfile extends React.Component {
   }
 
   render() {
-    const { classes, state } = this.props;
+    const { classes, state, updateState } = this.props;
     const {
       username, email, password, curPassword, passwordCheck, profilePicture, followers,
       followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
@@ -299,7 +299,7 @@ class SimpleProfile extends React.Component {
 
     return (
       <div>
-        <AppToolbar profilePic={state.profilePic} username={state.username} />
+        <AppToolbar profilePic={state.profilePic} username={state.username} updateState={updateState} />
         <Tabs
           value={index}
           onChange={this.handleTabChange}

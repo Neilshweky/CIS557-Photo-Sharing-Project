@@ -24,6 +24,7 @@ import TextField from '@material-ui/core/TextField';
 import SendIcon from '@material-ui/icons/Send';
 import moment from 'moment';
 import Comment from './Comment';
+import NewCommentField from './NewCommentField';
 
 const styles = (theme) => ({
   root: {
@@ -43,15 +44,13 @@ const styles = (theme) => ({
 class CommentBar extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { commentText: '' };
     this.handleSubmitComment = this.handleSubmitComment.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
     this.getProfileAvatar = this.getProfileAvatar.bind(this);
   }
 
-  handleSubmitComment() {
+  handleSubmitComment(commentText) {
     const { addComment, postID } = this.props;
-    const { commentText } = this.state;
     addComment(commentText);
   }
 
@@ -116,23 +115,7 @@ class CommentBar extends React.Component {
             </List>
           </div>
         </Grid>
-        <Grid item xs={11}>
-          <TextField
-            id={`newComment-${postID}`}
-            multiline
-            rowsMax="2"
-            placeholder="Write a comment..."
-            onChange={(e) => this.setState({ commentText: e.target.value })}
-            style={{ width: '95%', marginTop: 5 }}
-            variant="outlined"
-          />
-        </Grid>
-        <Grid item xs={1}>
-          <SendIcon
-            id={`comment-save-${postID}`}
-            onClick={this.handleSubmitComment}
-          />
-        </Grid>
+        <NewCommentField postID={postID} addComment={this.handleSubmitComment} />
       </Grid>
     );
   }

@@ -18,10 +18,10 @@ class Homepage extends React.PureComponent {
   }
 
   render() {
-    const { state } = this.props;
+    const { state, updateState } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={state.profilePic} username={state.username} />
+        <AppToolbar profilePic={state.profilePic} username={state.username} updateState={updateState} />
         <Container>
           <h1 id="welcome">
             Welcome.

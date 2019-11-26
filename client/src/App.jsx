@@ -60,8 +60,8 @@ class App extends React.Component {
             <Route render={(props) => <Homepage {...props} state={this.state} updateState={this.updateState} />} exact path="/" />
             <Route render={(props) => <Homepage {...props} state={this.state} updateState={this.updateState} />} exact path="/home" />
             <Route render={(props) => <ImageUpload {...props} state={this.state} updateState={this.updateState} />} exact path="/imageupload" />
-            <Route render={(props) => <SignIn {...props} state={this.state} />} updateState={this.updateState} exact path="/signin" />
-            <Route render={(props) => <SignUp {...props} state={this.state} />} updateState={this.updateState} exact path="/signup" />
+            <Route render={(props) => <SignIn {...props} state={this.state} updateState={this.updateState} />} exact path="/signin" />
+            <Route render={(props) => <SignUp {...props} state={this.state} updateState={this.updateState} />} exact path="/signup" />
             <Route render={(props) => <SimpleProfile {...props} state={this.state} updateState={this.updateState} />} exact path="/profile/:username" />
             <Route render={(props) => <FriendSearch {...props} state={this.state} updateState={this.updateState} />} exact path="/:username/:searchTerm" />
           </Switch>
