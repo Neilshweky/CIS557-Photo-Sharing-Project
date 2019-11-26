@@ -25,19 +25,34 @@ import SendIcon from '@material-ui/icons/Send';
 import { Link } from '@material-ui/core';
 import moment from 'moment';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import { InputBase } from '@material-ui/core';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
+import EditMenu from './EditMenu';
+import SaveIcon from '@material-ui/icons/Save';
 
 const styles = (theme) => ({
   avatar: {
     backgroundColor: theme.palette.secondary.main,
+  },
+  menuItem: {
+    height: '30px',
   },
 });
 
 class Comment extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { profilePic: '' };
+    this.state = {
+      profilePic: '', CommentEditAnchorEl: null, isCommentEditOpen: false, commentText: props.text, bEditMode: false,
+    };
     this.getProfilePic = this.getProfilePic.bind(this);
     this.getProfileAvatar = this.getProfileAvatar.bind(this);
+    this.handleCommentEditOpen = this.handleCommentEditOpen.bind(this);
+    this.handleCommentEditClose = this.handleCommentEditClose.bind(this);
+    this.handleEditComment = this.handleEditComment.bind(this);
+    this.handleSubmitEdit = this.handleSubmitEdit.bind(this);
+    this.handleDeleteComment = this.handleDeleteComment.bind(this);
   }
 
   async componentDidMount() {
@@ -86,10 +101,41 @@ class Comment extends React.Component {
     return avatar;
   }
 
+  handleEditComment() {
+    this.setState({ isCommentEditOpen: false, bEditMode: true });
+
+    const { id } = this.props;
+    document.getElementById(`comment-${id}`).disabled = false;
+    document.getElementById(`comment-${id}`).style.color = 'blue';
+  }
+
+  handleDeleteComment() {
+    const { deleteComment, id } = this.props;
+    deleteComment(id);
+  }
+
+  handleSubmitEdit() {
+    const { editComment, id } = this.props;
+    const { commentText } = this.state;
+    editComment(commentText, id);
+    this.setState({ bEditMode: false });
+    document.getElementById(`comment-${id}`).disabled = true;
+    document.getElementById(`comment-${id}`).style.color = 'black';
+  }
+
+  handleCommentEditOpen(event) {
+    this.setState({ CommentEditAnchorEl: event.currentTarget, isCommentEditOpen: true });
+  }
+
+  handleCommentEditClose() {
+    this.setState({ CommentEditAnchorEl: null, isCommentEditOpen: false });
+  }
+
   render() {
     const {
-      username, timestamp, text, id,
+      username, timestamp, id, bLoggedIn, classes
     } = this.props;
+    const { CommentEditAnchorEl, isCommentEditOpen, bEditMode, commentText } = this.state;
     return (
       <div>
         <ListItem key={id}>
@@ -98,13 +144,32 @@ class Comment extends React.Component {
           </ListItemAvatar>
           <ListItemText secondary={moment.unix(timestamp).format('M/D/YY [at] h:mm a')}>
             <Link href={`/profile/${username}`}>{username}</Link>
-            <Typography variant="inherit">{` ${text}`}</Typography>
+            <InputBase
+              id={`comment-${id}`}
+              multiline
+              rowsMax="2"
+              value={commentText}
+              onChange={(e) => this.setState({ commentText: e.target.value })}
+              disabled
+              style={{ width: '90%', color: 'black' }}
+            />
           </ListItemText>
-          <ListItemSecondaryAction>
-            <IconButton edge="end" aria-label="delete">
-              <MoreVertIcon />
-            </IconButton>
-          </ListItemSecondaryAction>
+          {bLoggedIn && (
+            <ListItemSecondaryAction>
+              {bEditMode
+                ? (
+                  <IconButton edge="end" onClick={this.handleSubmitEdit}>
+                    <SaveIcon />
+                  </IconButton>
+                )
+                : (
+                  <IconButton edge="end" onClick={this.handleCommentEditOpen}>
+                    <MoreVertIcon />
+                  </IconButton>
+                )}
+            </ListItemSecondaryAction>
+          )}
+          <EditMenu bPost={false} deleteAction={this.handleDeleteComment} editAction={this.handleEditComment} anchor={CommentEditAnchorEl} status={isCommentEditOpen} close={this.handleCommentEditClose} />
         </ListItem>
       </div>
     );

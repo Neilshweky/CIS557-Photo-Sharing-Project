@@ -40,7 +40,7 @@ app.post('/unlike/:postid/:username', routes.unlikePost);
 app.post('/follow/:username/:friend', routes.follow);
 app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', routes.addComment);
-app.post('/editComment/:postID/:commentID', routes.editComment);
+app.put('/editComment/:postID/:commentID', routes.editComment);
 
 app.get('/user/:username', routes.getUser);
 app.get('/posts/:username/:num', routes.getPosts);

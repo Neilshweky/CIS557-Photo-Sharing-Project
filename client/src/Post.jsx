@@ -29,6 +29,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import Paper from '@material-ui/core/Paper';
 import CommentBar from './CommentBar';
 import { localStorage } from './Utilities';
+import EditMenu from './EditMenu';
 
 const styles = (theme) => ({
   card: {
@@ -60,7 +61,7 @@ const styles = (theme) => ({
     marginLeft: '5px',
   },
   menuItem: {
-    height: '28px',
+    height: '30px',
   },
 });
 
@@ -88,6 +89,8 @@ class Post extends React.Component {
     this.handleCommentsClose = this.handleCommentsClose.bind(this);
     this.getProfileAvatar = this.getProfileAvatar.bind(this);
     this.handlePostComment = this.handlePostComment.bind(this);
+    this.handleEditComment = this.handleEditComment.bind(this);
+    this.handleDeleteComment = this.handleDeleteComment.bind(this);
   }
 
   componentDidMount() {
@@ -186,6 +189,7 @@ class Post extends React.Component {
     }
     document.getElementById(`post-save-${post.uid}`).style.display = 'none';
     document.getElementById(`post-caption-${post.uid}`).disabled = true;
+    document.getElementById(`post-caption-${post.uid}`).style.color = 'black';
   }
 
   async handlePostComment(commentText) {
@@ -208,10 +212,54 @@ class Post extends React.Component {
     }
   }
 
+  async handleEditComment(commentText, commentID) {
+    const { post, username } = this.props;
+    const curCommentText = post.comments.filter((comment) => comment.uid === commentID)[0].comment;
+    if (commentText !== curCommentText) {
+      const resp = await fetch(`http://localhost:8080/editComment/${post.uid}/${commentID}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+          body: JSON.stringify({ comment: commentText }),
+        });
+      if (resp.ok) {
+        const { comments } = this.state;
+        const updatedComments = comments.map((curComment) => { if (curComment.uid === commentID) { curComment.comment = commentText; } return curComment; });
+        this.setState({ comments: updatedComments });
+      }
+    }
+  }
+
+  async handleDeleteComment(commentID) {
+    const { post } = this.props;
+    const resp = await fetch(`http://localhost:8080/comment/${post.uid}/${commentID}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+        },
+        mode: 'cors',
+      });
+    if (resp.ok) {
+      const { comments, numComments } = this.state;
+      const updatedComments = comments.filter((comment) => comment.uid !== commentID);
+      this.setState({ comments: updatedComments, numComments: numComments - 1 });
+    }
+  }
+
   handleEditPost() {
     const { post } = this.props;
-    document.getElementById(`post-caption-${post.uid}`).disabled = false;
+    const captionElement = document.getElementById(`post-caption-${post.uid}`);
+    captionElement.disabled = false;
+    captionElement.variant = 'outlined';
+    captionElement.style.color = 'blue';
     document.getElementById(`post-save-${post.uid}`).style.display = 'block';
+
     this.setState({ isPostEditOpen: false });
   }
 
@@ -254,31 +302,6 @@ class Post extends React.Component {
     const {
       PostEditAnchorEl, isPostEditOpen, isCommentsOpen, caption,
     } = this.state;
-    const renderPostEditMenu = (
-      <Menu
-        anchorEl={PostEditAnchorEl}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        id="post-edit-menu"
-        keepMounted
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={isPostEditOpen}
-        getContentAnchorEl={null}
-        onClose={this.handlePostEditClose}
-      >
-        <MenuItem
-          onClick={this.handleEditPost}
-          className={classes.menuItem}
-        >
-          <p>Edit Post</p>
-        </MenuItem>
-        <MenuItem
-          className={classes.menuItem}
-          onClick={this.handleDeletePost}
-        >
-          <p>Delete Post</p>
-        </MenuItem>
-      </Menu>
-    );
     const renderHeader = username === post.username
       ? (
         <CardHeader
@@ -318,7 +341,7 @@ class Post extends React.Component {
               />
             </Grid>
             <Grid item xs={5}>
-              <CommentBar comments={comments} postID={post.uid} username={username} addComment={this.handlePostComment} />
+              <CommentBar comments={comments} postID={post.uid} username={username} addComment={this.handlePostComment} editComment={this.handleEditComment} deleteComment={this.handleDeleteComment} />
             </Grid>
           </Grid>
         </DialogContent>
@@ -342,7 +365,7 @@ class Post extends React.Component {
                 value={caption}
                 onChange={(e) => this.setState({ caption: e.target.value })}
                 disabled
-                style={{ width: '100%' }}
+                style={{ width: '100%', color: 'black' }}
               />
             </Grid>
             <Grid item xs={1}>
@@ -373,7 +396,7 @@ class Post extends React.Component {
             </Typography>
           </IconButton>
         </CardActions>
-        {renderPostEditMenu}
+        <EditMenu bPost deleteAction={this.handleDeletePost} editAction={this.handleEditPost} anchor={PostEditAnchorEl} status={isPostEditOpen} close={this.handlePostEditClose} />
         {renderComments}
       </Card>
 

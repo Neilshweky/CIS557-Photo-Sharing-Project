@@ -29,12 +29,17 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: '', email: '', profilePic: '', posts: [], followees: [], followers: [], users: [], loginTime: '', dataLoaded: false,
+      username: '', email: '', profilePic: '', posts: [], followees: [], followers: [], loginTime: '', dataLoaded: false,
     };
     this.updateState = this.updateState.bind(this);
+    this.populateState = this.populateState.bind(this);
   }
 
   async componentDidMount() {
+    this.populateState();
+  }
+
+  async populateState() {
     const username = localStorage.getItem('user');
     if (username != null) {
       const resp = await fetch(`http://localhost:8080/user/${username}`);
@@ -49,6 +54,9 @@ class App extends React.Component {
 
   updateState(key, value) {
     this.setState({ [key]: value });
+    if (key === 'username') {
+      this.populateState();
+    }
   }
 
   render() {

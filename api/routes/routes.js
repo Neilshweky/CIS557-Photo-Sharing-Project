@@ -223,12 +223,11 @@ const editComment = (req, res) => {
 
 const deleteComment = (req, res) => {
   const { postID, commentID } = req.params;
-  postDB.deleteComment(postID, comment)
+  postDB.deleteComment(postID, commentID)
     .then((data) => {
       if (data === undefined || data === null) {
         res.status(404).send({});
-      }
-      else {
+      } else {
         res.status(200).send(data);
       }
     })
