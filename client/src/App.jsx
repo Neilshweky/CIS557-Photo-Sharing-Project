@@ -46,7 +46,9 @@ class App extends React.Component {
       if (resp.ok) {
         const loginTime = localStorage.getItem('login');
         const data = await resp.json();
-        this.setState({ username, email: data.email, profilePic: data.profilePicture, posts: data.posts, followees: data.followees, followers: data.followers, loginTime })
+        this.setState({
+          username, email: data.email, profilePic: data.profilePicture, posts: data.posts, followees: data.followees, followers: data.followers, loginTime,
+        });
       }
     }
     this.setState({ dataLoaded: true });
@@ -60,18 +62,20 @@ class App extends React.Component {
   }
 
   render() {
-    const { dataLoaded } = this.state;
+    const {
+      dataLoaded, username, profilePic, posts, loginTime, email, followers, followees,
+    } = this.state;
     return (
       dataLoaded && (
         <Router>
           <Switch>
-            <Route render={(props) => <Homepage {...props} state={this.state} updateState={this.updateState} />} exact path="/" />
-            <Route render={(props) => <Homepage {...props} state={this.state} updateState={this.updateState} />} exact path="/home" />
-            <Route render={(props) => <ImageUpload {...props} state={this.state} updateState={this.updateState} />} exact path="/imageupload" />
-            <Route render={(props) => <SignIn {...props} state={this.state} updateState={this.updateState} />} exact path="/signin" />
-            <Route render={(props) => <SignUp {...props} state={this.state} updateState={this.updateState} />} exact path="/signup" />
-            <Route render={(props) => <SimpleProfile {...props} state={this.state} updateState={this.updateState} />} exact path="/profile/:username" />
-            <Route render={(props) => <FriendSearch {...props} state={this.state} updateState={this.updateState} />} exact path="/:username/:searchTerm" />
+            <Route render={(props) => <Homepage {...props} username={username} profilePic={profilePic} posts={posts} loginTime={loginTime} updateState={this.updateState} />} exact path="/" />
+            <Route render={(props) => <Homepage {...props} username={username} profilePic={profilePic} posts={posts} loginTime={loginTime} updateState={this.updateState} />} exact path="/home" />
+            <Route render={(props) => <ImageUpload {...props} username={username} loginTime={loginTime} profilePic={profilePic} updateState={this.updateState} />} exact path="/imageupload" />
+            <Route render={(props) => <SignIn {...props} username={username} loginTime={loginTime} updateState={this.updateState} />} exact path="/signin" />
+            <Route render={(props) => <SignUp {...props} username={username} loginTime={loginTime} updateState={this.updateState} />} exact path="/signup" />
+            <Route render={(props) => <SimpleProfile {...props} username={username} profilePic={profilePic} email={email} followees={followees} followers={followers} updateState={this.updateState} />} exact path="/profile/:username" />
+            <Route render={(props) => <FriendSearch {...props} username={username} profilePic={profilePic} updateState={this.updateState} />} exact path="/search/:username/:searchTerm" />
           </Switch>
         </Router>
       )

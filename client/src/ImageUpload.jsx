@@ -31,8 +31,7 @@ class ImageUpload extends React.Component {
   }
 
   componentDidMount() {
-    const username = localStorage.getItem('user');
-    const loginTime = localStorage.getItem('login');
+    const { history, username, loginTime } = this.props;
 
     if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
       localStorage.clear();
@@ -88,10 +87,10 @@ class ImageUpload extends React.Component {
 
   render() {
     const { picture, caption } = this.state;
-    const { classes, state, updateState } = this.props;
+    const { classes, username, profilePic, updateState } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={state.profilePic} username={state.username} updateState={updateState} />
+        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
         <Box p={3}>
           <h1 id="welcome">
             Welcome.

@@ -213,8 +213,7 @@ const editComment = (req, res) => {
         if (err.message === 'No post found to edit comment' ||
           err.message === 'No comment found to edit') {
           res.status(400).send(err);
-        }
-        else {
+        } else {
           res.status(500).send(err);
         }
       });
