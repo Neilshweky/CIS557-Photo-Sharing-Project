@@ -1,5 +1,5 @@
 const userDB = require('../models/userDatabase.js');
-const postDB = require('../models/postDatabase.js')
+const postDB = require('../models/postDatabase.js');
 
 // Route for '/signup', creates a new user
 const signup = (req, res) => {
@@ -173,8 +173,7 @@ const deletePost = (req, res) => {
     .then((data) => {
       if (data === undefined || data === null) {
         res.status(404).send({});
-      }
-      else {
+      } else {
         res.status(200).send(data);
       }
     })
@@ -209,11 +208,10 @@ const editComment = (req, res) => {
   postDB.editComment(postID, commentID, comment)
     .then((data) => res.status(200).send(data))
     .catch((err) => {
-      if (err.message === 'No post found to edit comment' ||
-        err.message === 'No comment found to edit') {
+      if (err.message === 'No post found to edit comment'
+       || err.message === 'No comment found to edit') {
         res.status(400).send(err);
-      }
-      else {
+      } else {
         res.status(500).send(err);
       }
     });
@@ -221,12 +219,11 @@ const editComment = (req, res) => {
 
 const deleteComment = (req, res) => {
   const { postID, commentID } = req.params;
-  postDB.deleteComment(postID, comment)
+  postDB.deleteComment(postID, commentID)
     .then((data) => {
       if (data === undefined || data === null) {
         res.status(404).send({});
-      }
-      else {
+      } else {
         res.status(200).send(data);
       }
     })
