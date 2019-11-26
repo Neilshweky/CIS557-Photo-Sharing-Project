@@ -217,37 +217,38 @@ const editComment = (req, res) => {
           res.status(500).send(err);
         }
       });
-  };
+  }
+};
 
-  const deleteComment = (req, res) => {
-    const { postID, commentID } = req.params;
-    postDB.deleteComment(postID, commentID)
-      .then((data) => {
-        if (data === undefined || data === null) {
-          res.status(404).send({});
-        } else {
-          res.status(200).send(data);
-        }
-      })
-      .catch((err) => res.status(500).send(err));
-  };
+const deleteComment = (req, res) => {
+  const { postID, commentID } = req.params;
+  postDB.deleteComment(postID, commentID)
+    .then((data) => {
+      if (data === undefined || data === null) {
+        res.status(404).send({});
+      } else {
+        res.status(200).send(data);
+      }
+    })
+    .catch((err) => res.status(500).send(err));
+};
 
-  module.exports = {
-    signup,
-    login,
-    updateProfile,
-    postPicture,
-    getUser,
-    deleteUser,
-    getPosts,
-    likePost,
-    unlikePost,
-    follow,
-    unfollow,
-    searchUsers,
-    updatePost,
-    deletePost,
-    addComment,
-    editComment,
-    deleteComment,
-  };
+module.exports = {
+  signup,
+  login,
+  updateProfile,
+  postPicture,
+  getUser,
+  deleteUser,
+  getPosts,
+  likePost,
+  unlikePost,
+  follow,
+  unfollow,
+  searchUsers,
+  updatePost,
+  deletePost,
+  addComment,
+  editComment,
+  deleteComment,
+};
