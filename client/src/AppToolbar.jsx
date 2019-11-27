@@ -122,7 +122,9 @@ class AppToolbar extends React.Component {
   }
 
   render() {
-    const { classes, profilePic, username, updateState } = this.props;
+    const {
+      classes, profilePic, username, updateState,
+    } = this.props;
     const {
       mobileMoreAnchorEl, isMobileMenuOpen,
     } = this.state;
@@ -301,5 +303,8 @@ AppToolbar.propTypes = {
     sectionMobile: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  profilePic: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
 };
 export default withStyles(styles)(AppToolbar);

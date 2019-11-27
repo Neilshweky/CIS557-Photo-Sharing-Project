@@ -184,6 +184,9 @@ SignUp.propTypes = {
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  loginTime: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(SignUp);

@@ -93,7 +93,9 @@ class SimpleProfile extends React.Component {
   }
 
   componentDidMount() {
-    const { username, loginTime, history, match } = this.props;
+    const {
+      username, loginTime, history, match,
+    } = this.props;
     if (username === '' || loginTime === '' || dateDiff(loginTime) > 30) {
       localStorage.clear();
       history.push('/signin');
@@ -266,7 +268,9 @@ class SimpleProfile extends React.Component {
       classes, profilePic, username, updateState,
     } = this.props;
     const {
-      profUsername, email, password, curPassword, passwordCheck, profilePicture, followers, followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
+      profUsername, email, password, curPassword, passwordCheck,
+      profilePicture, followers, followees, index, reactPosts,
+      followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let avatar = null;
     try {
@@ -360,7 +364,13 @@ class SimpleProfile extends React.Component {
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
-          {dataLoaded && <FriendTable bProfilePage data={followeeData} bLoggedInUser={bLoggedInUser} />}
+          {dataLoaded && (
+            <FriendTable
+              bProfilePage
+              data={followeeData}
+              bLoggedInUser={bLoggedInUser}
+            />
+          )}
         </TabPanel>
         <TabPanel value={index} index={3}>
           <Container>
@@ -493,6 +503,10 @@ SimpleProfile.propTypes = {
       username: PropTypes.string.isRequired,
     }),
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  loginTime: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
+  profilePic: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(SimpleProfile);

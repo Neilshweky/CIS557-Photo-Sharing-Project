@@ -1,42 +1,22 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import GridList from '@material-ui/core/GridList';
-import GridListTile from '@material-ui/core/GridListTile';
-import GridListTileBar from '@material-ui/core/GridListTileBar';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import IconButton from '@material-ui/core/IconButton';
-import InfoIcon from '@material-ui/icons/Info';
-import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import FolderIcon from '@material-ui/icons/Folder';
-import DeleteIcon from '@material-ui/icons/Delete';
-import TextField from '@material-ui/core/TextField';
-import SendIcon from '@material-ui/icons/Send';
-import { Link } from '@material-ui/core';
+import { Link, InputBase } from '@material-ui/core';
 import moment from 'moment';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import { InputBase } from '@material-ui/core';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import EditMenu from './EditMenu';
 import SaveIcon from '@material-ui/icons/Save';
+import PropTypes from 'prop-types';
+import EditMenu from './EditMenu';
+
 
 const styles = (theme) => ({
   avatar: {
     backgroundColor: theme.palette.secondary.main,
-  },
-  menuItem: {
-    height: '30px',
   },
 });
 
@@ -52,7 +32,6 @@ class Comment extends React.Component {
     this.handleCommentEditClose = this.handleCommentEditClose.bind(this);
     this.handleEditComment = this.handleEditComment.bind(this);
     this.handleSubmitEdit = this.handleSubmitEdit.bind(this);
-    this.handleDeleteComment = this.handleDeleteComment.bind(this);
   }
 
   async componentDidMount() {
@@ -109,11 +88,6 @@ class Comment extends React.Component {
     document.getElementById(`comment-${id}`).style.color = 'blue';
   }
 
-  handleDeleteComment() {
-    const { deleteComment, id } = this.props;
-    deleteComment(id);
-  }
-
   handleSubmitEdit() {
     const { editComment, id } = this.props;
     const { commentText } = this.state;
@@ -133,9 +107,11 @@ class Comment extends React.Component {
 
   render() {
     const {
-      username, timestamp, id, bLoggedIn, classes
+      username, timestamp, id, bLoggedIn, deleteComment,
     } = this.props;
-    const { CommentEditAnchorEl, isCommentEditOpen, bEditMode, commentText } = this.state;
+    const {
+      CommentEditAnchorEl, isCommentEditOpen, bEditMode, commentText,
+    } = this.state;
     return (
       <div>
         <ListItem key={id}>
@@ -154,6 +130,14 @@ class Comment extends React.Component {
               style={{ width: '90%', color: 'black' }}
             />
           </ListItemText>
+          <EditMenu
+            bPost={false}
+            deleteAction={() => deleteComment(id)}
+            editAction={this.handleEditComment}
+            anchor={CommentEditAnchorEl}
+            status={isCommentEditOpen}
+            close={this.handleCommentEditClose}
+          />
           {bLoggedIn && (
             <ListItemSecondaryAction>
               {bEditMode
@@ -169,11 +153,24 @@ class Comment extends React.Component {
                 )}
             </ListItemSecondaryAction>
           )}
-          <EditMenu bPost={false} deleteAction={this.handleDeleteComment} editAction={this.handleEditComment} anchor={CommentEditAnchorEl} status={isCommentEditOpen} close={this.handleCommentEditClose} />
         </ListItem>
       </div>
     );
   }
 }
+
+Comment.propTypes = {
+  classes: PropTypes.shape({
+    avatar: PropTypes.string.isRequired,
+  }).isRequired,
+  text: PropTypes.string.isRequired,
+  username: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  timestamp: PropTypes.number.isRequired,
+  editComment: PropTypes.func.isRequired,
+  deleteComment: PropTypes.func.isRequired,
+  bLoggedIn: PropTypes.bool.isRequired,
+
+};
 
 export default withStyles(styles)(Comment);

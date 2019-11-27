@@ -1,6 +1,7 @@
 import React from 'react';
-import Post from './Post';
 import { Box } from '@material-ui/core';
+import PropTypes from 'prop-types';
+import Post from './Post';
 
 export default class PostBox extends React.Component {
   constructor(props) {
@@ -21,7 +22,14 @@ export default class PostBox extends React.Component {
     if (resp.ok) {
       const postData = await resp.json();
       postData.forEach((post) => {
-        const comp = <Post post={post} key={post.uid} username={username} deletePost={this.deletePost} />;
+        const comp = (
+          <Post
+            post={post}
+            key={post.uid}
+            username={username}
+            deletePost={this.deletePost}
+          />
+        );
         return bHome ? compList.push(comp) : (post.username === username && compList.push(comp));
       });
       this.setState({ reactPosts: compList });
@@ -44,3 +52,8 @@ export default class PostBox extends React.Component {
     );
   }
 }
+
+PostBox.propTypes = {
+  username: PropTypes.string.isRequired,
+  bHome: PropTypes.bool.isRequired,
+};

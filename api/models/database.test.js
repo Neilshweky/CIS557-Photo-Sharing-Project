@@ -375,10 +375,7 @@ describe('comments tests', () => {
   });
 
   test('add a comment to fake post', async () => {
-    await postDB.addComment('FAKE ID', 'neilshweky', 'cool beans man')
-      .catch((err) => {
-        expect(err).toBe('No post found to add comment');
-      });
+    await expect(postDB.addComment('FAKE ID', 'neilshweky', 'cool beans man')).rejects.toThrowError('No post found to add comment');
   });
 
   test('edit a comment', async () => {
@@ -398,22 +395,19 @@ describe('comments tests', () => {
   });
 
   test('edit no comment', async () => {
+    expect.assertions(1);
     const post = await Schemas.Post.findOne();
     await postDB.editComment(post.uid, 'FAKEID', 'hey there!')
-      .then((data) => {
-        fail('Should not edit non-existing comment');
-      })
       .catch((err) => {
         expect(err.message).toEqual('No comment found to edit');
       });
   });
+
   test('edit a comment no post', async () => {
+    expect.assertions(1);
     const post = await Schemas.Post.findOne();
     const comment = await postDB.addComment(post.uid, 'neilshweky', 'cool beans man');
     await postDB.editComment('FAKEID', comment.uid, 'hey there!')
-      .then((data) => {
-        fail('Should not edit comment in non-existing post');
-      })
       .catch((err) => {
         expect(err.message).toEqual('No post found to edit comment');
       });
@@ -429,12 +423,10 @@ describe('comments tests', () => {
   });
 
   test('delete a comment no post', async () => {
+    expect.assertions(1);
     const post = await Schemas.Post.findOne();
     const comment = await postDB.addComment(post.uid, 'neilshweky', 'cool beans man');
     await postDB.deleteComment('FAKEID', comment.uid)
-      .then((data) => {
-        fail('Should not delete comment from non-existing post');
-      })
       .catch((err) => {
         expect(err.message).toEqual('No post found for deletion');
       });
@@ -478,10 +470,7 @@ describe('edit and delete posts tests', () => {
   });
 
   test('edit post with invalid post ID', async () => {
-    await postDB.updatePost('FAKEID', 'new caption')
-      .catch((err) => {
-        expect(err).toEqual('No post found to update');
-      });
+    await expect(postDB.updatePost('FAKEID', 'new caption')).rejects.toThrowError('No post found to update');
   });
 
   test('delete post', async () => {

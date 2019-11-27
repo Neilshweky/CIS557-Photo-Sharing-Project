@@ -1,13 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Container } from '@material-ui/core';
+import { Container } from '@material-ui/core';
 import { dateDiff, localStorage } from './Utilities';
-import Post from './Post';
 import AppToolbar from './AppToolbar';
 import PostBox from './PostBox';
 
 class Homepage extends React.PureComponent {
-
   componentDidMount() {
     const { username, loginTime, history } = this.props;
 
@@ -36,5 +34,9 @@ class Homepage extends React.PureComponent {
 
 Homepage.propTypes = {
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
+  username: PropTypes.string.isRequired,
+  loginTime: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
+  profilePic: PropTypes.string.isRequired,
 };
 export default Homepage;

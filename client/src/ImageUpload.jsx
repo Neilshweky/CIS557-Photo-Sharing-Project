@@ -1,7 +1,7 @@
 import React from 'react';
 import ImageUploader from 'react-images-upload-disabled';
 import './ImageUpload.css';
-import { Button, Typography } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
@@ -25,7 +25,7 @@ const styles = (theme) => ({
 class ImageUpload extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { picture: null, caption: '', dataLoaded: false };
+    this.state = { picture: null, caption: '' };
     this.onDrop = this.onDrop.bind(this);
     this.uploadImage = this.uploadImage.bind(this);
   }
@@ -35,10 +35,7 @@ class ImageUpload extends React.Component {
 
     if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
       localStorage.clear();
-      const { history } = this.props;
       history.push('/signin');
-    } else {
-      this.setState({ dataLoaded: true });
     }
   }
 
@@ -87,7 +84,9 @@ class ImageUpload extends React.Component {
 
   render() {
     const { picture, caption } = this.state;
-    const { classes, username, profilePic, updateState } = this.props;
+    const {
+      classes, username, profilePic, updateState,
+    } = this.props;
     return (
       <div>
         <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
@@ -148,5 +147,9 @@ ImageUpload.propTypes = {
     textField: PropTypes.string.isRequired,
     submitButton: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  loginTime: PropTypes.string.isRequired,
+  profilePic: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
 };
 export default withStyles(styles)(ImageUpload);

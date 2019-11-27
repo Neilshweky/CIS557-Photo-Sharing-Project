@@ -3,7 +3,7 @@ import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import FriendTable from './FriendTable';
 import AppToolbar from './AppToolbar';
-import { localStorage } from './Utilities';
+import { localStorage, dateDiff } from './Utilities';
 
 export default class FriendSearch extends React.Component {
   constructor(props) {
@@ -12,14 +12,21 @@ export default class FriendSearch extends React.Component {
   }
 
   async componentDidMount() {
-    const { match, username } = this.props;
-    const searchValue = match.params.searchTerm;
-    // const { username } = this.state;
-    const resp = await fetch(`http://localhost:8080/searchusers/${username}/${searchValue}`);
-    if (resp.ok) {
-      this.setState({ data: await resp.json(), bLoaded: true });
+    const {
+      username, loginTime, history, match,
+    } = this.props;
+    if (username === '' || loginTime === '' || dateDiff(loginTime) > 30) {
+      localStorage.clear();
+      history.push('/signin');
+    } else {
+      const searchValue = match.params.searchTerm;
+      // const { username } = this.state;
+      const resp = await fetch(`http://localhost:8080/searchusers/${username}/${searchValue}`);
+      if (resp.ok) {
+        this.setState({ data: await resp.json(), bLoaded: true });
+      }
+      document.getElementById('search-field').value = searchValue;
     }
-    document.getElementById('search-field').value = searchValue;
   }
 
   render() {
@@ -45,4 +52,9 @@ FriendSearch.propTypes = {
       searchTerm: PropTypes.string.isRequired,
     }),
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  loginTime: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
+  profilePic: PropTypes.string.isRequired,
+  history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
 };

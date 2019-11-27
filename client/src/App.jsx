@@ -4,26 +4,12 @@ import './App.css';
 import {
   Route, BrowserRouter as Router, Switch,
 } from 'react-router-dom';
-// import { createStore } from 'redux';
-// import { Provider } from 'react-redux';
-// import photoApp from './reducers/reducers';
-// import { addUser, setMajorFilter } from '../actions/actions';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
 import SimpleProfile from './SimpleProfile';
 import ImageUpload from './ImageUpload';
 import Homepage from './Homepage';
 import FriendSearch from './FriendSearch';
-
-async function getLoggedInUserInfo() {
-  const username = sessionStorage.getItem('user');
-  const resp = await fetch(`http://localhost:8080/user/${username}`);
-  if (resp.ok) {
-    const data = await resp.json();
-    return data;
-  }
-  return {};
-}
 
 class App extends React.Component {
   constructor(props) {
@@ -47,7 +33,13 @@ class App extends React.Component {
         const loginTime = localStorage.getItem('login');
         const data = await resp.json();
         this.setState({
-          username, email: data.email, profilePic: data.profilePicture, posts: data.posts, followees: data.followees, followers: data.followers, loginTime,
+          username,
+          email: data.email,
+          profilePic: data.profilePicture,
+          posts: data.posts,
+          followees: data.followees,
+          followers: data.followers,
+          loginTime,
         });
       }
     }
@@ -74,8 +66,8 @@ class App extends React.Component {
             <Route render={(props) => <ImageUpload {...props} username={username} loginTime={loginTime} profilePic={profilePic} updateState={this.updateState} />} exact path="/imageupload" />
             <Route render={(props) => <SignIn {...props} username={username} loginTime={loginTime} updateState={this.updateState} />} exact path="/signin" />
             <Route render={(props) => <SignUp {...props} username={username} loginTime={loginTime} updateState={this.updateState} />} exact path="/signup" />
-            <Route render={(props) => <SimpleProfile {...props} username={username} profilePic={profilePic} email={email} followees={followees} followers={followers} updateState={this.updateState} />} exact path="/profile/:username" />
-            <Route render={(props) => <FriendSearch {...props} username={username} profilePic={profilePic} updateState={this.updateState} />} exact path="/search/:username/:searchTerm" />
+            <Route render={(props) => <SimpleProfile {...props} username={username} profilePic={profilePic} email={email} followees={followees} followers={followers} loginTime={loginTime} updateState={this.updateState} />} exact path="/profile/:username" />
+            <Route render={(props) => <FriendSearch {...props} username={username} loginTime={loginTime} profilePic={profilePic} updateState={this.updateState} />} exact path="/search/:username/:searchTerm" />
           </Switch>
         </Router>
       )
