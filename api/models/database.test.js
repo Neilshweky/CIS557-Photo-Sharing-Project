@@ -233,6 +233,20 @@ describe('post tests', () => {
       expect(retrieved[i].uid).not.toEqual(post.uid);
     }
   });
+
+  test('get more than query size', async () => {
+    /* eslint-disable no-await-in-loop */
+    for (let i = 0; i < postDB.QUERY_SIZE + 10; i += 1) {
+      await postDB.postPicture('pic', 'neilshweky');
+    }
+    const post = await postDB.postPicture('picture2', 'neilshweky');
+    await Schemas.Post.deleteOne({ uid: post.uid });
+    const retrieved = await postDB.getPostsForUserAndNum('neilshweky', 0);
+    expect(retrieved.length).toBe(postDB.QUERY_SIZE);
+    for (let i = 0; i < retrieved.length; i += 1) {
+      expect(retrieved[i].uid).not.toEqual(post.uid);
+    }
+  });
 });
 
 describe('like/unlike tests', () => {
