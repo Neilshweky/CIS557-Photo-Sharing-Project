@@ -1,5 +1,5 @@
 const userDB = require('../models/userDatabase.js');
-const postDB = require('../models/postDatabase.js')
+const postDB = require('../models/postDatabase.js');
 
 // Route for '/signup', creates a new user
 const signup = (req, res) => {
@@ -210,8 +210,8 @@ const editComment = (req, res) => {
     postDB.editComment(postID, commentID, comment)
       .then((data) => res.status(200).send(data))
       .catch((err) => {
-        if (err.message === 'No post found to edit comment' ||
-          err.message === 'No comment found to edit') {
+        if (err.message === 'No post found to edit comment'
+          || err.message === 'No comment found to edit') {
           res.status(400).send(err);
         } else {
           res.status(500).send(err);
