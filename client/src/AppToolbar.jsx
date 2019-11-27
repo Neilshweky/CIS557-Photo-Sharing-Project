@@ -88,21 +88,21 @@ class AppToolbar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      mobileMoreAnchorEl: null, searchValue: '', isMobileMenuOpen: false, loggedInUser: localStorage.getItem('user'), profilePic: '',
+      mobileMoreAnchorEl: null, searchValue: '', isMobileMenuOpen: false,
     };
     this.handleMobileMenuClose = this.handleMobileMenuClose.bind(this);
     this.handleMobileMenuOpen = this.handleMobileMenuOpen.bind(this);
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
   }
 
-  async componentDidMount() {
-    const { loggedInUser } = this.state;
-    const userResp = await fetch(`http://localhost:8080/user/${loggedInUser}`);
-    if (userResp.ok) {
-      const userData = await userResp.json();
-      this.setState({ profilePic: userData.profilePicture });
-    }
-  }
+  // async componentDidMount() {
+  //   const { loggedInUser } = this.state;
+  //   const userResp = await fetch(`http://localhost:8080/user/${loggedInUser}`);
+  //   if (userResp.ok) {
+  //     const userData = await userResp.json();
+  //     this.setState({ profilePic: userData.profilePicture });
+  //   }
+  // }
 
   handleMobileMenuClose() {
     this.setState({ mobileMoreAnchorEl: null, isMobileMenuOpen: false });
@@ -114,36 +114,43 @@ class AppToolbar extends React.Component {
 
   handleSearchSubmit(e) {
     e.preventDefault();
-    const { searchValue, loggedInUser } = this.state;
+    const { username } = this.props;
+    const { searchValue } = this.state;
     if (searchValue !== '') {
-      window.location.replace(`/search/${loggedInUser}/${searchValue}`);
+      window.location.replace(`/search/${username}/${searchValue}`);
     }
   }
 
   render() {
-    const { classes } = this.props;
     const {
-      loggedInUser, mobileMoreAnchorEl, isMobileMenuOpen, profilePic,
+      classes, profilePic, username, updateState,
+    } = this.props;
+    const {
+      mobileMoreAnchorEl, isMobileMenuOpen,
     } = this.state;
     const mobileMenuId = 'primary-search-account-menu-mobile';
-    let comp = null;
+    let avatar = null;
     try {
-      // eslint-disable-next-line import/no-dynamic-require,global-require
-      const src = require(`${profilePic}`);
-      comp = (
-        <Avatar
-          className={classes.avatar}
-          src={src}
-          id="profile-pic"
-        />
-      );
+      window.atob(profilePic);
+      if (profilePic !== '') {
+        avatar = (
+          <Avatar
+            className={classes.avatar}
+            src={`data:image/jpeg;base64,${profilePic}`}
+            id="profile-pic"
+            style={{ border: 0, objectFit: 'cover' }}
+          />
+        );
+      } else {
+        throw new Error('No image to upload');
+      }
     } catch (e) {
-      comp = (
+      avatar = (
         <Avatar
           className={classes.avatar}
           id="profile-pic"
         >
-          {loggedInUser.charAt(0)}
+          {username.charAt(0)}
         </Avatar>
       );
     }
@@ -159,10 +166,10 @@ class AppToolbar extends React.Component {
       >
         <MenuItem
           component={Link}
-          to={`/profile/${loggedInUser}`}
+          to={`/profile/${username}`}
         >
           <IconButton color="inherit">
-            {comp}
+            {avatar}
           </IconButton>
           <p>My Profile</p>
         </MenuItem>
@@ -185,7 +192,7 @@ class AppToolbar extends React.Component {
           <p>Upload Picture</p>
         </MenuItem>
         <MenuItem
-          onClick={() => localStorage.clear()}
+          onClick={() => { localStorage.clear(); updateState('username', ''); }}
           component={Link}
           to="/signin"
         >
@@ -228,10 +235,10 @@ class AppToolbar extends React.Component {
                   edge="end"
                   color="inherit"
                   component={Link}
-                  to={`/profile/${loggedInUser}`}
+                  to={`/profile/${username}`}
                 >
-                  <Typography style={{ marginRight: '5px' }}>{loggedInUser}</Typography>
-                  {comp}
+                  <Typography style={{ marginRight: '5px' }}>{username}</Typography>
+                  {avatar}
                 </IconButton>
               </Tooltip>
               <Tooltip title="My Feed">
@@ -257,7 +264,7 @@ class AppToolbar extends React.Component {
               <Tooltip title="Logout">
                 <IconButton
                   color="inherit"
-                  onClick={() => localStorage.clear()}
+                  onClick={() => { localStorage.clear(); updateState('username', ''); }}
                   component={Link}
                   to="/signin"
                 >
@@ -296,5 +303,8 @@ AppToolbar.propTypes = {
     sectionMobile: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  profilePic: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
 };
 export default withStyles(styles)(AppToolbar);

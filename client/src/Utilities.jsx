@@ -14,4 +14,6 @@ async function asyncForEach(array, callback) {
   await Promise.all(promises);
 }
 
-export { dateDiff, localStorage, asyncForEach };
+export {
+  dateDiff, localStorage, asyncForEach,
+};

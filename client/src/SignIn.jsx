@@ -60,10 +60,8 @@ class SignIn extends React.Component {
   }
 
   componentDidMount() {
-    const username = localStorage.getItem('user');
-    const loginTime = localStorage.getItem('login');
-    const { history } = this.props;
-    if (username !== null && loginTime !== null && dateDiff(new Date(loginTime)) < 30) {
+    const { username, loginTime, history } = this.props;
+    if (username !== '' && loginTime !== '' && dateDiff(new Date(loginTime)) < 30) {
       history.push('/home');
     } else {
       localStorage.clear();
@@ -75,7 +73,7 @@ class SignIn extends React.Component {
     e.preventDefault();
     document.getElementById('login-status').innerHTML = '';
     const { username, password } = this.state;
-    const { history } = this.props;
+    const { history, updateState } = this.props;
     const resp = await fetch('http://localhost:8080/login',
       {
         method: 'POST',
@@ -91,6 +89,8 @@ class SignIn extends React.Component {
         username);
       localStorage.setItem('login',
         new Date());
+      updateState('username', username);
+      updateState('loginTime', new Date().toString());
       history.push('/home');
     } else {
       document.getElementById('login-status').innerHTML = await resp.text();
@@ -182,6 +182,9 @@ SignIn.propTypes = {
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  loginTime: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(SignIn);

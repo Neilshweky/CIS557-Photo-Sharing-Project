@@ -1,4 +1,5 @@
-const db = require('../models/database.js');
+const userDB = require('../models/userDatabase.js');
+const postDB = require('../models/postDatabase.js');
 
 // Route for '/signup', creates a new user
 const signup = (req, res) => {
@@ -9,12 +10,12 @@ const signup = (req, res) => {
     const { password } = req.body;
     const { email } = req.body;
     const pic = req.body.profile_picture;
-    db.getUser(username)
+    userDB.getUser(username)
       .then((existingUser) => {
         if (existingUser != null) {
           res.status(400).send(`The username ${username} is already in use.`);
         } else {
-          db.createUser(username, email, password, pic)
+          userDB.createUser(username, email, password, pic)
             .then((data) => res.status(201).send(data))
             .catch((err) => res.status(500).send(err));
         }
@@ -30,7 +31,7 @@ const login = (req, res) => {
   } else {
     const { username } = req.body;
     const { password } = req.body;
-    db.checkLogin(username, password)
+    userDB.checkLogin(username, password)
       .then((user) => {
         if (user == null) {
           res.status(401).send('Invalid username and password combination.');
@@ -49,21 +50,21 @@ const login = (req, res) => {
 const updateProfile = (req, res) => {
   const { username } = req.body;
   if (req.body.email) {
-    db.updateEmail(username, req.body.email)
+    userDB.updateEmail(username, req.body.email)
       .then((data) => res.status(201).send(data))
       .catch((err) => {
         if (err.message === 'no user found') res.status(400).send(err.message);
         else res.status(500).send(err);
       });
   } else if (req.body.profilePicture) {
-    db.updateProfilePic(username, req.body.profilePicture)
+    userDB.updateProfilePic(username, req.body.profilePicture)
       .then((data) => res.status(201).send(data))
       .catch((err) => {
         if (err.message === 'no user found') res.status(400).send(err.message);
         else res.status(500).send(err.message);
       });
   } else if (req.body.oldPassword && req.body.newPassword) {
-    db.updatePassword(username, req.body.oldPassword, req.body.newPassword)
+    userDB.updatePassword(username, req.body.oldPassword, req.body.newPassword)
       .then((data) => res.status(201).send(data))
       .catch((err) => {
         if (err.message === 'no user found' || err.message === 'incorrect password') res.status(400).send(err.message);
@@ -75,11 +76,11 @@ const updateProfile = (req, res) => {
 };
 
 const postPicture = (req, res) => {
-  console.log('posting picture', req.body);
   if (!req.body.pic) {
     res.status(400).send('Picture is required to create post.');
   } else {
-    db.postPicture(req.body.pic, req.body.username)
+    const { pic, username, caption } = req.body;
+    postDB.postPicture(pic, username, caption)
       .then((data) => res.status(201).send(data))
       .catch((err) => res.status(500).send(err));
   }
@@ -87,7 +88,7 @@ const postPicture = (req, res) => {
 
 const getUser = (req, res) => {
   const { username } = req.params;
-  db.getUser(username).then((data) => {
+  userDB.getUser(username).then((data) => {
     if (data === undefined || data === null) res.status(404).send({});
     else res.status(200).send(data);
   }).catch((err) => res.status(500).send(err));
@@ -95,7 +96,7 @@ const getUser = (req, res) => {
 
 const deleteUser = (req, res) => {
   const { username } = req.params;
-  db.deleteUser(username).then((data) => {
+  userDB.deleteUser(username).then((data) => {
     if (data === undefined || data === null) res.status(404).send({});
     else res.status(200).send(data);
   }).catch((err) => res.status(500).send(err));
@@ -103,7 +104,7 @@ const deleteUser = (req, res) => {
 
 const getPosts = (req, res) => {
   const { username, num } = req.params;
-  db.getPostsForUserAndNum(username, num).then((posts) => {
+  postDB.getPostsForUserAndNum(username, num).then((posts) => {
     res.status(200).send(posts);
   }).catch((err) => {
     res.status(500).send(err);
@@ -112,41 +113,125 @@ const getPosts = (req, res) => {
 
 const likePost = (req, res) => {
   const { username, postid } = req.params;
-  db.getUser(username).then((user) => {
+  userDB.getUser(username).then((user) => {
     if (user == null) {
       res.status(400).send(`There is no such user ${username}.`);
-    } else if (user.followees.indexOf(username) === -1) {
+    } else if (user.username !== username && user.followees.indexOf(username) === -1) {
       res.status(400).send(`${username} does not follow original poster.`);
     } else {
-      db.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
+      postDB.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
     }
   });
 };
 
 const unlikePost = (req, res) => {
   const { username, postid } = req.params;
-  db.unlikePost(username, postid).then(() => { res.status(200).send('Post unliked'); }).catch((err) => res.status(500).send(err));
+  postDB.unlikePost(username, postid).then(() => { res.status(200).send('Post unliked'); }).catch((err) => res.status(500).send(err));
 };
 
 const follow = (req, res) => {
   const { username, friend } = req.params;
-  db.followUser(username, friend).then(() => { res.status(200).send(`${username} followed ${friend}`); }).catch((err) => res.status(500).send(err));
+  userDB.followUser(username, friend).then(() => { res.status(200).send(`${username} followed ${friend}`); }).catch((err) => res.status(500).send(err));
 };
 
 const unfollow = (req, res) => {
   const { username, friend } = req.params;
-  db.unfollowUser(username, friend).then(() => { res.status(200).send(`${username} unfollowed ${friend}`); }).catch((err) => res.status(500).send(err));
+  userDB.unfollowUser(username, friend).then(() => { res.status(200).send(`${username} unfollowed ${friend}`); }).catch((err) => res.status(500).send(err));
 };
 
 const searchUsers = (req, res) => {
   const { username, term } = req.params;
-  db.getSearchSuggestions(username, term).then((data) => {
+  userDB.getSearchSuggestions(username, term).then((data) => {
     res.status(200).send(data);
   }).catch((err) => {
     res.status(500).send(err);
   });
 };
 
+// POST EDIT ROUTES
+
+const updatePost = (req, res) => {
+  const { postID } = req.params;
+  const { caption } = req.body;
+  if (!caption) {
+    res.status(400).send('New caption is required to update post');
+  } else {
+    postDB.updatePost(postID, caption)
+      .then((data) => res.status(200).send(data))
+      .catch((err) => {
+        if (err.message === 'No post found to edit') {
+          res.status(400).send(err);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  }
+};
+
+const deletePost = (req, res) => {
+  const { postID } = req.params;
+  postDB.deletePost(postID)
+    .then((data) => {
+      if (data === undefined || data === null) {
+        res.status(404).send({});
+      } else {
+        res.status(200).send(data);
+      }
+    })
+    .catch((err) => res.status(500).send(err));
+};
+
+// COMMENT EDIT ROUTES
+
+const addComment = (req, res) => {
+  const { postID, username } = req.params;
+  const { comment } = req.body;
+  if (!comment) {
+    res.status(400).send('New comment required');
+  } else {
+    postDB.addComment(postID, username, comment)
+      .then((data) => res.status(200).send(data))
+      .catch((err) => {
+        if (err === 'No post found to add comment') {
+          res.status(400).send(err);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  }
+};
+
+const editComment = (req, res) => {
+  const { postID, commentID } = req.params;
+  const { comment } = req.body;
+  if (!comment) {
+    res.status(400).send('Edit comment required');
+  } else {
+    postDB.editComment(postID, commentID, comment)
+      .then((data) => res.status(200).send(data))
+      .catch((err) => {
+        if (err.message === 'No post found to edit comment'
+          || err.message === 'No comment found to edit') {
+          res.status(400).send(err);
+        } else {
+          res.status(500).send(err);
+        }
+      });
+  }
+};
+
+const deleteComment = (req, res) => {
+  const { postID, commentID } = req.params;
+  postDB.deleteComment(postID, commentID)
+    .then((data) => {
+      if (data === undefined || data === null) {
+        res.status(404).send({});
+      } else {
+        res.status(200).send(data);
+      }
+    })
+    .catch((err) => res.status(500).send(err));
+};
 
 module.exports = {
   signup,
@@ -161,4 +246,9 @@ module.exports = {
   follow,
   unfollow,
   searchUsers,
+  updatePost,
+  deletePost,
+  addComment,
+  editComment,
+  deleteComment,
 };

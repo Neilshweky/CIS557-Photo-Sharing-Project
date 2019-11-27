@@ -46,7 +46,7 @@ async function postPicture() {
   await fetch('http://localhost:8080/postpicture', {
     method: 'POST',
     body: JSON.stringify({ username: 'user1', pic: 'some_pic' }),
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
   }).then((res) => res.json()).then((json) => console.log(json));
 }
 
