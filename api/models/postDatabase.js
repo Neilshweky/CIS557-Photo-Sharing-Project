@@ -1,4 +1,3 @@
-/* eslint-disable */
 const SHA256 = require('crypto-js/sha256');
 const uuidv4 = require('uuid/v4');
 const moment = require('moment');

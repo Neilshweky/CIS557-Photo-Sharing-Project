@@ -15,13 +15,14 @@ export default class PostBox extends React.Component {
   }
 
   async generatePosts() {
-    const { username } = this.props;
+    const { username, bHome } = this.props;
     const compList = [];
     const resp = await fetch(`http://localhost:8080/posts/${username}/0`);
     if (resp.ok) {
       const postData = await resp.json();
       postData.forEach((post) => {
-        compList.push(<Post post={post} key={post.uid} username={username} deletePost={this.deletePost} />);
+        const comp = <Post post={post} key={post.uid} username={username} deletePost={this.deletePost} />;
+        return bHome ? compList.push(comp) : (post.username === username && compList.push(comp));
       });
       this.setState({ reactPosts: compList });
     }

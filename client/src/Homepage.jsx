@@ -9,25 +9,25 @@ import PostBox from './PostBox';
 class Homepage extends React.PureComponent {
 
   componentDidMount() {
-    const { state, history } = this.props;
+    const { username, loginTime, history } = this.props;
 
-    if (state.username === '' || state.loginTime === '' || dateDiff(state.loginTime) > 30) {
+    if (username === '' || loginTime === '' || dateDiff(loginTime) > 30) {
       localStorage.clear();
       history.push('/signin');
     }
   }
 
   render() {
-    const { state, updateState } = this.props;
+    const { username, profilePic, updateState } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={state.profilePic} username={state.username} updateState={updateState} />
+        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
         <Container>
           <h1 id="welcome">
             Welcome.
             {localStorage.getItem('user')}
           </h1>
-          <PostBox username={state.username} />
+          <PostBox username={username} bHome />
         </Container>
       </div>
     );

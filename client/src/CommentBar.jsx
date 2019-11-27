@@ -45,13 +45,25 @@ class CommentBar extends React.Component {
   constructor(props) {
     super(props);
     this.handleSubmitComment = this.handleSubmitComment.bind(this);
+    this.handleUpdateComment = this.handleUpdateComment.bind(this);
+    this.handleDeleteComment = this.handleDeleteComment.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
     this.getProfileAvatar = this.getProfileAvatar.bind(this);
   }
 
   handleSubmitComment(commentText) {
-    const { addComment, postID } = this.props;
+    const { addComment } = this.props;
     addComment(commentText);
+  }
+
+  handleUpdateComment(commentText, commentID) {
+    const { editComment } = this.props;
+    editComment(commentText, commentID);
+  }
+
+  handleDeleteComment(commentID) {
+    const { deleteComment } = this.props;
+    deleteComment(commentID);
   }
 
   async getProfilePic(username) {
@@ -110,6 +122,9 @@ class CommentBar extends React.Component {
                   timestamp={comment.timestamp}
                   id={comment.uid}
                   key={comment.uid}
+                  bLoggedIn={comment.username === username}
+                  editComment={this.handleUpdateComment}
+                  deleteComment={this.handleDeleteComment}
                 />
               ))}
             </List>

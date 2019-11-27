@@ -88,18 +88,17 @@ class SimpleProfile extends React.Component {
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      username: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false,
+      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false,
     };
   }
 
   componentDidMount() {
-    const { state, history, match } = this.props;
-    if (state.username === '' || state.loginTime === '' || dateDiff(state.loginTime) > 30) {
+    const { username, loginTime, history, match } = this.props;
+    if (username === '' || loginTime === '' || dateDiff(loginTime) > 30) {
       localStorage.clear();
       history.push('/signin');
     } else {
       this.getProfile(match.params.username);
-      this.setState({})
     }
   }
 
@@ -111,19 +110,18 @@ class SimpleProfile extends React.Component {
     }
   }
 
-  async getProfile(username) {
-    const { state } = this.props;
-    const loggedInUser = state.username;
-    const resp = await fetch(`http://localhost:8080/user/${username}`);
+  async getProfile(profUsername) {
+    const { username } = this.props;
+    const resp = await fetch(`http://localhost:8080/user/${profUsername}`);
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
-        username,
+        profUsername,
         email: data.email,
         followers: data.followers,
         followees: data.followees,
         profilePicture: data.profilePicture,
-        bLoggedInUser: username === loggedInUser,
+        bLoggedInUser: profUsername === username,
       }, async () => {
         await this.generatePosts();
         await this.getFolloweesData();
@@ -132,7 +130,7 @@ class SimpleProfile extends React.Component {
     }
   }
 
-  getFolloweesData() {
+  async getFolloweesData() {
     const { followees } = this.state;
     const followeeData = [];
     asyncForEach(followees, async (followee) => {
@@ -245,15 +243,15 @@ class SimpleProfile extends React.Component {
   }
 
   async generatePosts() {
-    const { username } = this.state;
-    const { state } = this.props;
+    const { profUsername } = this.state;
+    const { username } = this.props;
     const compList = [];
-    const resp = await fetch(`http://localhost:8080/posts/${username}/0`);
+    const resp = await fetch(`http://localhost:8080/posts/${profUsername}/0`);
     if (resp.ok) {
       const postData = await resp.json();
-      const myPostData = postData.filter((post) => post.username === username);
+      const myPostData = postData.filter((post) => post.username === profUsername);
       myPostData.forEach((post) => {
-        compList.push(<Post post={post} key={post.uid} username={state.username} />);
+        compList.push(<Post post={post} key={post.uid} username={username} />);
       });
       this.setState({ reactPosts: compList });
     }
@@ -264,20 +262,20 @@ class SimpleProfile extends React.Component {
   }
 
   render() {
-    const { classes, state, updateState } = this.props;
     const {
-      username, email, password, curPassword, passwordCheck, profilePicture, followers,
-      followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
+      classes, profilePic, username, updateState,
+    } = this.props;
+    const {
+      profUsername, email, password, curPassword, passwordCheck, profilePicture, followers, followees, index, reactPosts, followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let avatar = null;
     try {
-      const actualPic = bLoggedInUser ? state.profilePic : profilePicture;
-      window.atob(actualPic);
-      if (actualPic !== '') {
+      window.atob(profilePicture);
+      if (profilePicture !== '') {
         avatar = (
           <Avatar
             className={classes.avatar}
-            src={`data:image/jpeg;base64,${actualPic}`}
+            src={`data:image/jpeg;base64,${profilePicture}`}
             id="profile-pic"
             style={{ border: 0, objectFit: 'cover' }}
           />
@@ -292,14 +290,14 @@ class SimpleProfile extends React.Component {
           id="profile-pic"
           style={{ fontSize: '48px' }}
         >
-          {username.charAt(0)}
+          {profUsername.charAt(0)}
         </Avatar>
       );
     }
 
     return (
       <div>
-        <AppToolbar profilePic={state.profilePic} username={state.username} updateState={updateState} />
+        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
         <Tabs
           value={index}
           onChange={this.handleTabChange}
@@ -319,19 +317,21 @@ class SimpleProfile extends React.Component {
                 {avatar}
               </div>
               <Typography component="h1" variant="h5">
-                {username}
+                {profUsername}
               </Typography>
               <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
                 <Grid item xs={12}>
                   <Grid container justify="center" alignItems="center" spacing={1}>
-                    <Grid item xs={4}>
-                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                        {reactPosts.length}
-                      </Typography>
-                      <Typography variant="h5">
-                        Posts
-                      </Typography>
-                    </Grid>
+                    {dataLoaded && (
+                      <Grid item xs={4}>
+                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                          {reactPosts.length}
+                        </Typography>
+                        <Typography variant="h5">
+                          Posts
+                        </Typography>
+                      </Grid>
+                    )}
                     <Grid item xs={4}>
                       <Typography variant="h4" style={{ fontWeight: 'bold' }}>
                         {followers.length}
@@ -356,11 +356,11 @@ class SimpleProfile extends React.Component {
         </TabPanel>
         <TabPanel value={index} index={1}>
           <Container>
-            <PostBox username={state.username} />
+            {dataLoaded && <PostBox bHome={false} username={profUsername} />}
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
-          {dataLoaded && <FriendTable bProfilePage data={followeeData} bLoggedInUser />}
+          {dataLoaded && <FriendTable bProfilePage data={followeeData} bLoggedInUser={bLoggedInUser} />}
         </TabPanel>
         <TabPanel value={index} index={3}>
           <Container>
@@ -381,80 +381,82 @@ class SimpleProfile extends React.Component {
               <div id="email-status" style={{ marginTop: '20px' }} />
               <div id="password-status" />
               <form className={classes.form} noValidate onSubmit={this.updateProfile}>
-                <Grid container justify="center" aligntems="center" spacing={2}>
-                  <Grid item xs={3} />
-                  <Grid item xs={6}>
-                    <TextField
-                      InputLabelProps={{
-                        classes: {
-                          root: classes.label,
-                        },
-                      }}
-                      autoComplete="email"
-                      fullWidth
-                      id="email"
-                      label="Email Address"
-                      name="email"
-                      defaultValue={state.email}
-                      variant="outlined"
-                    />
+                {dataLoaded && (
+                  <Grid container justify="center" aligntems="center" spacing={2}>
+                    <Grid item xs={3} />
+                    <Grid item xs={6}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="email"
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        defaultValue={email}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid item xs={3} />
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="curPassword"
+                        type="password"
+                        label="Current Password"
+                        name="curPassword"
+                        variant="outlined"
+                        value={curPassword}
+                        onChange={(e) => this.setState({ curPassword: e.target.value })}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="password"
+                        type="password"
+                        label="New Password"
+                        name="password"
+                        variant="outlined"
+                        value={password}
+                        onChange={(e) => this.setState({ password: e.target.value })}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.label,
+                          },
+                        }}
+                        autoComplete="password"
+                        fullWidth
+                        id="passwordCheck"
+                        type="password"
+                        label="Re-enter Password"
+                        name="passwordCheck"
+                        variant="outlined"
+                        value={passwordCheck}
+                        onChange={(e) => this.setState({ passwordCheck: e.target.value })}
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={3} />
-                  <Grid item xs={4}>
-                    <TextField
-                      InputLabelProps={{
-                        classes: {
-                          root: classes.label,
-                        },
-                      }}
-                      autoComplete="password"
-                      fullWidth
-                      id="curPassword"
-                      type="password"
-                      label="Current Password"
-                      name="curPassword"
-                      variant="outlined"
-                      value={curPassword}
-                      onChange={(e) => this.setState({ curPassword: e.target.value })}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <TextField
-                      InputLabelProps={{
-                        classes: {
-                          root: classes.label,
-                        },
-                      }}
-                      autoComplete="password"
-                      fullWidth
-                      id="password"
-                      type="password"
-                      label="New Password"
-                      name="password"
-                      variant="outlined"
-                      value={password}
-                      onChange={(e) => this.setState({ password: e.target.value })}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <TextField
-                      InputLabelProps={{
-                        classes: {
-                          root: classes.label,
-                        },
-                      }}
-                      autoComplete="password"
-                      fullWidth
-                      id="passwordCheck"
-                      type="password"
-                      label="Re-enter Password"
-                      name="passwordCheck"
-                      variant="outlined"
-                      value={passwordCheck}
-                      onChange={(e) => this.setState({ passwordCheck: e.target.value })}
-                    />
-                  </Grid>
-                </Grid>
+                )}
                 <Button
                   className={classes.submit}
                   id="loginsubmit"
@@ -463,7 +465,7 @@ class SimpleProfile extends React.Component {
                   variant="contained"
                 >
                   Update
-                  </Button>
+                </Button>
               </form>
             </div>
           </Container>

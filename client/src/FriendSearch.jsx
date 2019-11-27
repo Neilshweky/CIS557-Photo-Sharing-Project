@@ -8,13 +8,13 @@ import { localStorage } from './Utilities';
 export default class FriendSearch extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { username: localStorage.getItem('user'), data: [], bLoaded: false };
+    this.state = { data: [], bLoaded: false };
   }
 
   async componentDidMount() {
-    const { match } = this.props;
+    const { match, username } = this.props;
     const searchValue = match.params.searchTerm;
-    const { username } = this.state;
+    // const { username } = this.state;
     const resp = await fetch(`http://localhost:8080/searchusers/${username}/${searchValue}`);
     if (resp.ok) {
       this.setState({ data: await resp.json(), bLoaded: true });
@@ -24,9 +24,10 @@ export default class FriendSearch extends React.Component {
 
   render() {
     const { data, bLoaded } = this.state;
+    const { username, profilePic, updateState } = this.props;
     return (
       <div>
-        <AppToolbar />
+        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
         <div>
           <Box p={3}>
             {bLoaded && <FriendTable bProfilePage={false} data={data} bLoggedInUser />}
