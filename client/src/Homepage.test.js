@@ -15,62 +15,47 @@ beforeEach(async () => {
 });
 
 async function signUpUsers() {
-  await fetch('http://localhost:8080/user/user1', { method: 'DELETE' }).then(
-    await fetch('http://localhost:8080/signup', {
-      method: 'POST',
-      body: JSON.stringify({ username: 'user1', password: 'user1pw', email: 'user1@seas.upenn.edu' }),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then((res) => res.json())
-      .then((json) => console.log(json))
-      .catch((err) => console.log('User already exists', err)),
-  );
-  await fetch('http://localhost:8080/user/user2', { method: 'DELETE' }).then(
-    await fetch('http://localhost:8080/signup', {
-      method: 'POST',
-      body: JSON.stringify({ username: 'user2', password: 'user2pw', email: 'user2@seas.upenn.edu' }),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then((res) => res.json())
-      .then((json) => console.log(json))
-      .catch((err) => console.log('User already exists', err)),
-  );
+  await fetch('http://localhost:8080/user/user1', { method: 'DELETE' });
+  await fetch('http://localhost:8080/signup', {
+    method: 'POST',
+    body: JSON.stringify({ username: 'user1', password: 'user1pw', email: 'user1@seas.upenn.edu' }),
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 async function follow(user, followee) {
-  await fetch(`http://localhost:8080/follow/${user}/${followee}`, { method: 'POST' })
+  return fetch(`http://localhost:8080/follow/${user}/${followee}`, { method: 'POST' })
     .then((res) => console.log(res));
 }
 
 async function postPicture() {
-  await fetch('http://localhost:8080/postpicture', {
+  return fetch('http://localhost:8080/postpicture', {
     method: 'POST',
     body: JSON.stringify({ username: 'user1', pic: 'some_pic' }),
     headers: { 'Content-Type': 'application/json' },
-  }).then((res) => res.json()).then((json) => console.log(json));
+  }).then((res) => res.json());
 }
 
-async function login() {
-  driver.wait(until.urlIs('http://localhost:3000/signin'));
-  await driver.get('http://localhost:3000/signin');
-  await driver.findElement(By.id('username')).sendKeys('user1');
-  await driver.findElement(By.id('password')).sendKeys('user1pw', Key.RETURN);
-  driver.wait(until.urlIs('http://localhost:3000/home'), 200);
+async function loginSuccess() {
+  await driver.findElement(By.id('username')).sendKeys('neilshweky');
+  await driver.findElement(By.id('password')).sendKeys('cis557sucks', Key.RETURN);
 }
 
 it('empty homepage test', async () => {
-  await signUpUsers();
-  await follow('user1', 'user2');
-  await login();
+  // await signUpUsers();
+  await loginSuccess();
+  driver.wait(until.urlIs('http://localhost:3000/home'), 2000);
+  const url = await driver.getCurrentUrl();
+  expect(url).toBe('http://localhost:3000/home');
   await driver.findElement(By.id('welcome')).getAttribute('innerHTML').then((val) => {
     expect(val).toEqual('Welcome.user1');
   });
 });
 
 it('posts in homepage test', async () => {
-  await signUpUsers();
-  await follow('user1', 'user2');
-  await login();
+  // await signUpUsers ();
+  // await follow('user1', 'user2');
+  await loginSuccess();
   await postPicture();
   await driver.findElement(By.id('welcome')).getAttribute('innerHTML').then((val) => {
     expect(val).toEqual('Welcome.user1');
