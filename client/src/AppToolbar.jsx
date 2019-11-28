@@ -17,7 +17,6 @@ import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import Avatar from '@material-ui/core/Avatar';
 import PropTypes from 'prop-types';
-import { localStorage } from './Utilities';
 
 const styles = (theme) => ({
   grow: {
@@ -192,7 +191,7 @@ class AppToolbar extends React.Component {
           <p>Upload Picture</p>
         </MenuItem>
         <MenuItem
-          onClick={() => { localStorage.clear(); updateState('username', ''); }}
+          onClick={() => { window.localStorage.clear(); updateState('username', ''); }}
           component={Link}
           to="/signin"
         >

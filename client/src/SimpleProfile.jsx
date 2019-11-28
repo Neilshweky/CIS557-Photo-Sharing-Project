@@ -15,7 +15,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AppToolbar from './AppToolbar';
 import FriendTable from './FriendTable';
-import { dateDiff, localStorage, asyncForEach } from './Utilities';
 import Post from './Post';
 import PostBox from './PostBox';
 
@@ -93,15 +92,8 @@ class SimpleProfile extends React.Component {
   }
 
   componentDidMount() {
-    const {
-      username, loginTime, history, match,
-    } = this.props;
-    if (username === '' || loginTime === '' || dateDiff(loginTime) > 30) {
-      localStorage.clear();
-      history.push('/signin');
-    } else {
-      this.getProfile(match.params.username);
-    }
+    const { match } = this.props;
+    this.getProfile(match.params.username);
   }
 
   componentDidUpdate(prevProps) {
@@ -135,13 +127,18 @@ class SimpleProfile extends React.Component {
   async getFolloweesData() {
     const { followees } = this.state;
     const followeeData = [];
-    asyncForEach(followees, async (followee) => {
+    const promises = [];
+    const callbackFn = async (followee) => {
       const resp = await fetch(`http://localhost:8080/user/${followee}`);
       if (resp.ok) {
         const data = await resp.json();
         followeeData.push({ username: followee, profilePicture: data.profilePicture });
       }
-    });
+    };
+    for (let index = 0; index < followees.length; index += 1) {
+      promises.push(callbackFn(followees[index], index, followees));
+    }
+    await Promise.all(promises);
     this.setState({ followeeData });
   }
 
@@ -504,7 +501,6 @@ SimpleProfile.propTypes = {
     }),
   }).isRequired,
   username: PropTypes.string.isRequired,
-  loginTime: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
   profilePic: PropTypes.string.isRequired,
 };

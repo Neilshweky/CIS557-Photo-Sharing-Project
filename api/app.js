@@ -8,8 +8,8 @@ const session = require('express-session');
 require('./models/userDatabase.js');
 require('./models/postDatabase.js');
 
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '8mb' }));
+app.use(bodyParser.json({ limit: '8mb' }));
 
 // app.use(express.logger("default"));
 app.use(cookieParser());

@@ -14,7 +14,6 @@ import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOut
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import { Link } from '@material-ui/core';
-import { localStorage } from './Utilities';
 
 const styles = (theme) => ({
   root: {
@@ -36,7 +35,7 @@ const styles = (theme) => ({
 class SimpleTable extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { curUser: localStorage.getItem('user'), data: props.data };
+    this.state = { curUser: props.username, data: props.data };
     this.unfollow = this.unfollow.bind(this);
     this.follow = this.follow.bind(this);
   }
@@ -169,6 +168,7 @@ SimpleTable.propTypes = {
     avatarCell: PropTypes.string.isRequired,
     table: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(SimpleTable);
