@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import { dateDiff, localStorage } from './Utilities';
 import AppToolbar from './AppToolbar';
 
 const styles = (theme) => ({
@@ -28,15 +27,6 @@ class ImageUpload extends React.Component {
     this.state = { picture: null, caption: '' };
     this.onDrop = this.onDrop.bind(this);
     this.uploadImage = this.uploadImage.bind(this);
-  }
-
-  componentDidMount() {
-    const { history, username, loginTime } = this.props;
-
-    if (username === null || loginTime === null || dateDiff(loginTime) > 30) {
-      localStorage.clear();
-      history.push('/signin');
-    }
   }
 
   async onDrop(e) {
@@ -60,6 +50,7 @@ class ImageUpload extends React.Component {
 
   async uploadImage() {
     const { picture, caption } = this.state;
+    const { username } = this.props;
     const resp = await fetch('http://localhost:8080/postpicture',
       {
         method: 'POST',
@@ -68,7 +59,7 @@ class ImageUpload extends React.Component {
           'Access-Control-Origin': '*',
         },
         mode: 'cors',
-        body: JSON.stringify({ username: localStorage.getItem('user'), pic: picture, caption }),
+        body: JSON.stringify({ username, pic: picture, caption }),
       });
     if (resp.ok) {
       this.setState({
@@ -93,7 +84,7 @@ class ImageUpload extends React.Component {
         <Box p={3}>
           <h1 id="welcome">
             Welcome.
-            {localStorage.getItem('user')}
+            {username}
           </h1>
           <div id="status" />
           <Grid container spacing={2}>
@@ -148,7 +139,6 @@ ImageUpload.propTypes = {
     submitButton: PropTypes.string.isRequired,
   }).isRequired,
   username: PropTypes.string.isRequired,
-  loginTime: PropTypes.string.isRequired,
   profilePic: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
 };

@@ -17,7 +17,7 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { dateDiff, localStorage } from './Utilities';
+import dateDiff from './Utilities';
 
 
 const styles = (theme) => ({
@@ -60,11 +60,11 @@ class SignIn extends React.Component {
   }
 
   componentDidMount() {
-    const { username, loginTime, history } = this.props;
+    const { history, username, loginTime } = this.props;
     if (username !== '' && loginTime !== '' && dateDiff(new Date(loginTime)) < 30) {
       history.push('/home');
     } else {
-      localStorage.clear();
+      window.localStorage.clear();
     }
   }
 

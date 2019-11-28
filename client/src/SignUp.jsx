@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import PropTypes from 'prop-types';
-import { dateDiff, localStorage } from './Utilities';
+import dateDiff from './Utilities';
 
 const styles = (theme) => ({
   '@global': {
@@ -58,7 +58,7 @@ class SignUp extends React.Component {
     if (username !== '' && loginTime !== '' && dateDiff(new Date(loginTime)) < 30) {
       history.push('/home');
     } else {
-      localStorage.clear();
+      window.localStorage.clear();
     }
   }
 

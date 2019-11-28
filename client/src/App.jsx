@@ -10,6 +10,7 @@ import SimpleProfile from './SimpleProfile';
 import ImageUpload from './ImageUpload';
 import Homepage from './Homepage';
 import FriendSearch from './FriendSearch';
+import PrivateRoute from './PrivateRoute';
 
 class App extends React.Component {
   constructor(props) {
@@ -61,13 +62,13 @@ class App extends React.Component {
       dataLoaded && (
         <Router>
           <Switch>
-            <Route render={(props) => <Homepage {...props} username={username} profilePic={profilePic} posts={posts} loginTime={loginTime} updateState={this.updateState} />} exact path="/" />
-            <Route render={(props) => <Homepage {...props} username={username} profilePic={profilePic} posts={posts} loginTime={loginTime} updateState={this.updateState} />} exact path="/home" />
-            <Route render={(props) => <ImageUpload {...props} username={username} loginTime={loginTime} profilePic={profilePic} updateState={this.updateState} />} exact path="/imageupload" />
+            <PrivateRoute component={(props) => <Homepage {...props} username={username} profilePic={profilePic} posts={posts} updateState={this.updateState} />} exact path="/home" />
+            <PrivateRoute component={(props) => <Homepage {...props} username={username} profilePic={profilePic} posts={posts} updateState={this.updateState} />} exact path="/" />
+            <PrivateRoute component={(props) => <ImageUpload {...props} username={username} profilePic={profilePic} updateState={this.updateState} />} exact path="/imageupload" />
             <Route render={(props) => <SignIn {...props} username={username} loginTime={loginTime} updateState={this.updateState} />} exact path="/signin" />
             <Route render={(props) => <SignUp {...props} username={username} loginTime={loginTime} updateState={this.updateState} />} exact path="/signup" />
-            <Route render={(props) => <SimpleProfile {...props} username={username} profilePic={profilePic} email={email} followees={followees} followers={followers} loginTime={loginTime} updateState={this.updateState} />} exact path="/profile/:username" />
-            <Route render={(props) => <FriendSearch {...props} username={username} loginTime={loginTime} profilePic={profilePic} updateState={this.updateState} />} exact path="/search/:username/:searchTerm" />
+            <PrivateRoute component={(props) => <SimpleProfile {...props} username={username} profilePic={profilePic} email={email} followees={followees} followers={followers} updateState={this.updateState} />} exact path="/profile/:username" />
+            <PrivateRoute component={(props) => <FriendSearch {...props} username={username} profilePic={profilePic} updateState={this.updateState} />} exact path="/search/:username/:searchTerm" />
           </Switch>
         </Router>
       )
