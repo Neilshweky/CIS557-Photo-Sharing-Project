@@ -27,7 +27,7 @@ function postPicture(picture, username, caption) {
       const friends = values[1];
       friends.push(username);
       console.log(friends);
-      return addPostIDToUsers(post.uid, friends).then(() => post);
+      return addPostIDToUsers(post.uid, friends).then(() => post).catch(console.log);
     });
 }
 
