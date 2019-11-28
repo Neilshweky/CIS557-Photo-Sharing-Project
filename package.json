@@ -14,7 +14,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "eslint": "cd api && eslint . --fix; cd ../client && eslint . --ext .js,.jsx --fix;exit 0",
-    "start": "cd api && node app.js",
+    "start": "sleep 1000000",
     "client": "npm start --prefix client"
   },
   "repository": {
