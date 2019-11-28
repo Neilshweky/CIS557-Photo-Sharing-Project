@@ -34,7 +34,7 @@ const login = (req, res) => {
     userDB.checkLogin(username, password)
       .then((user) => {
         if (user == null) {
-          res.status(401).send('Invalid username and password combination.');
+          res.status(403).send('Invalid username and password combination.');
         } else {
           res.status(200).send(`${username} is now logged in.`);
         }
@@ -89,7 +89,7 @@ const postPicture = (req, res) => {
 const getUser = (req, res) => {
   const { username } = req.params;
   userDB.getUser(username).then((data) => {
-    if (data === undefined || data === null) res.status(404).send({});
+    if (data === undefined || data === null) res.status(404).send('User not found');
     else res.status(200).send(data);
   }).catch((err) => res.status(500).send(err));
 };
@@ -97,7 +97,7 @@ const getUser = (req, res) => {
 const deleteUser = (req, res) => {
   const { username } = req.params;
   userDB.deleteUser(username).then((data) => {
-    if (data === undefined || data === null) res.status(404).send({});
+    if (data === undefined || data === null) res.status(404).send('User not found');
     else res.status(200).send(data);
   }).catch((err) => res.status(500).send(err));
 };
@@ -160,7 +160,7 @@ const updatePost = (req, res) => {
       .then((data) => res.status(200).send(data))
       .catch((err) => {
         if (err.message === 'No post found to edit') {
-          res.status(400).send(err);
+          res.status(404).send(err);
         } else {
           res.status(500).send(err);
         }
@@ -170,15 +170,20 @@ const updatePost = (req, res) => {
 
 const deletePost = (req, res) => {
   const { postID } = req.params;
-  postDB.deletePost(postID)
-    .then((data) => {
-      if (data === undefined || data === null) {
-        res.status(404).send({});
-      } else {
-        res.status(200).send(data);
-      }
-    })
-    .catch((err) => res.status(500).send(err));
+  if (!postID) {
+    res.status(400).send('PostID is required to delete post');
+  } else {
+    postDB.deletePost(postID)
+      .then((data) => {
+        if (data === undefined || data === null) {
+          res.status(404).send({});
+        } else {
+          res.status(200).send(data);
+        }
+      })
+      .catch((err) => res.status(500).send(err));
+  }
+
 };
 
 // COMMENT EDIT ROUTES
@@ -186,14 +191,14 @@ const deletePost = (req, res) => {
 const addComment = (req, res) => {
   const { postID, username } = req.params;
   const { comment } = req.body;
-  if (!comment) {
-    res.status(400).send('New comment required');
+  if (!comment || !postID || !username) {
+    res.status(400).send('A comment, postID, and username are required');
   } else {
     postDB.addComment(postID, username, comment)
       .then((data) => res.status(200).send(data))
       .catch((err) => {
         if (err === 'No post found to add comment') {
-          res.status(400).send(err);
+          res.status(404).send(err);
         } else {
           res.status(500).send(err);
         }
@@ -204,15 +209,15 @@ const addComment = (req, res) => {
 const editComment = (req, res) => {
   const { postID, commentID } = req.params;
   const { comment } = req.body;
-  if (!comment) {
-    res.status(400).send('Edit comment required');
+  if (!comment || !postID || !commentID) {
+    res.status(400).send('A comment, postID, and commentID are required');
   } else {
     postDB.editComment(postID, commentID, comment)
       .then((data) => res.status(200).send(data))
       .catch((err) => {
         if (err.message === 'No post found to edit comment'
           || err.message === 'No comment found to edit') {
-          res.status(400).send(err);
+          res.status(404).send(err);
         } else {
           res.status(500).send(err);
         }
@@ -222,15 +227,19 @@ const editComment = (req, res) => {
 
 const deleteComment = (req, res) => {
   const { postID, commentID } = req.params;
-  postDB.deleteComment(postID, commentID)
-    .then((data) => {
-      if (data === undefined || data === null) {
-        res.status(404).send({});
-      } else {
-        res.status(200).send(data);
-      }
-    })
-    .catch((err) => res.status(500).send(err));
+  if (!postID || !commentID) {
+    res.status(400).send('A postID and commentID are required');
+  } else {
+    postDB.deleteComment(postID, commentID)
+      .then((data) => {
+        if (data === undefined || data === null) {
+          res.status(404).send('post not found');
+        } else {
+          res.status(200).send(data);
+        }
+      })
+      .catch((err) => res.status(500).send(err));
+  }
 };
 
 module.exports = {
