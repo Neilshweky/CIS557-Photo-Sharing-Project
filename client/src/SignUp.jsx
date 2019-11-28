@@ -54,10 +54,8 @@ class SignUp extends React.Component {
   }
 
   componentDidMount() {
-    const username = localStorage.getItem('user');
-    const loginTime = localStorage.getItem('login');
-    const { history } = this.props;
-    if (username !== null && loginTime !== null && dateDiff(new Date(loginTime)) < 30) {
+    const { history, username, loginTime } = this.props;
+    if (username !== '' && loginTime !== '' && dateDiff(new Date(loginTime)) < 30) {
       history.push('/home');
     } else {
       localStorage.clear();
@@ -78,12 +76,14 @@ class SignUp extends React.Component {
         body: JSON.stringify(this.state),
       });
     const { username } = this.state;
-    const { history } = this.props;
+    const { history, updateState } = this.props;
     if (resp.ok) {
       localStorage.setItem('user',
         username);
       localStorage.setItem('login',
         new Date());
+      updateState('username', username);
+      updateState('loginTime', new Date().toString());
       history.push('/home');
     } else {
       document.getElementById('signup-status').innerHTML = await resp.text();
@@ -184,6 +184,9 @@ SignUp.propTypes = {
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  loginTime: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(SignUp);

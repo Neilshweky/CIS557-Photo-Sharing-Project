@@ -114,14 +114,17 @@ class AppToolbar extends React.Component {
 
   handleSearchSubmit(e) {
     e.preventDefault();
-    const { searchValue, loggedInUser } = this.state;
+    const { username } = this.props;
+    const { searchValue } = this.state;
     if (searchValue !== '') {
-      window.location.replace(`/search/${loggedInUser}/${searchValue}`);
+      window.location.replace(`/search/${username}/${searchValue}`);
     }
   }
 
   render() {
-    const { classes, profilePic, username, updateState } = this.props;
+    const {
+      classes, profilePic, username, updateState,
+    } = this.props;
     const {
       mobileMoreAnchorEl, isMobileMenuOpen,
     } = this.state;
@@ -300,5 +303,8 @@ AppToolbar.propTypes = {
     sectionMobile: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  profilePic: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
 };
 export default withStyles(styles)(AppToolbar);

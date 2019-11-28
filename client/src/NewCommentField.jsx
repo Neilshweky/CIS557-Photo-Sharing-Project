@@ -2,8 +2,9 @@ import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import SendIcon from '@material-ui/icons/Send';
 import TextField from '@material-ui/core/TextField';
+import PropTypes from 'prop-types';
 
-export default class newCommentBar extends React.Component {
+export default class NewCommentField extends React.Component {
   constructor(props) {
     super(props);
     this.state = { commentText: '' };
@@ -42,3 +43,8 @@ export default class newCommentBar extends React.Component {
     );
   }
 }
+
+NewCommentField.propTypes = {
+  addComment: PropTypes.func.isRequired,
+  postID: PropTypes.string.isRequired,
+};

@@ -1,5 +1,3 @@
-/* eslint-disable */
-const SHA256 = require('crypto-js/sha256');
 const uuidv4 = require('uuid/v4');
 const moment = require('moment');
 
@@ -8,27 +6,13 @@ const user = require('./userDatabase.js');
 
 const QUERY_SIZE = 10;
 
-function createPost(picture, username, caption = "") {
+function createPost(picture, username, caption = '') {
   const post = new Schemas.Post({ picture, username, caption });
   return post.save();
 }
 
 function getPost(uid) {
   return Schemas.Post.findOne({ uid });
-}
-
-// 1. create a post
-// 2. get all of current users friends
-function postPicture(picture, username, caption) {
-  return Promise
-    .all([createPost(picture, username, caption), user.getFollowersForUsername(username)])
-    .then((values) => {
-      const post = values[0];
-      const friends = values[1];
-      friends.push(username);
-      console.log(friends);
-      return addPostIDToUsers(post.uid, friends).then(() => post).catch(console.log);
-    });
 }
 
 function addPostIDToUsers(postID, usernames) {
@@ -45,6 +29,19 @@ function addPostIDToUsers(postID, usernames) {
   );
 }
 
+// 1. create a post
+// 2. get all of current users friends
+function postPicture(picture, username, caption) {
+  return Promise
+    .all([createPost(picture, username, caption), user.getFollowersForUsername(username)])
+    .then((values) => {
+      const post = values[0];
+      const friends = values[1];
+      friends.push(username);
+      console.log(friends);
+      return addPostIDToUsers(post.uid, friends).then(() => post);
+    });
+}
 
 function getPostIdsForUserAndNum(username, num) {
   return Schemas.User.findOne({ username },
@@ -53,21 +50,23 @@ function getPostIdsForUserAndNum(username, num) {
 }
 
 async function getPostsForUserAndNum(username, num) {
-  results = [];
+  let results = [];
+  let numSeen = num;
   while (results.length <= QUERY_SIZE) {
-    const posts = await getPostIdsForUserAndNum(username, parseInt(num, 10))
+    // eslint-disable-next-line no-await-in-loop
+    const posts = await getPostIdsForUserAndNum(username, parseInt(numSeen, 10));
     if (posts == null) {
       return Promise.resolve(results.slice(0, QUERY_SIZE));
     }
+    // eslint-disable-next-line no-await-in-loop
     const data = await Promise.all(posts.map((post) => getPost(post)));
     results = results.concat(data.filter((elem) => elem !== null));
     if (posts < QUERY_SIZE) {
-      return Promise.resolve(results.slice(0, QUERY_SIZE))
+      return Promise.resolve(results.slice(0, QUERY_SIZE));
     }
-    num += QUERY_SIZE;
-
+    numSeen += QUERY_SIZE;
   }
-  return Promise.resolve(results.slice(0, QUERY_SIZE))
+  return Promise.resolve(results.slice(0, QUERY_SIZE));
 }
 
 async function likePost(username, uid) {
@@ -105,16 +104,17 @@ async function addComment(postID, username, comment) {
   const newComment = {
     uid: uuidv4(),
     timestamp: moment().unix(),
-    username: username,
-    comment: comment
+    username,
+    comment,
   };
-  return Schemas.Post.updateOne({ uid: postID }, { $push: { comments: newComment } }).then(data => {
-    if (data.nModified == 0) {
-      return Promise.reject('No post found to add comment');
-    } else {
-      return newComment;
+  return Schemas.Post.updateOne({ uid: postID }, {
+    $push: { comments: newComment },
+  }).then((data) => {
+    if (data.nModified === 0) {
+      return Promise.reject(Error('No post found to add comment'));
     }
-  })
+    return newComment;
+  });
 }
 
 // Edits the comment with the given ID on the given post
@@ -125,9 +125,9 @@ async function editComment(postID, commentID, comment) {
   }
   const edit = await Schemas.Post.updateOne(
     { uid: postID, 'comments.uid': commentID },
-    { $set: { 'comments.$.comment': comment } }
+    { $set: { 'comments.$.comment': comment } },
   );
-  if (edit.nModified == 0) {
+  if (edit.nModified === 0) {
     throw new Error('No comment found to edit');
   }
   return edit;
@@ -141,19 +141,18 @@ async function deleteComment(postID, commentID) {
   }
   return Schemas.Post.updateOne(
     { uid: postID },
-    { $pull: { comments: { uid: commentID } } }
+    { $pull: { comments: { uid: commentID } } },
   );
 }
 
 // Update the post caption
 async function updatePost(postID, caption) {
-  return Schemas.Post.updateOne({ uid: postID }, { $set: { caption } }).then(data => {
-    if (data.nModified == 0) {
-      return Promise.reject('No post found to update');
-    } else {
-      return caption;
+  return Schemas.Post.updateOne({ uid: postID }, { $set: { caption } }).then((data) => {
+    if (data.nModified === 0) {
+      return Promise.reject(Error('No post found to update'));
     }
-  })
+    return caption;
+  });
 }
 
 // Deletes the post with the given post ID
@@ -174,5 +173,5 @@ module.exports = {
   deleteComment,
   updatePost,
   deletePost,
-  QUERY_SIZE
+  QUERY_SIZE,
 };

@@ -1,6 +1,10 @@
-/* eslint-disable */
 const SHA256 = require('crypto-js/sha256');
 const Schemas = require('./schemas.js');
+
+// Returns a User from the database as a Promise, by username
+function getUser(username) {
+  return Schemas.User.findOne({ username }).exec();
+}
 
 // Adds user to database after signup, and returns it as a Promise
 async function createUser(username, email, password, profilePicture) {
@@ -17,11 +21,6 @@ async function createUser(username, email, password, profilePicture) {
   };
   const user = new Schemas.User(profile);
   return user.save();
-}
-
-// Returns a User from the database as a Promise, by username
-function getUser(username) {
-  return Schemas.User.findOne({ username }).exec();
 }
 
 // Deletes a user from the database

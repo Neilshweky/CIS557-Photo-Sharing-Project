@@ -60,8 +60,8 @@ class SignIn extends React.Component {
   }
 
   componentDidMount() {
-    const { state, history } = this.props;
-    if (state.username !== '' && state.loginTime !== '' && dateDiff(new Date(state.loginTime)) < 30) {
+    const { username, loginTime, history } = this.props;
+    if (username !== '' && loginTime !== '' && dateDiff(new Date(loginTime)) < 30) {
       history.push('/home');
     } else {
       localStorage.clear();
@@ -90,6 +90,7 @@ class SignIn extends React.Component {
       localStorage.setItem('login',
         new Date());
       updateState('username', username);
+      updateState('loginTime', new Date().toString());
       history.push('/home');
     } else {
       document.getElementById('login-status').innerHTML = await resp.text();
@@ -181,6 +182,9 @@ SignIn.propTypes = {
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
   }).isRequired,
+  username: PropTypes.string.isRequired,
+  loginTime: PropTypes.string.isRequired,
+  updateState: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(SignIn);

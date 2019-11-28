@@ -1,5 +1,4 @@
 import React from 'react';
-import { Img } from 'react-image';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -12,23 +11,15 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
 import Typography from '@material-ui/core/Typography';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { InputBase } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
-import SendIcon from '@material-ui/icons/Send';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import Paper from '@material-ui/core/Paper';
 import CommentBar from './CommentBar';
-import { localStorage } from './Utilities';
+import EditMenu from './EditMenu';
 
 const styles = (theme) => ({
   card: {
@@ -60,7 +51,7 @@ const styles = (theme) => ({
     marginLeft: '5px',
   },
   menuItem: {
-    height: '28px',
+    height: '30px',
   },
 });
 
@@ -88,6 +79,8 @@ class Post extends React.Component {
     this.handleCommentsClose = this.handleCommentsClose.bind(this);
     this.getProfileAvatar = this.getProfileAvatar.bind(this);
     this.handlePostComment = this.handlePostComment.bind(this);
+    this.handleEditComment = this.handleEditComment.bind(this);
+    this.handleDeleteComment = this.handleDeleteComment.bind(this);
   }
 
   componentDidMount() {
@@ -186,6 +179,7 @@ class Post extends React.Component {
     }
     document.getElementById(`post-save-${post.uid}`).style.display = 'none';
     document.getElementById(`post-caption-${post.uid}`).disabled = true;
+    document.getElementById(`post-caption-${post.uid}`).style.color = 'black';
   }
 
   async handlePostComment(commentText) {
@@ -208,10 +202,61 @@ class Post extends React.Component {
     }
   }
 
+  async handleEditComment(commentText, commentID) {
+    const { post } = this.props;
+    const { comments } = this.state;
+    const curCommentText = comments.filter((comment) => comment.uid === commentID)[0].comment;
+    if (commentText !== curCommentText) {
+      const resp = await fetch(`http://localhost:8080/editComment/${post.uid}/${commentID}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+          },
+          mode: 'cors',
+          body: JSON.stringify({ comment: commentText }),
+        });
+      if (resp.ok) {
+        const updatedComments = comments.map(
+          (curComment) => {
+            if (curComment.uid === commentID) {
+              const curCom = curComment;
+              curCom.comment = commentText;
+            } return curComment;
+          },
+        );
+        this.setState({ comments: updatedComments });
+      }
+    }
+  }
+
+  async handleDeleteComment(commentID) {
+    const { post } = this.props;
+    const resp = await fetch(`http://localhost:8080/comment/${post.uid}/${commentID}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+        },
+        mode: 'cors',
+      });
+    if (resp.ok) {
+      const { comments, numComments } = this.state;
+      const updatedComments = comments.filter((comment) => comment.uid !== commentID);
+      this.setState({ comments: updatedComments, numComments: numComments - 1 });
+    }
+  }
+
   handleEditPost() {
     const { post } = this.props;
-    document.getElementById(`post-caption-${post.uid}`).disabled = false;
+    const captionElement = document.getElementById(`post-caption-${post.uid}`);
+    captionElement.disabled = false;
+    captionElement.variant = 'outlined';
+    captionElement.style.color = 'blue';
     document.getElementById(`post-save-${post.uid}`).style.display = 'block';
+
     this.setState({ isPostEditOpen: false });
   }
 
@@ -254,31 +299,6 @@ class Post extends React.Component {
     const {
       PostEditAnchorEl, isPostEditOpen, isCommentsOpen, caption,
     } = this.state;
-    const renderPostEditMenu = (
-      <Menu
-        anchorEl={PostEditAnchorEl}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        id="post-edit-menu"
-        keepMounted
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={isPostEditOpen}
-        getContentAnchorEl={null}
-        onClose={this.handlePostEditClose}
-      >
-        <MenuItem
-          onClick={this.handleEditPost}
-          className={classes.menuItem}
-        >
-          <p>Edit Post</p>
-        </MenuItem>
-        <MenuItem
-          className={classes.menuItem}
-          onClick={this.handleDeletePost}
-        >
-          <p>Delete Post</p>
-        </MenuItem>
-      </Menu>
-    );
     const renderHeader = username === post.username
       ? (
         <CardHeader
@@ -318,7 +338,14 @@ class Post extends React.Component {
               />
             </Grid>
             <Grid item xs={5}>
-              <CommentBar comments={comments} postID={post.uid} username={username} addComment={this.handlePostComment} />
+              <CommentBar
+                comments={comments}
+                postID={post.uid}
+                username={username}
+                addComment={this.handlePostComment}
+                editComment={this.handleEditComment}
+                deleteComment={this.handleDeleteComment}
+              />
             </Grid>
           </Grid>
         </DialogContent>
@@ -342,7 +369,7 @@ class Post extends React.Component {
                 value={caption}
                 onChange={(e) => this.setState({ caption: e.target.value })}
                 disabled
-                style={{ width: '100%' }}
+                style={{ width: '100%', color: 'black' }}
               />
             </Grid>
             <Grid item xs={1}>
@@ -373,7 +400,14 @@ class Post extends React.Component {
             </Typography>
           </IconButton>
         </CardActions>
-        {renderPostEditMenu}
+        <EditMenu
+          bPost
+          deleteAction={this.handleDeletePost}
+          editAction={this.handleEditPost}
+          anchor={PostEditAnchorEl}
+          status={isPostEditOpen}
+          close={this.handlePostEditClose}
+        />
         {renderComments}
       </Card>
 
@@ -407,6 +441,8 @@ Post.propTypes = {
     caption: PropTypes.string.isRequired,
     comments: PropTypes.array.isRequired,
   }),
+  username: PropTypes.string.isRequired,
+  deletePost: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(Post);
