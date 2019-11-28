@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "jest",
-    "eslint": "eslint ."
+    "eslint": "eslint .",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
