@@ -32,16 +32,22 @@ const login = (req, res) => {
     const { username } = req.body;
     const { password } = req.body;
     userDB.checkLogin(username, password)
-      .then((user) => {
-        if (user == null) {
-          res.status(403).send('Invalid username and password combination.');
-        } else {
-          res.status(200).send(`${username} is now logged in.`);
-        }
+      .then(() => {
+        res.status(200).send(`${username} is now logged in.`);
       })
       .catch((err) => {
-        console.log('HERE');
-        res.status(500).send(err);
+        switch (err.message) {
+          case 'No user':
+          case 'incorrect password':
+            res.status(401).send('Invalid username and password combination.');
+            break;
+          case 'account locked':
+            res.status(403).send('Account Locked.');
+            break;
+          default:
+            res.status(500).send(err);
+            break;
+        }
       });
   }
 };

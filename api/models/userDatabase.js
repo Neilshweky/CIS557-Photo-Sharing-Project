@@ -64,10 +64,25 @@ async function updatePassword(username, oldPassword, newPassword) {
 // Checks correct user login
 async function checkLogin(username, password) {
   const user = await getUser(username);
-  if (user == null || user.password !== SHA256(password).toString()) {
-    return null;
+  if (user == null) {
+    return Promise.reject(Error('No user'));
   }
-  return user;
+  if (user.lockUntil && user.lockUntil > Date.now()) {
+    await Schemas.User.updateOne({ username }, { $inc: { loginAttempts: 1 } });
+    return Promise.reject(Error('account locked'));
+  }
+  if (user.password !== SHA256(password).toString()) {
+    const updated = await Schemas.User.findOneAndUpdate({ username },
+      { $inc: { loginAttempts: 1 } });
+    if (updated.loginAttempts + 1 === 5) {
+      await Schemas.User.update({ username },
+        { $set: { lockUntil: Date.now() + 2 * 60 * 60 * 1000 } });
+      return Promise.reject(Error('account locked'));
+    }
+    return Promise.reject(Error('incorrect password'));
+  }
+  return Schemas.User.findOneAndUpdate({ username },
+    { $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } });
 }
 
 function followUser(username, friend) { // follow a user

@@ -51,9 +51,9 @@ describe('authentication tests', () => {
   });
 
   test('checkLogin not successful', async () => {
+    expect.assertions(1);
     await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'cis557', 'some_pic');
-    const result = await userDB.checkLogin('neilshweky', 'cis557-2');
-    expect(result).toEqual(null);
+    await userDB.checkLogin('neilshweky', 'cis557-2').catch((err) => expect(err.message).toEqual('incorrect password'));
   });
 });
 
