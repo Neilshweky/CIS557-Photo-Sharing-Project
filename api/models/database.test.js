@@ -258,7 +258,7 @@ describe('like/unlike tests', () => {
   });
 
   test('like-then-unlike test', async () => {
-    const post = await postDB.createPost('some_pic', 'neilshweky');
+    const post = await postDB.postPicture('some_pic', 'neilshweky');
     await postDB.likePost('cbros', post.uid);
     const likedPost = await postDB.getPost(post.uid);
     expect(Array.from(likedPost.likes)).toEqual(['cbros']);
@@ -268,7 +268,7 @@ describe('like/unlike tests', () => {
   });
 
   test('like/unlike your own post post test', async () => {
-    const post = await postDB.createPost('some_pic', 'neilshweky');
+    const post = await postDB.postPicture('some_pic', 'neilshweky');
     await postDB.likePost('neilshweky', post.uid);
     const likedPost = await postDB.getPost(post.uid);
     expect(Array.from(likedPost.likes)).toEqual(['neilshweky']);
@@ -288,13 +288,13 @@ describe('like/unlike tests', () => {
   });
 
   test('like post from non-existing user test', async () => {
-    const post = await postDB.createPost('some_pic', 'neilshweky');
+    const post = await postDB.postPicture('some_pic', 'neilshweky');
     const nopost = await postDB.likePost('no_user', post.uid);
     expect(nopost).toBeNull();
   });
 
   test('unlike post from non-existing user test', async () => {
-    const post = await postDB.createPost('some_pic', 'neilshweky');
+    const post = await postDB.postPicture('some_pic', 'neilshweky');
     const nopost = await postDB.unlikePost('no_user', post.uid);
     expect(nopost).toBeNull();
   });
@@ -360,7 +360,7 @@ describe('comments tests', () => {
   beforeEach(async () => {
     await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
     await userDB.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
-    await postDB.createPost('picture', 'neilshweky');
+    await postDB.postPicture('picture', 'neilshweky');
   });
 
   test('add a comment', async () => {
@@ -473,7 +473,7 @@ describe('edit and delete posts tests', () => {
   beforeEach(async () => {
     await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
     await userDB.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
-    await postDB.createPost('picture', 'neilshweky', 'some caption');
+    await postDB.postPicture('picture', 'neilshweky', 'some caption');
   });
 
   test('edit post', async () => {

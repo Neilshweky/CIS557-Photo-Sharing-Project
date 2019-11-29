@@ -89,7 +89,7 @@ async function unlikePost(username, uid) {
   const post = await getPost(uid);
   if (existingUser == null || post == null
     || (existingUser.username !== post.username
-      && existingUser.post.indexOf(post.uid) === -1)) {
+      && existingUser.posts.indexOf(post.uid) === -1)) {
     return null;
   }
   return Schemas.Post.updateOne(
