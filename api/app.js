@@ -1,4 +1,5 @@
 const express = require('express');
+const { check } = require('express-validator');
 
 const app = express();
 const cookieParser = require('cookie-parser');
@@ -32,7 +33,9 @@ app.use(cors());
 app.get('/', (req, res) => { res.send('Hello, World\n'); });
 
 app.post('/signup', routes.signup);
-app.post('/login', routes.login);
+app.post('/login', [
+  // password must be at least 5 chars long
+  check('password').isLength({ min: 5 })], routes.login);
 app.post('/postpicture', routes.postPicture);
 app.put('/updatePost/:postID', routes.updatePost);//
 app.post('/like/:postid/:username', routes.likePost);

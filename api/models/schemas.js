@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 const uuidv4 = require('uuid/v4');
 const moment = require('moment');
 
-mongoose.connect('mongodb://localhost/cis557', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost/cis557', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-});
+}).then(() => console.log('Connected to mongo')).catch(console.log);
+mongoose.set('useFindAndModify', false);
 
 const { Schema } = mongoose;
 const trim = (str) => str.trim();
@@ -22,6 +23,8 @@ const User = new Schema({
   followers: Array, // IN adjacanecy list
   followees: Array, // OUT adjacency list
   posts: Array,
+  loginAttempts: { type: Number, required: true, default: 0 },
+  lockUntil: { type: Number },
 });
 
 const Post = new Schema({

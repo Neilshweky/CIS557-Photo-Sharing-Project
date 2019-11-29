@@ -38,7 +38,6 @@ function postPicture(picture, username, caption) {
       const post = values[0];
       const friends = values[1];
       friends.push(username);
-      console.log(friends);
       return addPostIDToUsers(post.uid, friends).then(() => post);
     });
 }
@@ -75,7 +74,7 @@ async function likePost(username, uid) {
   const post = await getPost(uid);
   if (existingUser == null || post == null
     || (existingUser.username !== post.username
-      && existingUser.followees.indexOf(post.username) === -1)) {
+      && existingUser.posts.indexOf(post.uid) === -1)) {
     return null;
   }
   return Schemas.Post.updateOne(
@@ -90,7 +89,7 @@ async function unlikePost(username, uid) {
   const post = await getPost(uid);
   if (existingUser == null || post == null
     || (existingUser.username !== post.username
-      && existingUser.followees.indexOf(post.username) === -1)) {
+      && existingUser.posts.indexOf(post.uid) === -1)) {
     return null;
   }
   return Schemas.Post.updateOne(
@@ -123,14 +122,17 @@ async function editComment(postID, commentID, comment) {
   if (!post) {
     throw new Error('No post found to edit comment');
   }
-  const edit = await Schemas.Post.updateOne(
+
+  return Schemas.Post.updateOne(
     { uid: postID, 'comments.uid': commentID },
-    { $set: { 'comments.$.comment': comment } },
-  );
-  if (edit.nModified === 0) {
-    throw new Error('No comment found to edit');
-  }
-  return edit;
+    { $set: { 'comments.$.comment': comment } })
+    .then((edit) => {
+      if (edit.nModified === 0) {
+        throw new Error('No comment found to edit');
+      } else {
+        return edit;
+      }
+    });
 }
 
 // Deletes the comment with the given ID from the given post
