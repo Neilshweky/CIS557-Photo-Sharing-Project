@@ -21,7 +21,7 @@ const user2 = new Schemas.User({
 const user3 = new Schemas.User({
   username: 'sarah',
   email: 'sbaumg@sas.upenn.edu',
-  password: SHA256('123'),
+  password: SHA256('12345'),
   profilePicture: './pictures/cut-1.jpg',
   followers: ['neilshweky'],
 });

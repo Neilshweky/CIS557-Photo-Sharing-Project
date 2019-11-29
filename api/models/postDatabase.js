@@ -38,7 +38,6 @@ function postPicture(picture, username, caption) {
       const post = values[0];
       const friends = values[1];
       friends.push(username);
-      console.log(friends);
       return addPostIDToUsers(post.uid, friends).then(() => post);
     });
 }
@@ -75,7 +74,7 @@ async function likePost(username, uid) {
   const post = await getPost(uid);
   if (existingUser == null || post == null
     || (existingUser.username !== post.username
-      && existingUser.followees.indexOf(post.username) === -1)) {
+      && existingUser.posts.indexOf(post.uid) === -1)) {
     return null;
   }
   return Schemas.Post.updateOne(
@@ -90,7 +89,7 @@ async function unlikePost(username, uid) {
   const post = await getPost(uid);
   if (existingUser == null || post == null
     || (existingUser.username !== post.username
-      && existingUser.followees.indexOf(post.username) === -1)) {
+      && existingUser.post.indexOf(post.uid) === -1)) {
     return null;
   }
   return Schemas.Post.updateOne(

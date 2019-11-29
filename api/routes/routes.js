@@ -1,3 +1,4 @@
+const { validationResult } = require('express-validator');
 const userDB = require('../models/userDatabase.js');
 const postDB = require('../models/postDatabase.js');
 
@@ -31,6 +32,10 @@ const login = (req, res) => {
   } else {
     const { username } = req.body;
     const { password } = req.body;
+    const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   res.status(422).json({ errors: errors.array() });
+    // }
     userDB.checkLogin(username, password)
       .then(() => {
         res.status(200).send(`${username} is now logged in.`);
