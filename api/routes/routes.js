@@ -1,3 +1,4 @@
+const { validationResult } = require('express-validator');
 const userDB = require('../models/userDatabase.js');
 const postDB = require('../models/postDatabase.js');
 
@@ -31,17 +32,27 @@ const login = (req, res) => {
   } else {
     const { username } = req.body;
     const { password } = req.body;
+    const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   res.status(422).json({ errors: errors.array() });
+    // }
     userDB.checkLogin(username, password)
-      .then((user) => {
-        if (user == null) {
-          res.status(403).send('Invalid username and password combination.');
-        } else {
-          res.status(200).send(`${username} is now logged in.`);
-        }
+      .then(() => {
+        res.status(200).send(`${username} is now logged in.`);
       })
       .catch((err) => {
-        console.log('HERE');
-        res.status(500).send(err);
+        switch (err.message) {
+          case 'No user':
+          case 'incorrect password':
+            res.status(401).send('Invalid username and password combination.');
+            break;
+          case 'account locked':
+            res.status(403).send('Account Locked.');
+            break;
+          default:
+            res.status(500).send(err);
+            break;
+        }
       });
   }
 };
