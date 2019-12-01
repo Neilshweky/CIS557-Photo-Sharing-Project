@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const userDB = require('../models/userDatabase.js');
 const postDB = require('../models/postDatabase.js');
@@ -30,15 +31,20 @@ const login = (req, res) => {
   if (!req.body.username || !req.body.password) {
     res.status(400).send('Please enter username and password to log in.');
   } else {
-    const { username } = req.body;
-    const { password } = req.body;
+    const { username, password } = req.body;
     const errors = validationResult(req);
     // if (!errors.isEmpty()) {
     //   res.status(422).json({ errors: errors.array() });
     // }
     userDB.checkLogin(username, password)
       .then(() => {
-        res.status(200).send(`${username} is now logged in.`);
+        jwt.sign(
+          { username },
+          'secretkey',
+          (err, token) => {
+            res.status(200).send({ message: `${username} is now logged in.`, token });
+          },
+        );
       })
       .catch((err) => {
         switch (err.message) {
@@ -98,7 +104,10 @@ const postPicture = (req, res) => {
 };
 
 const getUser = (req, res) => {
-  const { username } = req.params;
+  let { username } = req.params;
+  if (!username) {
+    username = req.decoded.username;
+  }
   userDB.getUser(username).then((data) => {
     if (data === undefined || data === null) res.status(404).send('User not found');
     else res.status(200).send(data);

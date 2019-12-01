@@ -40,7 +40,13 @@ class Comment extends React.Component {
 
   async getProfilePic() {
     const { username } = this.props;
-    const resp = await fetch(`http://localhost:8080/user/${username}`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`http://localhost:8080/user/${username}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
@@ -123,11 +129,13 @@ class Comment extends React.Component {
             <InputBase
               id={`comment-${id}`}
               multiline
-              rowsMax="2"
               value={commentText}
               onChange={(e) => this.setState({ commentText: e.target.value })}
               disabled
-              style={{ width: '90%', color: 'black' }}
+              style={{
+                width: '90%',
+                color: 'black',
+              }}
             />
           </ListItemText>
           <EditMenu

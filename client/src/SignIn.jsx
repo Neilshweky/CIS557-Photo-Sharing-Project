@@ -85,12 +85,9 @@ class SignIn extends React.Component {
         body: JSON.stringify({ username, password }),
       });
     if (resp.ok) {
-      localStorage.setItem('user',
-        username);
-      localStorage.setItem('login',
-        new Date());
+      const data = await resp.json();
+      window.sessionStorage.setItem('token', data.token);
       updateState('username', username);
-      updateState('loginTime', new Date().toString());
       history.push('/home');
     } else {
       document.getElementById('login-status').innerHTML = await resp.text();

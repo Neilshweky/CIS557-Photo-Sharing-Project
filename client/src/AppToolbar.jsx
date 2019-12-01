@@ -94,15 +94,6 @@ class AppToolbar extends React.Component {
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
   }
 
-  // async componentDidMount() {
-  //   const { loggedInUser } = this.state;
-  //   const userResp = await fetch(`http://localhost:8080/user/${loggedInUser}`);
-  //   if (userResp.ok) {
-  //     const userData = await userResp.json();
-  //     this.setState({ profilePic: userData.profilePicture });
-  //   }
-  // }
-
   handleMobileMenuClose() {
     this.setState({ mobileMoreAnchorEl: null, isMobileMenuOpen: false });
   }
@@ -191,7 +182,7 @@ class AppToolbar extends React.Component {
           <p>Upload Picture</p>
         </MenuItem>
         <MenuItem
-          onClick={() => { window.localStorage.clear(); updateState('username', ''); }}
+          onClick={() => { window.sessionStorage.clear(); updateState('username', ''); }}
           component={Link}
           to="/signin"
         >
@@ -263,7 +254,7 @@ class AppToolbar extends React.Component {
               <Tooltip title="Logout">
                 <IconButton
                   color="inherit"
-                  onClick={() => { localStorage.clear(); updateState('username', ''); }}
+                  onClick={() => { window.sessionStorage.clear(); updateState('username', ''); }}
                   component={Link}
                   to="/signin"
                 >
