@@ -1,5 +1,6 @@
 const express = require('express');
 const { check } = require('express-validator');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const cookieParser = require('cookie-parser');
@@ -26,6 +27,30 @@ const routes = require('./routes/routes.js');
 
 app.use(cors());
 
+function validateToken(req, res, next) {
+  const excluded = ['/login', '/signup'];
+  if (excluded.indexOf(req.url) > -1) {
+    return next();
+  }
+  const bearerHeader = req.headers.authorization;
+  if (typeof bearerHeader !== 'undefined') {
+    const bearer = bearerHeader.split(' ');
+    const bearerToken = bearer[1];
+    return jwt.verify(bearerToken, 'secretkey', (err, result) => {
+      if (err) {
+        res.sendStatus(403);
+      }
+      req.decoded = result;
+      next();
+    });
+  }
+  return res.sendStatus(403);
+}
+
+// validation on all routes except /login and /signup
+
+app.use(validateToken);
+
 // Used to link js and css files
 // app.use(express.static('views/css'));
 // app.use(express.static('views/js'));
@@ -45,7 +70,7 @@ app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', routes.addComment);
 app.put('/editComment/:postID/:commentID', routes.editComment);
 
-app.get('/user/:username', routes.getUser);
+app.get('/user/:username?', routes.getUser);
 app.get('/posts/:username/:num', routes.getPosts);
 app.get('/searchusers/:username/:term', routes.searchUsers);
 

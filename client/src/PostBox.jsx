@@ -11,14 +11,19 @@ export default class PostBox extends React.Component {
     this.generatePosts = this.generatePosts.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.generatePosts();
   }
 
   async generatePosts() {
     const { username, bHome } = this.props;
     const compList = [];
-    const resp = await fetch(`http://localhost:8080/posts/${username}/0`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`http://localhost:8080/posts/${username}/0`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
       const postData = await resp.json();
       postData.forEach((post) => {

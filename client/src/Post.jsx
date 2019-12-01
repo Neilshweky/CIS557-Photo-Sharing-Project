@@ -90,7 +90,12 @@ class Post extends React.Component {
   async getProfilePic() {
     const { post } = this.props;
     const { username } = post;
-    const resp = await fetch(`http://localhost:8080/user/${username}`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`http://localhost:8080/user/${username}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
@@ -133,6 +138,7 @@ class Post extends React.Component {
   async handleLikeClick() {
     const { liked, numLikes } = this.state;
     const { post, username } = this.props;
+    const token = window.sessionStorage.getItem('token');
     if (liked) {
       const resp = await fetch(`http://localhost:8080/unlike/${post.uid}/${username}`,
         {
@@ -140,6 +146,7 @@ class Post extends React.Component {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
           },
           mode: 'cors',
         });
@@ -153,6 +160,7 @@ class Post extends React.Component {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
           },
           mode: 'cors',
         });
@@ -165,6 +173,7 @@ class Post extends React.Component {
   async handleSaveCaption() {
     const { caption } = this.state;
     const { post } = this.props;
+    const token = window.sessionStorage.getItem('token');
     if (caption !== post.caption) {
       await fetch(`http://localhost:8080/updatePost/${post.uid}`,
         {
@@ -172,6 +181,7 @@ class Post extends React.Component {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
           },
           mode: 'cors',
           body: JSON.stringify({ caption }),
@@ -184,12 +194,15 @@ class Post extends React.Component {
 
   async handlePostComment(commentText) {
     const { post, username } = this.props;
+    const token = window.sessionStorage.getItem('token');
     const resp = await fetch(`http://localhost:8080/addComment/${post.uid}/${username}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
+
         },
         mode: 'cors',
         body: JSON.stringify({ comment: commentText }),
@@ -205,6 +218,7 @@ class Post extends React.Component {
   async handleEditComment(commentText, commentID) {
     const { post } = this.props;
     const { comments } = this.state;
+    const token = window.sessionStorage.getItem('token');
     const curCommentText = comments.filter((comment) => comment.uid === commentID)[0].comment;
     if (commentText !== curCommentText) {
       const resp = await fetch(`http://localhost:8080/editComment/${post.uid}/${commentID}`,
@@ -213,6 +227,7 @@ class Post extends React.Component {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
           },
           mode: 'cors',
           body: JSON.stringify({ comment: commentText }),
@@ -233,12 +248,14 @@ class Post extends React.Component {
 
   async handleDeleteComment(commentID) {
     const { post } = this.props;
+    const token = window.sessionStorage.getItem('token');
     const resp = await fetch(`http://localhost:8080/comment/${post.uid}/${commentID}`,
       {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
         },
         mode: 'cors',
       });
@@ -262,12 +279,14 @@ class Post extends React.Component {
 
   async handleDeletePost() {
     const { post, deletePost } = this.props;
+    const token = window.sessionStorage.getItem('token');
     await fetch(`http://localhost:8080/post/${post.uid}`,
       {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
         },
         mode: 'cors',
       });

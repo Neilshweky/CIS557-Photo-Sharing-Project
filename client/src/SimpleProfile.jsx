@@ -106,7 +106,12 @@ class SimpleProfile extends React.Component {
 
   async getProfile(profUsername) {
     const { username } = this.props;
-    const resp = await fetch(`http://localhost:8080/user/${profUsername}`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`http://localhost:8080/user/${profUsername}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
@@ -120,6 +125,7 @@ class SimpleProfile extends React.Component {
         await this.generatePosts();
         await this.getFolloweesData();
         this.setState({ dataLoaded: true });
+        console.log(this.state.followees);
       });
     }
   }
@@ -128,8 +134,13 @@ class SimpleProfile extends React.Component {
     const { followees } = this.state;
     const followeeData = [];
     const promises = [];
+    const token = window.sessionStorage.getItem('token');
     const callbackFn = async (followee) => {
-      const resp = await fetch(`http://localhost:8080/user/${followee}`);
+      const resp = await fetch(`http://localhost:8080/user/${followee}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (resp.ok) {
         const data = await resp.json();
         followeeData.push({ username: followee, profilePicture: data.profilePicture });
@@ -155,6 +166,7 @@ class SimpleProfile extends React.Component {
     const currentPassword = e.target.curPassword.value;
     const newPassword = e.target.password.value;
     const newPassConfirm = e.target.passwordCheck.value;
+    const token = window.sessionStorage.getItem('token');
     if (newPassword === newPassConfirm) {
       if (email !== newEmail) {
         const respEmail = await fetch('http://localhost:8080/user',
@@ -163,6 +175,7 @@ class SimpleProfile extends React.Component {
             headers: {
               'Content-Type': 'application/json',
               'Access-Control-Origin': '*',
+              Authorization: `Bearer ${token}`,
             },
             mode: 'cors',
             body: JSON.stringify({ username, email: newEmail }),
@@ -184,6 +197,7 @@ class SimpleProfile extends React.Component {
             headers: {
               'Content-Type': 'application/json',
               'Access-Control-Origin': '*',
+              Authorization: `Bearer ${token}`,
             },
             mode: 'cors',
             body: JSON.stringify({ username, oldPassword: currentPassword, newPassword }),
@@ -201,14 +215,15 @@ class SimpleProfile extends React.Component {
 
   async updateProfilePic(e) {
     e.preventDefault();
-    const { username, profilePicture } = this.state;
-    const { updateState } = this.props;
+    const { profilePicture } = this.state;
+    const { updateState, username } = this.props;
     const photoStatus = document.getElementById('photo-status');
     photoStatus.innerHTML = '';
     document.getElementById('email-status').innerHTML = '';
     document.getElementById('password-status').innerHTML = '';
     const newImage = e.target.files[0];
     const reader = new FileReader();
+    const token = window.sessionStorage.getItem('token');
     reader.onload = (readerEvt) => {
       const binaryString = readerEvt.target.result;
       this.setState({
@@ -222,6 +237,7 @@ class SimpleProfile extends React.Component {
               headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Origin': '*',
+                Authorization: `Bearer ${token}`,
               },
               mode: 'cors',
               body: JSON.stringify({ username, profilePicture: newProfilePicture }),
@@ -245,7 +261,12 @@ class SimpleProfile extends React.Component {
     const { profUsername } = this.state;
     const { username } = this.props;
     const compList = [];
-    const resp = await fetch(`http://localhost:8080/posts/${profUsername}/0`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`http://localhost:8080/posts/${profUsername}/0`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
       const postData = await resp.json();
       const myPostData = postData.filter((post) => post.username === profUsername);
@@ -262,11 +283,11 @@ class SimpleProfile extends React.Component {
 
   render() {
     const {
-      classes, profilePic, username, updateState,
+      classes, profilePic, username, updateState, numPosts,
     } = this.props;
     const {
       profUsername, email, password, curPassword, passwordCheck,
-      profilePicture, followers, followees, index, reactPosts,
+      profilePicture, followers, followees, index,
       followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let avatar = null;
@@ -323,16 +344,14 @@ class SimpleProfile extends React.Component {
               <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
                 <Grid item xs={12}>
                   <Grid container justify="center" alignItems="center" spacing={1}>
-                    {dataLoaded && (
-                      <Grid item xs={4}>
-                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {reactPosts.length}
-                        </Typography>
-                        <Typography variant="h5">
-                          Posts
-                        </Typography>
-                      </Grid>
-                    )}
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {numPosts}
+                      </Typography>
+                      <Typography variant="h5">
+                        Posts
+                      </Typography>
+                    </Grid>
                     <Grid item xs={4}>
                       <Typography variant="h4" style={{ fontWeight: 'bold' }}>
                         {followers.length}
@@ -366,6 +385,7 @@ class SimpleProfile extends React.Component {
               bProfilePage
               data={followeeData}
               bLoggedInUser={bLoggedInUser}
+              username={username}
             />
           )}
         </TabPanel>
