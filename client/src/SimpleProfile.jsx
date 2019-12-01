@@ -125,7 +125,6 @@ class SimpleProfile extends React.Component {
         await this.generatePosts();
         await this.getFolloweesData();
         this.setState({ dataLoaded: true });
-        console.log(this.state.followees);
       });
     }
   }
@@ -376,7 +375,7 @@ class SimpleProfile extends React.Component {
         </TabPanel>
         <TabPanel value={index} index={1}>
           <Container>
-            {dataLoaded && <PostBox bHome={false} username={profUsername} />}
+            {dataLoaded && <PostBox bHome={false} username={profUsername} loggedIn={username} />}
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
