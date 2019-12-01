@@ -16,7 +16,7 @@ export default class PostBox extends React.Component {
   }
 
   async generatePosts() {
-    const { username, bHome } = this.props;
+    const { loggedIn, username, bHome } = this.props;
     const compList = [];
     const token = window.sessionStorage.getItem('token');
     const resp = await fetch(`http://localhost:8080/posts/${username}/0`, {
@@ -31,7 +31,7 @@ export default class PostBox extends React.Component {
           <Post
             post={post}
             key={post.uid}
-            username={username}
+            username={loggedIn}
             deletePost={this.deletePost}
           />
         );
