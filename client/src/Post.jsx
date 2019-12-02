@@ -175,7 +175,7 @@ class Post extends React.Component {
     const { post } = this.props;
     const token = window.sessionStorage.getItem('token');
     if (caption !== post.caption) {
-      await fetch(`http://localhost:8080/updatePost/${post.uid}`,
+      const resp = await fetch(`http://localhost:8080/updatePost/${post.uid}`,
         {
           method: 'PUT',
           headers: {
@@ -186,6 +186,9 @@ class Post extends React.Component {
           mode: 'cors',
           body: JSON.stringify({ caption }),
         });
+      if (!resp.ok) {
+        this.setState({ caption: post.caption });
+      }
     }
     document.getElementById(`post-save-${post.uid}`).style.display = 'none';
     document.getElementById(`post-caption-${post.uid}`).disabled = true;
@@ -242,8 +245,10 @@ class Post extends React.Component {
           },
         );
         this.setState({ comments: updatedComments });
+        return commentText;
       }
     }
+    return curCommentText;
   }
 
   async handleDeleteComment(commentID) {
@@ -384,7 +389,6 @@ class Post extends React.Component {
               <InputBase
                 id={`post-caption-${post.uid}`}
                 multiline
-                rowsMax="2"
                 value={caption}
                 onChange={(e) => this.setState({ caption: e.target.value })}
                 disabled
