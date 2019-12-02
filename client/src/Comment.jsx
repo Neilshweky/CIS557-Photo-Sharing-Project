@@ -12,6 +12,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import SaveIcon from '@material-ui/icons/Save';
 import PropTypes from 'prop-types';
 import EditMenu from './EditMenu';
+import { API_URL } from './Utilities';
 
 
 const styles = (theme) => ({
@@ -40,7 +41,7 @@ class Comment extends React.Component {
 
   async getProfilePic() {
     const { username } = this.props;
-    const resp = await fetch(`http://localhost:8080/user/${username}`);
+    const resp = await fetch(`${API_URL}/user/${username}`);
     if (resp.ok) {
       const data = await resp.json();
       this.setState({

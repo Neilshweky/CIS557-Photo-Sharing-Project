@@ -96,7 +96,7 @@ class AppToolbar extends React.Component {
 
   // async componentDidMount() {
   //   const { loggedInUser } = this.state;
-  //   const userResp = await fetch(`http://localhost:8080/user/${loggedInUser}`);
+  //   const userResp = await fetch(`${API_URL}/user/${loggedInUser}`);
   //   if (userResp.ok) {
   //     const userData = await userResp.json();
   //     this.setState({ profilePic: userData.profilePicture });

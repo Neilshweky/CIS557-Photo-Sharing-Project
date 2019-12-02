@@ -11,6 +11,7 @@ import ImageUpload from './ImageUpload';
 import Homepage from './Homepage';
 import FriendSearch from './FriendSearch';
 import PrivateRoute from './PrivateRoute';
+import { API_URL } from './Utilities';
 
 class App extends React.Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class App extends React.Component {
   async populateState() {
     const username = localStorage.getItem('user');
     if (username != null) {
-      const resp = await fetch(`http://localhost:8080/user/${username}`);
+      const resp = await fetch(`${API_URL}/user/${username}`);
       if (resp.ok) {
         const loginTime = localStorage.getItem('login');
         const data = await resp.json();

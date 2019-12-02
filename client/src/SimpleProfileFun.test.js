@@ -19,8 +19,8 @@ beforeEach(async () => {
 });
 
 async function goToProfileAfterLogin() {
-  await fetch('http://localhost:8080/user/neilshweky', { method: 'DELETE' }).then(
-    await fetch('http://localhost:8080/signup', {
+  await fetch('localhost:8080/user/neilshweky', { method: 'DELETE' }).then(
+    await fetch('localhost:8080/signup', {
       method: 'POST',
       body: JSON.stringify({ username: 'neilshweky', password: 'cis557sucks', email: 'nshweky@seas.upenn.edu' }),
       headers: { 'Content-Type': 'application/json' },

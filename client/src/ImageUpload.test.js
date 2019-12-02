@@ -16,7 +16,7 @@ beforeEach(async () => {
 });
 
 async function goToHomeAfterLogin() {
-  await fetch('http://localhost:8080/signup', {
+  await fetch('localhost:8080/signup', {
     method: 'POST',
     body: JSON.stringify({ username: 'neilshweky', password: 'cis557sucks', email: 'nshweky@seas.upenn.edu' }),
     headers: { 'Content-Type': 'application/json' },

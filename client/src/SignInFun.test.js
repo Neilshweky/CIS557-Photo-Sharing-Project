@@ -68,7 +68,7 @@ it('go to signup', async () => {
 });
 
 it('login attempt', async () => {
-  await fetch('http://localhost:8080/signup', {
+  await fetch('localhost:8080/signup', {
     method: 'POST',
     body: JSON.stringify({ username: 'neilshweky', password: 'cis557sucks', email: 'nshweky@seas.upenn' }),
     headers: { 'Content-Type': 'application/json' },

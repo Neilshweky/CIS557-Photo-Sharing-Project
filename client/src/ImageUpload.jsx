@@ -8,6 +8,7 @@ import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import AppToolbar from './AppToolbar';
+import { API_URL } from './Utilities';
 
 const styles = (theme) => ({
   textField: {
@@ -51,7 +52,7 @@ class ImageUpload extends React.Component {
   async uploadImage() {
     const { picture, caption } = this.state;
     const { username } = this.props;
-    const resp = await fetch('http://localhost:8080/postpicture',
+    const resp = await fetch(`${API_URL}/postpicture`,
       {
         method: 'POST',
         headers: {

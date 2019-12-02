@@ -2,6 +2,7 @@ import React from 'react';
 import { Box } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import Post from './Post';
+import { API_URL } from './Utilities';
 
 export default class PostBox extends React.Component {
   constructor(props) {
@@ -18,7 +19,7 @@ export default class PostBox extends React.Component {
   async generatePosts() {
     const { username, bHome } = this.props;
     const compList = [];
-    const resp = await fetch(`http://localhost:8080/posts/${username}/0`);
+    const resp = await fetch(`${API_URL}/posts/${username}/0`);
     if (resp.ok) {
       const postData = await resp.json();
       postData.forEach((post) => {

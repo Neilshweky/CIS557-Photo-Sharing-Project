@@ -17,6 +17,7 @@ import AppToolbar from './AppToolbar';
 import FriendTable from './FriendTable';
 import Post from './Post';
 import PostBox from './PostBox';
+import { API_URL } from './Utilities';
 
 const styles = (theme) => ({
   '@global': {
@@ -106,7 +107,7 @@ class SimpleProfile extends React.Component {
 
   async getProfile(profUsername) {
     const { username } = this.props;
-    const resp = await fetch(`http://localhost:8080/user/${profUsername}`);
+    const resp = await fetch(`${API_URL}/user/${profUsername}`);
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
@@ -129,7 +130,7 @@ class SimpleProfile extends React.Component {
     const followeeData = [];
     const promises = [];
     const callbackFn = async (followee) => {
-      const resp = await fetch(`http://localhost:8080/user/${followee}`);
+      const resp = await fetch(`${API_URL}/user/${followee}`);
       if (resp.ok) {
         const data = await resp.json();
         followeeData.push({ username: followee, profilePicture: data.profilePicture });
@@ -157,7 +158,7 @@ class SimpleProfile extends React.Component {
     const newPassConfirm = e.target.passwordCheck.value;
     if (newPassword === newPassConfirm) {
       if (email !== newEmail) {
-        const respEmail = await fetch('http://localhost:8080/user',
+        const respEmail = await fetch('${API_URL}/user',
           {
             method: 'PUT',
             headers: {
@@ -178,7 +179,7 @@ class SimpleProfile extends React.Component {
       }
       if (newPassword !== '') {
         this.setState({ password: '', curPassword: '', passwordCheck: '' });
-        const respPass = await fetch('http://localhost:8080/user',
+        const respPass = await fetch('${API_URL}/user',
           {
             method: 'PUT',
             headers: {
@@ -216,7 +217,7 @@ class SimpleProfile extends React.Component {
       }, async () => {
         const { newProfilePicture } = this.state;
         if (profilePicture !== newProfilePicture) {
-          const respPic = await fetch('http://localhost:8080/user',
+          const respPic = await fetch('${API_URL}/user',
             {
               method: 'PUT',
               headers: {
@@ -245,7 +246,7 @@ class SimpleProfile extends React.Component {
     const { profUsername } = this.state;
     const { username } = this.props;
     const compList = [];
-    const resp = await fetch(`http://localhost:8080/posts/${profUsername}/0`);
+    const resp = await fetch(`${API_URL}/posts/${profUsername}/0`);
     if (resp.ok) {
       const postData = await resp.json();
       const myPostData = postData.filter((post) => post.username === profUsername);

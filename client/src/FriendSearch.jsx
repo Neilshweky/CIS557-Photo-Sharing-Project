@@ -3,6 +3,7 @@ import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
 import FriendTable from './FriendTable';
 import AppToolbar from './AppToolbar';
+import { API_URL } from './Utilities';
 
 export default class FriendSearch extends React.Component {
   constructor(props) {
@@ -14,7 +15,7 @@ export default class FriendSearch extends React.Component {
     const { match, username } = this.props;
     const searchValue = match.params.searchTerm;
     // const { username } = this.state;
-    const resp = await fetch(`http://localhost:8080/searchusers/${username}/${searchValue}`);
+    const resp = await fetch(`${API_URL}/searchusers/${username}/${searchValue}`);
     if (resp.ok) {
       this.setState({ data: await resp.json(), bLoaded: true });
     }

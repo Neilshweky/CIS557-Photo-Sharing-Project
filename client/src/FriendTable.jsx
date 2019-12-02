@@ -14,6 +14,7 @@ import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOut
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import { Link } from '@material-ui/core';
+import { API_URL } from './Utilities';
 
 const styles = (theme) => ({
   root: {
@@ -52,7 +53,7 @@ class SimpleTable extends React.Component {
     this.setState({ data });
 
 
-    await fetch(`http://localhost:8080/unfollow/${curUser}/${unfollowed}`,
+    await fetch(`${API_URL}/unfollow/${curUser}/${unfollowed}`,
       {
         method: 'POST',
         headers: {
@@ -67,7 +68,7 @@ class SimpleTable extends React.Component {
     const { curUser, data } = this.state;
     data[toFollowIndex].following = true;
     this.setState({ data });
-    await fetch(`http://localhost:8080/follow/${curUser}/${data[toFollowIndex].username}`,
+    await fetch(`${API_URL}/follow/${curUser}/${data[toFollowIndex].username}`,
       {
         method: 'POST',
         headers: {

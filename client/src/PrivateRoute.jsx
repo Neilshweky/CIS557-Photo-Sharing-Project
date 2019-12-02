@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
-import dateDiff from './Utilities';
+import { dateDiff } from './Utilities';
 
 
 const PrivateRoute = ({ component: Component, ...rest }) => {

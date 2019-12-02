@@ -1,3 +1,4 @@
+
 const {
   Builder, By, Key, until,
 } = require('selenium-webdriver');
@@ -15,8 +16,8 @@ beforeEach(async () => {
 });
 
 async function signUpUsers() {
-  await fetch('http://localhost:8080/user/user1', { method: 'DELETE' });
-  await fetch('http://localhost:8080/signup', {
+  await fetch('localhost:8080/user/user1', { method: 'DELETE' });
+  await fetch('localhost:8080/signup', {
     method: 'POST',
     body: JSON.stringify({ username: 'user1', password: 'user1pw', email: 'user1@seas.upenn.edu' }),
     headers: { 'Content-Type': 'application/json' },
@@ -24,12 +25,12 @@ async function signUpUsers() {
 }
 
 async function follow(user, followee) {
-  return fetch(`http://localhost:8080/follow/${user}/${followee}`, { method: 'POST' })
+  return fetch(`localhost:8080/follow/${user}/${followee}`, { method: 'POST' })
     .then((res) => console.log(res));
 }
 
 async function postPicture() {
-  return fetch('http://localhost:8080/postpicture', {
+  return fetch('localhost:8080/postpicture', {
     method: 'POST',
     body: JSON.stringify({ username: 'user1', pic: 'some_pic' }),
     headers: { 'Content-Type': 'application/json' },

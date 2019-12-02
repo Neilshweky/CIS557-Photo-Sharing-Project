@@ -4,4 +4,6 @@ function dateDiff(date) {
   return diffDays;
 }
 
-export default dateDiff;
+const API_URL = process.env.API_URL || 'http://localhost:8080';
+
+export { dateDiff, API_URL };

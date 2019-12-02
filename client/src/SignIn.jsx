@@ -17,7 +17,7 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import dateDiff from './Utilities';
+import { dateDiff, API_URL } from './Utilities';
 
 
 const styles = (theme) => ({
@@ -74,7 +74,7 @@ class SignIn extends React.Component {
     document.getElementById('login-status').innerHTML = '';
     const { username, password } = this.state;
     const { history, updateState } = this.props;
-    const resp = await fetch('http://localhost:8080/login',
+    const resp = await fetch(`${API_URL}/login`,
       {
         method: 'POST',
         headers: {

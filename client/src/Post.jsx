@@ -20,6 +20,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import CommentBar from './CommentBar';
 import EditMenu from './EditMenu';
+import { API_URL } from './Utilities';
 
 const styles = (theme) => ({
   card: {
@@ -90,7 +91,7 @@ class Post extends React.Component {
   async getProfilePic() {
     const { post } = this.props;
     const { username } = post;
-    const resp = await fetch(`http://localhost:8080/user/${username}`);
+    const resp = await fetch(`${API_URL}/user/${username}`);
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
@@ -134,7 +135,7 @@ class Post extends React.Component {
     const { liked, numLikes } = this.state;
     const { post, username } = this.props;
     if (liked) {
-      const resp = await fetch(`http://localhost:8080/unlike/${post.uid}/${username}`,
+      const resp = await fetch(`${API_URL}/unlike/${post.uid}/${username}`,
         {
           method: 'POST',
           headers: {
@@ -147,7 +148,7 @@ class Post extends React.Component {
         this.setState({ liked: false, numLikes: numLikes - 1 });
       }
     } else {
-      const resp = await fetch(`http://localhost:8080/like/${post.uid}/${username}`,
+      const resp = await fetch(`${API_URL}/like/${post.uid}/${username}`,
         {
           method: 'POST',
           headers: {
@@ -166,7 +167,7 @@ class Post extends React.Component {
     const { caption } = this.state;
     const { post } = this.props;
     if (caption !== post.caption) {
-      await fetch(`http://localhost:8080/updatePost/${post.uid}`,
+      await fetch(`${API_URL}/updatePost/${post.uid}`,
         {
           method: 'PUT',
           headers: {
@@ -184,7 +185,7 @@ class Post extends React.Component {
 
   async handlePostComment(commentText) {
     const { post, username } = this.props;
-    const resp = await fetch(`http://localhost:8080/addComment/${post.uid}/${username}`,
+    const resp = await fetch(`${API_URL}/addComment/${post.uid}/${username}`,
       {
         method: 'POST',
         headers: {
@@ -207,7 +208,7 @@ class Post extends React.Component {
     const { comments } = this.state;
     const curCommentText = comments.filter((comment) => comment.uid === commentID)[0].comment;
     if (commentText !== curCommentText) {
-      const resp = await fetch(`http://localhost:8080/editComment/${post.uid}/${commentID}`,
+      const resp = await fetch(`${API_URL}/editComment/${post.uid}/${commentID}`,
         {
           method: 'PUT',
           headers: {
@@ -233,7 +234,7 @@ class Post extends React.Component {
 
   async handleDeleteComment(commentID) {
     const { post } = this.props;
-    const resp = await fetch(`http://localhost:8080/comment/${post.uid}/${commentID}`,
+    const resp = await fetch(`${API_URL}/comment/${post.uid}/${commentID}`,
       {
         method: 'DELETE',
         headers: {
@@ -262,7 +263,7 @@ class Post extends React.Component {
 
   async handleDeletePost() {
     const { post, deletePost } = this.props;
-    await fetch(`http://localhost:8080/post/${post.uid}`,
+    await fetch(`${API_URL}/post/${post.uid}`,
       {
         method: 'DELETE',
         headers: {

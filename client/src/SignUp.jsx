@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import PropTypes from 'prop-types';
-import dateDiff from './Utilities';
+import { dateDiff, API_URL } from './Utilities';
 
 const styles = (theme) => ({
   '@global': {
@@ -65,7 +65,7 @@ class SignUp extends React.Component {
   async signup(e) {
     // e.preventDefault should always be the first thing in the function
     e.preventDefault();
-    const resp = await fetch('http://localhost:8080/signup',
+    const resp = await fetch(`${API_URL}/signup`,
       {
         method: 'POST',
         headers: {
