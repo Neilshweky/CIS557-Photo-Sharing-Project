@@ -23,7 +23,15 @@ const signup = (req, res) => {
           } else {
             console.log(req.body.username);
             userDB.createUser(username, email, password)
-              .then((data) => res.status(201).send(data))
+              .then((data) => {
+                jwt.sign(
+                  { username },
+                  'secretkey',
+                  (err, token) => {
+                    res.status(201).send({ message: `${username} is now logged in.`, token, data });
+                  },
+                );
+              })
               .catch((err) => res.status(500).send(err));
           }
         })

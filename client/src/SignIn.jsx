@@ -54,17 +54,28 @@ class SignIn extends React.Component {
     this.state = {
       username: '',
       password: '',
+      isLoaded: false,
     };
     this.login = this.login.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
-  componentDidMount() {
-    const { history, username, loginTime } = this.props;
-    if (username !== '' && loginTime !== '' && dateDiff(new Date(loginTime)) < 30) {
-      history.push('/home');
+  async componentDidMount() {
+    const { history } = this.props;
+    const token = window.sessionStorage.getItem('token');
+    if (token !== null) {
+      // Your axios call here
+      const resp = await fetch('http://localhost:8080/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (resp.ok) {
+        history.push('/home');
+      }
     } else {
-      window.localStorage.clear();
+      window.sessionStorage.clear();
+      this.setState({ isLoaded: true });
     }
   }
 
@@ -101,7 +112,8 @@ class SignIn extends React.Component {
 
   render() {
     const { classes } = this.props;
-    return (
+    const { isLoaded } = this.state;
+    return (isLoaded && (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
@@ -165,6 +177,7 @@ class SignIn extends React.Component {
           </form>
         </div>
       </Container>
+    )
     );
   }
 }
