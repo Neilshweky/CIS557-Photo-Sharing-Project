@@ -5,7 +5,7 @@ const moment = require('moment');
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost/cis557', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log('Connected to mongo')).catch(console.log);
+}).then(() => console.log('Connected to mongo', process.env.MONGO_URI || 'mongodb://localhost/cis557')).catch(console.log);
 mongoose.set('useFindAndModify', false);
 
 const { Schema } = mongoose;
