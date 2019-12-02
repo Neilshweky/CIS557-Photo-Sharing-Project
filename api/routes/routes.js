@@ -8,21 +8,27 @@ const signup = (req, res) => {
   if (!req.body.username || !req.body.password || !req.body.email) {
     res.status(400).send('Username, password and email are required to sign up.');
   } else {
-    const { username } = req.body;
-    const { password } = req.body;
-    const { email } = req.body;
-    const pic = req.body.profile_picture;
-    userDB.getUser(username)
-      .then((existingUser) => {
-        if (existingUser != null) {
-          res.status(400).send(`The username ${username} is already in use.`);
-        } else {
-          userDB.createUser(username, email, password, pic)
-            .then((data) => res.status(201).send(data))
-            .catch((err) => res.status(500).send(err));
-        }
-      })
-      .catch((err) => res.status(500).send(err));
+    const {
+      username, password, email,
+    } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorString = errors.errors.map((error) => error.msg).join('<br>');
+      res.status(422).send(errorString);
+    } else {
+      userDB.getUser(username)
+        .then((existingUser) => {
+          if (existingUser != null) {
+            res.status(400).send(`The username ${username} is already in use.`);
+          } else {
+            console.log(req.body.username);
+            userDB.createUser(username, email, password)
+              .then((data) => res.status(201).send(data))
+              .catch((err) => res.status(500).send(err));
+          }
+        })
+        .catch((err) => res.status(500).send(err));
+    }
   }
 };
 
@@ -31,64 +37,72 @@ const login = (req, res) => {
   if (!req.body.username || !req.body.password) {
     res.status(400).send('Please enter username and password to log in.');
   } else {
-    const { username, password } = req.body;
     const errors = validationResult(req);
-    // if (!errors.isEmpty()) {
-    //   res.status(422).json({ errors: errors.array() });
-    // }
-    userDB.checkLogin(username, password)
-      .then(() => {
-        jwt.sign(
-          { username },
-          'secretkey',
-          (err, token) => {
-            res.status(200).send({ message: `${username} is now logged in.`, token });
-          },
-        );
-      })
-      .catch((err) => {
-        switch (err.message) {
-          case 'No user':
-          case 'incorrect password':
-            res.status(401).send('Invalid username and password combination.');
-            break;
-          case 'account locked':
-            res.status(403).send('Account Locked.');
-            break;
-          default:
-            res.status(500).send(err);
-            break;
-        }
-      });
+    if (!errors.isEmpty()) {
+      const errorString = errors.errors.map((error) => error.msg).join('<br>');
+      res.status(422).send(errorString);
+    } else {
+      const { username, password } = req.body;
+      userDB.checkLogin(username, password)
+        .then(() => {
+          jwt.sign(
+            { username },
+            'secretkey',
+            (err, token) => {
+              res.status(200).send({ message: `${username} is now logged in.`, token });
+            },
+          );
+        })
+        .catch((err) => {
+          switch (err.message) {
+            case 'No user':
+            case 'incorrect password':
+              res.status(401).send('Invalid username and password combination.');
+              break;
+            case 'account locked':
+              res.status(403).send('Account Locked.');
+              break;
+            default:
+              res.status(500).send(err);
+              break;
+          }
+        });
+    }
   }
 };
 
 // Route for '/updateProfile', updates the user's profile
 const updateProfile = (req, res) => {
-  const { username } = req.body;
-  if (req.body.email) {
-    userDB.updateEmail(username, req.body.email)
-      .then((data) => res.status(201).send(data))
-      .catch((err) => {
-        if (err.message === 'no user found') res.status(400).send(err.message);
-        else res.status(500).send(err);
-      });
-  } else if (req.body.profilePicture) {
-    userDB.updateProfilePic(username, req.body.profilePicture)
-      .then((data) => res.status(201).send(data))
-      .catch((err) => {
-        if (err.message === 'no user found') res.status(400).send(err.message);
-        else res.status(500).send(err.message);
-      });
-  } else if (req.body.oldPassword && req.body.newPassword) {
-    userDB.updatePassword(username, req.body.oldPassword, req.body.newPassword)
-      .then((data) => res.status(201).send(data))
-      .catch((err) => {
-        if (err.message === 'no user found' || err.message === 'incorrect password') res.status(400).send(err.message);
-        else res.status(500).send(err.message);
-      });
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorString = errors.errors.map((error) => error.msg).join('<br>');
+    res.status(422).send(errorString);
   } else {
-    res.status(400).send('Invalid profile update');
+    const { username } = req.body;
+    if (req.body.email) {
+      userDB.updateEmail(username, req.body.email)
+        .then((data) => res.status(201).send(data))
+        .catch((err) => {
+          if (err.message === 'no user found') res.status(400).send(err.message);
+          else res.status(500).send(err);
+        });
+    } else if (req.body.profilePicture) {
+      userDB.updateProfilePic(username, req.body.profilePicture)
+        .then((data) => res.status(201).send(data))
+        .catch((err) => {
+          if (err.message === 'no user found') res.status(400).send(err.message);
+          else res.status(500).send(err.message);
+        });
+    } else if (req.body.oldPassword && req.body.newPassword) {
+      userDB.updatePassword(username, req.body.oldPassword, req.body.newPassword)
+        .then((data) => res.status(201).send(data))
+        .catch((err) => {
+          if (err.message === 'no user found' || err.message === 'incorrect password') res.status(400).send(err.message);
+          else res.status(500).send(err.message);
+        });
+    } else {
+      res.status(400).send('Invalid profile update');
+    }
   }
 };
 
@@ -96,10 +110,16 @@ const postPicture = (req, res) => {
   if (!req.body.pic) {
     res.status(400).send('Picture is required to create post.');
   } else {
-    const { pic, username, caption } = req.body;
-    postDB.postPicture(pic, username, caption)
-      .then((data) => res.status(201).send(data))
-      .catch((err) => res.status(500).send(err));
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorString = errors.errors.map((error) => error.msg).join('<br>');
+      res.status(422).send(errorString);
+    } else {
+      const { pic, username, caption } = req.body;
+      postDB.postPicture(pic, username, caption)
+        .then((data) => res.status(201).send(data))
+        .catch((err) => res.status(500).send(err));
+    }
   }
 };
 
@@ -176,15 +196,21 @@ const updatePost = (req, res) => {
   if (!caption) {
     res.status(400).send('New caption is required to update post');
   } else {
-    postDB.updatePost(postID, caption)
-      .then((data) => res.status(200).send(data))
-      .catch((err) => {
-        if (err.message === 'No post found to edit') {
-          res.status(404).send(err);
-        } else {
-          res.status(500).send(err);
-        }
-      });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorString = errors.errors.map((error) => error.msg).join('<br>');
+      res.status(422).send(errorString);
+    } else {
+      postDB.updatePost(postID, caption)
+        .then((data) => res.status(200).send(data))
+        .catch((err) => {
+          if (err.message === 'No post found to edit') {
+            res.status(404).send(err);
+          } else {
+            res.status(500).send(err);
+          }
+        });
+    }
   }
 };
 
@@ -203,7 +229,6 @@ const deletePost = (req, res) => {
       })
       .catch((err) => res.status(500).send(err));
   }
-
 };
 
 // COMMENT EDIT ROUTES
@@ -214,15 +239,21 @@ const addComment = (req, res) => {
   if (!comment || !postID || !username) {
     res.status(400).send('A comment, postID, and username are required');
   } else {
-    postDB.addComment(postID, username, comment)
-      .then((data) => res.status(200).send(data))
-      .catch((err) => {
-        if (err === 'No post found to add comment') {
-          res.status(404).send(err);
-        } else {
-          res.status(500).send(err);
-        }
-      });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorString = errors.errors.map((error) => error.msg).join('<br>');
+      res.status(422).send(errorString);
+    } else {
+      postDB.addComment(postID, username, comment)
+        .then((data) => res.status(200).send(data))
+        .catch((err) => {
+          if (err === 'No post found to add comment') {
+            res.status(404).send(err);
+          } else {
+            res.status(500).send(err);
+          }
+        });
+    }
   }
 };
 
@@ -232,16 +263,22 @@ const editComment = (req, res) => {
   if (!comment || !postID || !commentID) {
     res.status(400).send('A comment, postID, and commentID are required');
   } else {
-    postDB.editComment(postID, commentID, comment)
-      .then((data) => res.status(200).send(data))
-      .catch((err) => {
-        if (err.message === 'No post found to edit comment'
-          || err.message === 'No comment found to edit') {
-          res.status(404).send(err);
-        } else {
-          res.status(500).send(err);
-        }
-      });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorString = errors.errors.map((error) => error.msg).join('<br>');
+      res.status(422).send(errorString);
+    } else {
+      postDB.editComment(postID, commentID, comment)
+        .then((data) => res.status(200).send(data))
+        .catch((err) => {
+          if (err.message === 'No post found to edit comment'
+            || err.message === 'No comment found to edit') {
+            res.status(404).send(err);
+          } else {
+            res.status(500).send(err);
+          }
+        });
+    }
   }
 };
 

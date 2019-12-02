@@ -26,7 +26,6 @@ export default class NewCommentField extends React.Component {
           <TextField
             id={`newComment-${postID}`}
             multiline
-            rowsMax="2"
             placeholder="Write a comment..."
             onChange={(e) => this.setState({ commentText: e.target.value })}
             style={{ width: '95%', marginTop: 5 }}

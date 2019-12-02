@@ -94,11 +94,11 @@ class Comment extends React.Component {
     document.getElementById(`comment-${id}`).style.color = 'blue';
   }
 
-  handleSubmitEdit() {
+  async handleSubmitEdit() {
     const { editComment, id } = this.props;
     const { commentText } = this.state;
-    editComment(commentText, id);
-    this.setState({ bEditMode: false });
+    const updatedText = await editComment(commentText, id);
+    this.setState({ bEditMode: false, commentText: updatedText });
     document.getElementById(`comment-${id}`).disabled = true;
     document.getElementById(`comment-${id}`).style.color = 'black';
   }

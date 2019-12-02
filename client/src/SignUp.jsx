@@ -47,7 +47,6 @@ class SignUp extends React.Component {
       username: '',
       password: '',
       email: '',
-      profile_picture: '',
     };
     this.signup = this.signup.bind(this);
     this.handleChange = this.handleChange.bind(this);
