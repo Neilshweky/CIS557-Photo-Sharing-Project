@@ -15,7 +15,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AppToolbar from './AppToolbar';
 import FriendTable from './FriendTable';
-import Post from './Post';
 import PostBox from './PostBox';
 
 const styles = (theme) => ({
@@ -82,12 +81,12 @@ class SimpleProfile extends React.Component {
     super(props);
     this.getProfile = this.getProfile.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
-    this.generatePosts = this.generatePosts.bind(this);
+    // this.generatePosts = this.generatePosts.bind(this);
     this.getFolloweesData = this.getFolloweesData.bind(this);
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false,
+      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false,
     };
   }
 
@@ -105,6 +104,7 @@ class SimpleProfile extends React.Component {
   }
 
   async getProfile(profUsername) {
+    this.setState({ dataLoaded: false });
     const { username } = this.props;
     const token = window.sessionStorage.getItem('token');
     const resp = await fetch(`http://localhost:8080/user/${profUsername}`, {
@@ -122,9 +122,8 @@ class SimpleProfile extends React.Component {
         profilePicture: data.profilePicture,
         bLoggedInUser: profUsername === username,
       }, async () => {
-        await this.generatePosts();
         await this.getFolloweesData();
-        this.setState({ dataLoaded: true });
+        this.setState({ dataLoaded: true, index: 0 });
       });
     }
   }
@@ -256,26 +255,6 @@ class SimpleProfile extends React.Component {
     reader.readAsBinaryString(newImage);
   }
 
-  async generatePosts() {
-    const { profUsername } = this.state;
-    const { username } = this.props;
-    const compList = [];
-    const token = window.sessionStorage.getItem('token');
-    const resp = await fetch(`http://localhost:8080/posts/${profUsername}/0`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (resp.ok) {
-      const postData = await resp.json();
-      const myPostData = postData.filter((post) => post.username === profUsername);
-      myPostData.forEach((post) => {
-        compList.push(<Post post={post} key={post.uid} username={username} />);
-      });
-      this.setState({ reactPosts: compList });
-    }
-  }
-
   handleTabChange(e, newValue) {
     this.setState({ index: newValue });
   }
@@ -315,7 +294,6 @@ class SimpleProfile extends React.Component {
         </Avatar>
       );
     }
-
     return (
       <div>
         <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
