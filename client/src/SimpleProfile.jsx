@@ -87,7 +87,7 @@ class SimpleProfile extends React.Component {
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false,
+      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0,
     };
   }
 
@@ -122,6 +122,7 @@ class SimpleProfile extends React.Component {
         followees: data.followees,
         profilePicture: data.profilePicture,
         bLoggedInUser: profUsername === username,
+        numMyPosts: data.numMyPosts,
       }, async () => {
         await this.getFolloweesData();
         this.setState({ dataLoaded: true, index: 0 });
@@ -262,12 +263,12 @@ class SimpleProfile extends React.Component {
 
   render() {
     const {
-      classes, profilePic, username, updateState, numMyPosts
+      classes, profilePic, username, updateState,
     } = this.props;
     const {
       profUsername, email, password, curPassword, passwordCheck,
       profilePicture, followers, followees, index,
-      followeeData, dataLoaded, bLoggedInUser,
+      followeeData, dataLoaded, bLoggedInUser, numMyPosts
     } = this.state;
     let avatar = null;
     try {
