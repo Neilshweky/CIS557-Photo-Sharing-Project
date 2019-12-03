@@ -159,7 +159,7 @@ async function updatePost(postID, caption) {
 // Deletes the post with the given post ID
 async function deletePost(postID) {
   const p1 = await Schemas.Post.findOneAndDelete({ uid: postID });
-  const p2 = Schemas.User.update({ username: p1.username }, { $inc: { numMyPosts: -1 } });
+  const p2 = Schemas.User.updateOne({ username: p1.username }, { $inc: { numMyPosts: -1 } });
   return Promise.all([
     p1, p2,
     Schemas.User.updateMany({}, { $pull: { posts: postID } }),

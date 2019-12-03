@@ -75,7 +75,7 @@ async function checkLogin(username, password) {
     const updated = await Schemas.User.findOneAndUpdate({ username },
       { $inc: { loginAttempts: 1 } });
     if (updated.loginAttempts + 1 === 5) {
-      await Schemas.User.update({ username },
+      await Schemas.User.updateOne({ username },
         { $set: { lockUntil: Date.now() + 2 * 60 * 60 * 1000 } });
       return Promise.reject(Error('account locked'));
     }
