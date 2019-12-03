@@ -65,7 +65,7 @@ class SignIn extends React.Component {
     const token = window.sessionStorage.getItem('token');
     if (token !== null) {
       // Your axios call here
-      const resp = await fetch('http://localhost:8080/', {
+      const resp = await fetch(`${API_URL}/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
