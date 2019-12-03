@@ -72,9 +72,7 @@ async function likePost(username, uid) {
   console.log('liking post: ', username, ', ', uid);
   const existingUser = await user.getUser(username);
   const post = await getPost(uid);
-  if (existingUser == null || post == null
-    || (existingUser.username !== post.username
-      && existingUser.posts.indexOf(post.uid) === -1)) {
+  if (existingUser == null || post == null) {
     return null;
   }
   return Schemas.Post.updateOne(
@@ -87,9 +85,7 @@ async function unlikePost(username, uid) {
   console.log('unliking post: ', username, ', ', uid);
   const existingUser = await user.getUser(username);
   const post = await getPost(uid);
-  if (existingUser == null || post == null
-    || (existingUser.username !== post.username
-      && existingUser.posts.indexOf(post.uid) === -1)) {
+  if (existingUser == null || post == null) {
     return null;
   }
   return Schemas.Post.updateOne(
