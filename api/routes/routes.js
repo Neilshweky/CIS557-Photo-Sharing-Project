@@ -13,7 +13,7 @@ const signup = (req, res) => {
     userDB.getUser(username)
       .then((existingUser) => {
         if (existingUser != null) {
-          res.status(400).send(`The username ${username} is already in use.`);
+          res.status(409).send(`The username ${username} is already in use.`);
         } else {
           userDB.createUser(username, email, password, pic)
             .then((data) => res.status(201).send(data))
@@ -40,7 +40,6 @@ const login = (req, res) => {
         }
       })
       .catch((err) => {
-        console.log('HERE');
         res.status(500).send(err);
       });
   }
@@ -51,27 +50,28 @@ const updateProfile = (req, res) => {
   const { username } = req.body;
   if (req.body.email) {
     userDB.updateEmail(username, req.body.email)
-      .then((data) => res.status(201).send(data))
+      .then((data) => res.status(200).send(data))
       .catch((err) => {
-        if (err.message === 'no user found') res.status(400).send(err.message);
+        if (err.message === 'no user found') res.status(404).send(err.message);
         else res.status(500).send(err);
       });
   } else if (req.body.profilePicture) {
     userDB.updateProfilePic(username, req.body.profilePicture)
-      .then((data) => res.status(201).send(data))
+      .then((data) => res.status(200).send(data))
       .catch((err) => {
-        if (err.message === 'no user found') res.status(400).send(err.message);
+        if (err.message === 'no user found') res.status(404).send(err.message);
         else res.status(500).send(err.message);
       });
   } else if (req.body.oldPassword && req.body.newPassword) {
     userDB.updatePassword(username, req.body.oldPassword, req.body.newPassword)
-      .then((data) => res.status(201).send(data))
+      .then((data) => res.status(200).send(data))
       .catch((err) => {
-        if (err.message === 'no user found' || err.message === 'incorrect password') res.status(400).send(err.message);
+        if (err.message === 'no user found') res.status(404).send(err.message);
+        else if (err.message === 'incorrect password') res.status(401).send(err.message);
         else res.status(500).send(err.message);
       });
   } else {
-    res.status(400).send('Invalid profile update');
+    res.status(400).send('Invalid profile update (missing parameters)');
   }
 };
 
@@ -115,28 +115,60 @@ const likePost = (req, res) => {
   const { username, postid } = req.params;
   userDB.getUser(username).then((user) => {
     if (user == null) {
-      res.status(400).send(`There is no such user ${username}.`);
+      res.status(404).send(`There is no such user ${username}.`);
     } else if (user.username !== username && user.followees.indexOf(username) === -1) {
-      res.status(400).send(`${username} does not follow original poster.`);
+      res.status(409).send(`${username} does not follow original poster.`);
     } else {
-      postDB.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
+      postDB.likePost(username, postid)
+        .then(() => { res.status(200).send('Post liked'); })
+        .catch((err) => res.status(500).send(err));
     }
   });
 };
 
 const unlikePost = (req, res) => {
   const { username, postid } = req.params;
-  postDB.unlikePost(username, postid).then(() => { res.status(200).send('Post unliked'); }).catch((err) => res.status(500).send(err));
+  userDB.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(404).send(`There is no such user ${username}.`);
+    } else if (user.username !== username && user.followees.indexOf(username) === -1) {
+      res.status(409).send(`${username} does not follow original poster.`);
+    } else {
+      postDB.unlikePost(username, postid)
+        .then(() => { res.status(200).send('Post unliked'); })
+        .catch((err) => res.status(500).send(err));
+    }
+  });
 };
 
 const follow = (req, res) => {
   const { username, friend } = req.params;
-  userDB.followUser(username, friend).then(() => { res.status(200).send(`${username} followed ${friend}`); }).catch((err) => res.status(500).send(err));
+  userDB.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(404).send(`There is no such user ${username}.`);
+    } else if (user.followees.indexOf(friend) !== -1) {
+      res.status(409).send(`${username} already follows ${friend}.`);
+    } else {
+      userDB.followUser(username, friend)
+        .then(() => { res.status(200).send(`${username} followed ${friend}`); })
+        .catch((err) => res.status(500).send(err));
+    }
+  });
 };
 
 const unfollow = (req, res) => {
   const { username, friend } = req.params;
-  userDB.unfollowUser(username, friend).then(() => { res.status(200).send(`${username} unfollowed ${friend}`); }).catch((err) => res.status(500).send(err));
+  userDB.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(404).send(`There is no such user ${username}.`);
+    } else if (user.followees.indexOf(friend) === -1) {
+      res.status(409).send(`${username} does not follow ${friend}.`);
+    } else {
+      userDB.unfollowUser(username, friend)
+        .then(() => { res.status(200).send(`${username} unfollowed ${friend}`); })
+        .catch((err) => res.status(500).send(err));
+    }
+  });
 };
 
 const searchUsers = (req, res) => {
@@ -160,7 +192,7 @@ const updatePost = (req, res) => {
       .then((data) => res.status(200).send(data))
       .catch((err) => {
         if (err.message === 'No post found to edit') {
-          res.status(400).send(err);
+          res.status(404).send(err);
         } else {
           res.status(500).send(err);
         }
@@ -193,7 +225,7 @@ const addComment = (req, res) => {
       .then((data) => res.status(200).send(data))
       .catch((err) => {
         if (err === 'No post found to add comment') {
-          res.status(400).send(err);
+          res.status(404).send(err);
         } else {
           res.status(500).send(err);
         }
@@ -212,7 +244,7 @@ const editComment = (req, res) => {
       .catch((err) => {
         if (err.message === 'No post found to edit comment'
           || err.message === 'No comment found to edit') {
-          res.status(400).send(err);
+          res.status(404).send(err);
         } else {
           res.status(500).send(err);
         }

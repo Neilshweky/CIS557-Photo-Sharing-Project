@@ -41,12 +41,12 @@ app.post('/follow/:username/:friend', routes.follow);
 app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', routes.addComment);
 app.put('/editComment/:postID/:commentID', routes.editComment);
+app.put('/user', routes.updateProfile);//
 
 app.get('/user/:username', routes.getUser);
 app.get('/posts/:username/:num', routes.getPosts);
 app.get('/searchusers/:username/:term', routes.searchUsers);
 
-app.put('/user', routes.updateProfile);//
 app.delete('/user/:username', routes.deleteUser);
 app.delete('/post/:postID', routes.deletePost);//
 app.delete('/comment/:postID/:commentID', routes.deleteComment);//
