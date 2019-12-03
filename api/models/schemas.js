@@ -23,6 +23,7 @@ const User = new Schema({
   followers: Array, // IN adjacanecy list
   followees: Array, // OUT adjacency list
   posts: Array,
+  numMyPosts: { type: Number, default: 0 },
   loginAttempts: { type: Number, required: true, default: 0 },
   lockUntil: { type: Number },
 });

@@ -33,7 +33,10 @@ function addPostIDToUsers(postID, usernames) {
 // 2. get all of current users friends
 function postPicture(picture, username, caption) {
   return Promise
-    .all([createPost(picture, username, caption), user.getFollowersForUsername(username)])
+    .all([
+      createPost(picture, username, caption),
+      user.getFollowersForUsername(username),
+      Schemas.User.updateOne({ username }, { $inc: { numMyPosts: 1 } })])
     .then((values) => {
       const post = values[0];
       const friends = values[1];
@@ -154,9 +157,11 @@ async function updatePost(postID, caption) {
 }
 
 // Deletes the post with the given post ID
-function deletePost(postID) {
+async function deletePost(postID) {
+  const p1 = await Schemas.Post.findOneAndDelete({ uid: postID });
+  const p2 = Schemas.User.update({ username: p1.username }, { $inc: { numMyPosts: -1 } });
   return Promise.all([
-    Schemas.Post.deleteOne({ uid: postID }),
+    p1, p2,
     Schemas.User.updateMany({}, { $pull: { posts: postID } }),
   ]);
 }

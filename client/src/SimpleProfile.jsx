@@ -262,7 +262,7 @@ class SimpleProfile extends React.Component {
 
   render() {
     const {
-      classes, profilePic, username, updateState, numPosts,
+      classes, profilePic, username, updateState, numMyPosts
     } = this.props;
     const {
       profUsername, email, password, curPassword, passwordCheck,
@@ -324,7 +324,7 @@ class SimpleProfile extends React.Component {
                   <Grid container justify="center" alignItems="center" spacing={1}>
                     <Grid item xs={4}>
                       <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                        {numPosts}
+                        {numMyPosts}
                       </Typography>
                       <Typography variant="h5">
                         Posts
@@ -501,6 +501,7 @@ SimpleProfile.propTypes = {
   username: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
   profilePic: PropTypes.string.isRequired,
+  numMyPosts: PropTypes.number.isRequired,
 };
 
 export default withStyles(styles)(SimpleProfile);
