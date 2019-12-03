@@ -1,35 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
-
-
-// class PrivateRoute extends React.Component {
-//   // Add your own authentication on the below line.
-//   constructor(props) {
-//     super(props);
-//     this.state = { auth: false };
-//   }
-
-//   async componentDidMount() {
-//     const token = window.sessionStorage.getItem('token');
-
-//   }
-
-//   // const isLoggedIn = username !== '' && loginTime !== '' && dateDiff(new Date(loginTime)) < 30;
-//   render() {
-//     const { component: Component, ...rest } = this.props;
-//     const { auth } = this.state;
-//     return (
-//       <Route
-//         {...rest}
-//         render={(props) => (auth ? <Component {...props} />
-//           : <Redirect to={{ pathname: '/signin', state: { from: props.location } }} />)}
-//       />
-//     );
-//   }
-// }
-
-// export default PrivateRoute;
+import { API_URL } from './Utilities';
 
 class PrivateRoute extends React.Component {
 
@@ -46,7 +18,7 @@ class PrivateRoute extends React.Component {
     const token = window.sessionStorage.getItem('token');
     if (token !== null) {
       // Your axios call here
-      const resp = await fetch('http://localhost:8080/', {
+      const resp = await fetch(`${API_URL}/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
