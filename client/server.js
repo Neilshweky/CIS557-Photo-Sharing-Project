@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 
 
-if (process.env.NODE_ENV === 'production' || true) {
+if (process.env.NODE_ENV === 'production') {
   console.log('We\'re in production!');
   // Serve any static files
   app.use(express.static(path.join(__dirname, '/build')));
