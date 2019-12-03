@@ -5,5 +5,5 @@ function dateDiff(date) {
 }
 
 const API_URL = process.env.NODE_ENV === 'production' ? 'https://cis557-404-api.herokuapp.com' : 'http://localhost:8080';
-console.log('HERE I AM LOOK OVER HERE PLZ', API_URL);
+
 export { dateDiff, API_URL };
