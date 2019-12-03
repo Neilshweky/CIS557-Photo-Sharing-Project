@@ -28,10 +28,9 @@ class App extends React.Component {
   }
 
   async populateState() {
-    const username = localStorage.getItem('user');
     const token = window.sessionStorage.getItem('token');
     if (token !== null) {
-      const resp = await fetch(`${API_URL}/user/${username}`,
+      const resp = await fetch(`${API_URL}/user/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

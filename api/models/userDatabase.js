@@ -157,6 +157,8 @@ function getSearchSuggestions(username, term) {
   });
 }
 
+
+
 module.exports = {
   getUser,
   deleteUser,
