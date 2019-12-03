@@ -91,7 +91,12 @@ class Post extends React.Component {
   async getProfilePic() {
     const { post } = this.props;
     const { username } = post;
-    const resp = await fetch(`${API_URL}/user/${username}`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/user/${username}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
@@ -134,6 +139,7 @@ class Post extends React.Component {
   async handleLikeClick() {
     const { liked, numLikes } = this.state;
     const { post, username } = this.props;
+    const token = window.sessionStorage.getItem('token');
     if (liked) {
       const resp = await fetch(`${API_URL}/unlike/${post.uid}/${username}`,
         {
@@ -141,6 +147,7 @@ class Post extends React.Component {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
           },
           mode: 'cors',
         });
@@ -154,6 +161,7 @@ class Post extends React.Component {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
           },
           mode: 'cors',
         });
@@ -166,17 +174,22 @@ class Post extends React.Component {
   async handleSaveCaption() {
     const { caption } = this.state;
     const { post } = this.props;
+    const token = window.sessionStorage.getItem('token');
     if (caption !== post.caption) {
-      await fetch(`${API_URL}/updatePost/${post.uid}`,
+      const resp = await fetch(`${API_URL}/updatePost/${post.uid}`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
           },
           mode: 'cors',
           body: JSON.stringify({ caption }),
         });
+      if (!resp.ok) {
+        this.setState({ caption: post.caption });
+      }
     }
     document.getElementById(`post-save-${post.uid}`).style.display = 'none';
     document.getElementById(`post-caption-${post.uid}`).disabled = true;
@@ -185,12 +198,15 @@ class Post extends React.Component {
 
   async handlePostComment(commentText) {
     const { post, username } = this.props;
+    const token = window.sessionStorage.getItem('token');
     const resp = await fetch(`${API_URL}/addComment/${post.uid}/${username}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
+
         },
         mode: 'cors',
         body: JSON.stringify({ comment: commentText }),
@@ -206,6 +222,7 @@ class Post extends React.Component {
   async handleEditComment(commentText, commentID) {
     const { post } = this.props;
     const { comments } = this.state;
+    const token = window.sessionStorage.getItem('token');
     const curCommentText = comments.filter((comment) => comment.uid === commentID)[0].comment;
     if (commentText !== curCommentText) {
       const resp = await fetch(`${API_URL}/editComment/${post.uid}/${commentID}`,
@@ -214,6 +231,7 @@ class Post extends React.Component {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
           },
           mode: 'cors',
           body: JSON.stringify({ comment: commentText }),
@@ -228,18 +246,22 @@ class Post extends React.Component {
           },
         );
         this.setState({ comments: updatedComments });
+        return commentText;
       }
     }
+    return curCommentText;
   }
 
   async handleDeleteComment(commentID) {
     const { post } = this.props;
+    const token = window.sessionStorage.getItem('token');
     const resp = await fetch(`${API_URL}/comment/${post.uid}/${commentID}`,
       {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
         },
         mode: 'cors',
       });
@@ -263,12 +285,14 @@ class Post extends React.Component {
 
   async handleDeletePost() {
     const { post, deletePost } = this.props;
+    const token = window.sessionStorage.getItem('token');
     await fetch(`${API_URL}/post/${post.uid}`,
       {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
         },
         mode: 'cors',
       });
@@ -366,7 +390,6 @@ class Post extends React.Component {
               <InputBase
                 id={`post-caption-${post.uid}`}
                 multiline
-                rowsMax="2"
                 value={caption}
                 onChange={(e) => this.setState({ caption: e.target.value })}
                 disabled

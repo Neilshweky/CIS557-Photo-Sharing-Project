@@ -52,31 +52,46 @@ class SimpleTable extends React.Component {
     }
     this.setState({ data });
 
-
-    await fetch(`${API_URL}/unfollow/${curUser}/${unfollowed}`,
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/unfollow/${curUser}/${unfollowed}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
         },
         mode: 'cors',
       });
+    if (resp.ok) {
+      if (bProfilePage) {
+        data.splice(toUnfollowIndex, 1);
+      } else {
+        data[toUnfollowIndex].following = false;
+      }
+      this.setState({ data });
+    }
   }
 
   async follow(toFollowIndex) {
     const { curUser, data } = this.state;
     data[toFollowIndex].following = true;
     this.setState({ data });
-    await fetch(`${API_URL}/follow/${curUser}/${data[toFollowIndex].username}`,
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/follow/${curUser}/${data[toFollowIndex].username}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
         },
         mode: 'cors',
       });
+    if (resp.ok) {
+      data[toFollowIndex].following = true;
+      this.setState({ data });
+    }
   }
 
   render() {

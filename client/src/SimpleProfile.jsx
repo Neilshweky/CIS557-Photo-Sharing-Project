@@ -15,7 +15,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AppToolbar from './AppToolbar';
 import FriendTable from './FriendTable';
-import Post from './Post';
 import PostBox from './PostBox';
 import { API_URL } from './Utilities';
 
@@ -83,12 +82,12 @@ class SimpleProfile extends React.Component {
     super(props);
     this.getProfile = this.getProfile.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
-    this.generatePosts = this.generatePosts.bind(this);
+    // this.generatePosts = this.generatePosts.bind(this);
     this.getFolloweesData = this.getFolloweesData.bind(this);
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, reactPosts: [], followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false,
+      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false,
     };
   }
 
@@ -106,8 +105,14 @@ class SimpleProfile extends React.Component {
   }
 
   async getProfile(profUsername) {
+    this.setState({ dataLoaded: false });
     const { username } = this.props;
-    const resp = await fetch(`${API_URL}/user/${profUsername}`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/user/${profUsername}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
@@ -118,9 +123,8 @@ class SimpleProfile extends React.Component {
         profilePicture: data.profilePicture,
         bLoggedInUser: profUsername === username,
       }, async () => {
-        await this.generatePosts();
         await this.getFolloweesData();
-        this.setState({ dataLoaded: true });
+        this.setState({ dataLoaded: true, index: 0 });
       });
     }
   }
@@ -129,8 +133,13 @@ class SimpleProfile extends React.Component {
     const { followees } = this.state;
     const followeeData = [];
     const promises = [];
+    const token = window.sessionStorage.getItem('token');
     const callbackFn = async (followee) => {
-      const resp = await fetch(`${API_URL}/user/${followee}`);
+      const resp = await fetch(`${API_URL}/user/${followee}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (resp.ok) {
         const data = await resp.json();
         followeeData.push({ username: followee, profilePicture: data.profilePicture });
@@ -156,6 +165,7 @@ class SimpleProfile extends React.Component {
     const currentPassword = e.target.curPassword.value;
     const newPassword = e.target.password.value;
     const newPassConfirm = e.target.passwordCheck.value;
+    const token = window.sessionStorage.getItem('token');
     if (newPassword === newPassConfirm) {
       if (email !== newEmail) {
         const respEmail = await fetch('${API_URL}/user',
@@ -164,6 +174,7 @@ class SimpleProfile extends React.Component {
             headers: {
               'Content-Type': 'application/json',
               'Access-Control-Origin': '*',
+              Authorization: `Bearer ${token}`,
             },
             mode: 'cors',
             body: JSON.stringify({ username, email: newEmail }),
@@ -185,6 +196,7 @@ class SimpleProfile extends React.Component {
             headers: {
               'Content-Type': 'application/json',
               'Access-Control-Origin': '*',
+              Authorization: `Bearer ${token}`,
             },
             mode: 'cors',
             body: JSON.stringify({ username, oldPassword: currentPassword, newPassword }),
@@ -202,14 +214,15 @@ class SimpleProfile extends React.Component {
 
   async updateProfilePic(e) {
     e.preventDefault();
-    const { username, profilePicture } = this.state;
-    const { updateState } = this.props;
+    const { profilePicture } = this.state;
+    const { updateState, username } = this.props;
     const photoStatus = document.getElementById('photo-status');
     photoStatus.innerHTML = '';
     document.getElementById('email-status').innerHTML = '';
     document.getElementById('password-status').innerHTML = '';
     const newImage = e.target.files[0];
     const reader = new FileReader();
+    const token = window.sessionStorage.getItem('token');
     reader.onload = (readerEvt) => {
       const binaryString = readerEvt.target.result;
       this.setState({
@@ -223,6 +236,7 @@ class SimpleProfile extends React.Component {
               headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Origin': '*',
+                Authorization: `Bearer ${token}`,
               },
               mode: 'cors',
               body: JSON.stringify({ username, profilePicture: newProfilePicture }),
@@ -242,32 +256,17 @@ class SimpleProfile extends React.Component {
     reader.readAsBinaryString(newImage);
   }
 
-  async generatePosts() {
-    const { profUsername } = this.state;
-    const { username } = this.props;
-    const compList = [];
-    const resp = await fetch(`${API_URL}/posts/${profUsername}/0`);
-    if (resp.ok) {
-      const postData = await resp.json();
-      const myPostData = postData.filter((post) => post.username === profUsername);
-      myPostData.forEach((post) => {
-        compList.push(<Post post={post} key={post.uid} username={username} />);
-      });
-      this.setState({ reactPosts: compList });
-    }
-  }
-
   handleTabChange(e, newValue) {
     this.setState({ index: newValue });
   }
 
   render() {
     const {
-      classes, profilePic, username, updateState,
+      classes, profilePic, username, updateState, numPosts,
     } = this.props;
     const {
       profUsername, email, password, curPassword, passwordCheck,
-      profilePicture, followers, followees, index, reactPosts,
+      profilePicture, followers, followees, index,
       followeeData, dataLoaded, bLoggedInUser,
     } = this.state;
     let avatar = null;
@@ -296,7 +295,6 @@ class SimpleProfile extends React.Component {
         </Avatar>
       );
     }
-
     return (
       <div>
         <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
@@ -324,16 +322,14 @@ class SimpleProfile extends React.Component {
               <Grid container spacing={2} style={{ textAlign: 'center', marginTop: '20px' }}>
                 <Grid item xs={12}>
                   <Grid container justify="center" alignItems="center" spacing={1}>
-                    {dataLoaded && (
-                      <Grid item xs={4}>
-                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
-                          {reactPosts.length}
-                        </Typography>
-                        <Typography variant="h5">
-                          Posts
-                        </Typography>
-                      </Grid>
-                    )}
+                    <Grid item xs={4}>
+                      <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                        {numPosts}
+                      </Typography>
+                      <Typography variant="h5">
+                        Posts
+                      </Typography>
+                    </Grid>
                     <Grid item xs={4}>
                       <Typography variant="h4" style={{ fontWeight: 'bold' }}>
                         {followers.length}
@@ -358,7 +354,7 @@ class SimpleProfile extends React.Component {
         </TabPanel>
         <TabPanel value={index} index={1}>
           <Container>
-            {dataLoaded && <PostBox bHome={false} username={profUsername} />}
+            {dataLoaded && <PostBox bHome={false} username={profUsername} loggedIn={username} />}
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
@@ -367,6 +363,7 @@ class SimpleProfile extends React.Component {
               bProfilePage
               data={followeeData}
               bLoggedInUser={bLoggedInUser}
+              username={username}
             />
           )}
         </TabPanel>

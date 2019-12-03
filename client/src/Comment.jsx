@@ -41,7 +41,13 @@ class Comment extends React.Component {
 
   async getProfilePic() {
     const { username } = this.props;
-    const resp = await fetch(`${API_URL}/user/${username}`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/user/${username}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
     if (resp.ok) {
       const data = await resp.json();
       this.setState({
@@ -89,11 +95,11 @@ class Comment extends React.Component {
     document.getElementById(`comment-${id}`).style.color = 'blue';
   }
 
-  handleSubmitEdit() {
+  async handleSubmitEdit() {
     const { editComment, id } = this.props;
     const { commentText } = this.state;
-    editComment(commentText, id);
-    this.setState({ bEditMode: false });
+    const updatedText = await editComment(commentText, id);
+    this.setState({ bEditMode: false, commentText: updatedText });
     document.getElementById(`comment-${id}`).disabled = true;
     document.getElementById(`comment-${id}`).style.color = 'black';
   }
@@ -124,11 +130,13 @@ class Comment extends React.Component {
             <InputBase
               id={`comment-${id}`}
               multiline
-              rowsMax="2"
               value={commentText}
               onChange={(e) => this.setState({ commentText: e.target.value })}
               disabled
-              style={{ width: '90%', color: 'black' }}
+              style={{
+                width: '90%',
+                color: 'black',
+              }}
             />
           </ListItemText>
           <EditMenu

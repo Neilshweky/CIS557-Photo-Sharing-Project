@@ -14,8 +14,13 @@ export default class FriendSearch extends React.Component {
   async componentDidMount() {
     const { match, username } = this.props;
     const searchValue = match.params.searchTerm;
-    // const { username } = this.state;
-    const resp = await fetch(`${API_URL}/searchusers/${username}/${searchValue}`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/searchusers/${username}/${searchValue}`, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
     if (resp.ok) {
       this.setState({ data: await resp.json(), bLoaded: true });
     }
@@ -30,7 +35,14 @@ export default class FriendSearch extends React.Component {
         <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
         <div>
           <Box p={3}>
-            {bLoaded && <FriendTable bProfilePage={false} data={data} bLoggedInUser />}
+            {bLoaded && (
+              <FriendTable
+                bProfilePage={false}
+                data={data}
+                bLoggedInUser
+                username={username}
+              />
+            )}
           </Box>
         </div>
       </div>

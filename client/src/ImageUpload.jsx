@@ -51,13 +51,15 @@ class ImageUpload extends React.Component {
 
   async uploadImage() {
     const { picture, caption } = this.state;
-    const { username } = this.props;
+    const { username, updateState, numPosts } = this.props;
+    const token = window.sessionStorage.getItem('token');
     const resp = await fetch(`${API_URL}/postpicture`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
         },
         mode: 'cors',
         body: JSON.stringify({ username, pic: picture, caption }),
@@ -68,6 +70,7 @@ class ImageUpload extends React.Component {
       }, () => {
         document.getElementsByClassName('deleteImage')[0].click();
         document.getElementById('status').innerHTML = 'Uploaded Successfully';
+        updateState('numPosts', numPosts + 1);
       });
     } else {
       document.getElementById('status').innerHTML = 'Error Uploading. Please try again.';

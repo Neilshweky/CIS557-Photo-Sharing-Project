@@ -12,14 +12,19 @@ export default class PostBox extends React.Component {
     this.generatePosts = this.generatePosts.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.generatePosts();
   }
 
   async generatePosts() {
-    const { username, bHome } = this.props;
+    const { loggedIn, username, bHome } = this.props;
     const compList = [];
-    const resp = await fetch(`${API_URL}/posts/${username}/0`);
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/posts/${username}/0`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
       const postData = await resp.json();
       postData.forEach((post) => {
@@ -27,7 +32,7 @@ export default class PostBox extends React.Component {
           <Post
             post={post}
             key={post.uid}
-            username={username}
+            username={loggedIn}
             deletePost={this.deletePost}
           />
         );

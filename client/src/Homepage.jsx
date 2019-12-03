@@ -15,7 +15,7 @@ class Homepage extends React.PureComponent {
             Welcome.
             {username}
           </h1>
-          <PostBox username={username} bHome />
+          <PostBox username={username} loggedIn={username} bHome />
         </Container>
       </div>
     );
