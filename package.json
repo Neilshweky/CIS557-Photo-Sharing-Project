@@ -8,6 +8,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "install": "cd client && npm install && npm run build"
+    "eslint": "cd api && eslint . --fix; cd ../client && eslint . --ext .js,.jsx --fix;exit 0",
+
   },
   "repository": {
     "type": "git",
