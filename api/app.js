@@ -92,14 +92,17 @@ app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
 app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
 
+
 app.get('/user/:username?', routes.getUser);
 app.get('/posts/:username/:num', routes.getPosts);
 app.get('/searchusers/:username/:term', routes.searchUsers);
+
 
 app.put('/user', [check('email').isEmail().withMessage('Email address must be valid').trim()
   .normalizeEmail(),
 check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
   .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')], routes.updateProfile);
+
 app.delete('/user/:username', routes.deleteUser);
 app.delete('/post/:postID', routes.deletePost);
 app.delete('/comment/:postID/:commentID', routes.deleteComment);

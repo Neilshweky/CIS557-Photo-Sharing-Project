@@ -37,6 +37,7 @@ const signup = (req, res) => {
         })
         .catch((err) => res.status(500).send(err));
     }
+
   }
 };
 
@@ -163,28 +164,60 @@ const likePost = (req, res) => {
   const { username, postid } = req.params;
   userDB.getUser(username).then((user) => {
     if (user == null) {
-      res.status(400).send(`There is no such user ${username}.`);
+      res.status(404).send(`There is no such user ${username}.`);
     } else if (user.username !== username && user.followees.indexOf(username) === -1) {
-      res.status(400).send(`${username} does not follow original poster.`);
+      res.status(409).send(`${username} does not follow original poster.`);
     } else {
-      postDB.likePost(username, postid).then(() => { res.status(200).send('Post liked'); }).catch((err) => res.status(500).send(err));
+      postDB.likePost(username, postid)
+        .then(() => { res.status(200).send('Post liked'); })
+        .catch((err) => res.status(500).send(err));
     }
   });
 };
 
 const unlikePost = (req, res) => {
   const { username, postid } = req.params;
-  postDB.unlikePost(username, postid).then(() => { res.status(200).send('Post unliked'); }).catch((err) => res.status(500).send(err));
+  userDB.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(404).send(`There is no such user ${username}.`);
+    } else if (user.username !== username && user.followees.indexOf(username) === -1) {
+      res.status(409).send(`${username} does not follow original poster.`);
+    } else {
+      postDB.unlikePost(username, postid)
+        .then(() => { res.status(200).send('Post unliked'); })
+        .catch((err) => res.status(500).send(err));
+    }
+  });
 };
 
 const follow = (req, res) => {
   const { username, friend } = req.params;
-  userDB.followUser(username, friend).then(() => { res.status(200).send(`${username} followed ${friend}`); }).catch((err) => res.status(500).send(err));
+  userDB.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(404).send(`There is no such user ${username}.`);
+    } else if (user.followees.indexOf(friend) !== -1) {
+      res.status(409).send(`${username} already follows ${friend}.`);
+    } else {
+      userDB.followUser(username, friend)
+        .then(() => { res.status(200).send(`${username} followed ${friend}`); })
+        .catch((err) => res.status(500).send(err));
+    }
+  });
 };
 
 const unfollow = (req, res) => {
   const { username, friend } = req.params;
-  userDB.unfollowUser(username, friend).then(() => { res.status(200).send(`${username} unfollowed ${friend}`); }).catch((err) => res.status(500).send(err));
+  userDB.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(404).send(`There is no such user ${username}.`);
+    } else if (user.followees.indexOf(friend) === -1) {
+      res.status(409).send(`${username} does not follow ${friend}.`);
+    } else {
+      userDB.unfollowUser(username, friend)
+        .then(() => { res.status(200).send(`${username} unfollowed ${friend}`); })
+        .catch((err) => res.status(500).send(err));
+    }
+  });
 };
 
 const searchUsers = (req, res) => {
@@ -262,6 +295,7 @@ const addComment = (req, res) => {
           }
         });
     }
+
   }
 };
 
