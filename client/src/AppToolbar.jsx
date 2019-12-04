@@ -17,6 +17,7 @@ import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import Avatar from '@material-ui/core/Avatar';
 import PropTypes from 'prop-types';
+import { API_URL } from './Utilities';
 
 const styles = (theme) => ({
   grow: {
@@ -92,6 +93,21 @@ class AppToolbar extends React.Component {
     this.handleMobileMenuClose = this.handleMobileMenuClose.bind(this);
     this.handleMobileMenuOpen = this.handleMobileMenuOpen.bind(this);
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
+  }
+
+  async componentDidMount() {
+    const token = window.sessionStorage.getItem('token');
+    const { history } = this.props;
+    // Your axios call here
+    const resp = await fetch(`${API_URL}/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!resp.ok) {
+      window.sessionStorage.clear();
+      history.push('/signin');
+    }
   }
 
   handleMobileMenuClose() {

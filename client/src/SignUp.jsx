@@ -65,9 +65,10 @@ class SignUp extends React.Component {
       });
       if (resp.ok) {
         history.push('/home');
+      } else if (await resp.text() === 'Token expired') {
+        window.sessionStorage.clear();
       }
     } else {
-      window.sessionStorage.clear();
       this.setState({ isLoaded: true });
     }
   }

@@ -102,6 +102,9 @@ class Post extends React.Component {
       this.setState({
         profilePic: data.profilePicture,
       });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
   }
 
@@ -153,6 +156,9 @@ class Post extends React.Component {
         });
       if (resp.ok) {
         this.setState({ liked: false, numLikes: numLikes - 1 });
+      } else if (await resp.text() === 'Token expired') {
+        window.sessionStorage.clear();
+        window.location.replace('/signin');
       }
     } else {
       const resp = await fetch(`${API_URL}/like/${post.uid}/${username}`,
@@ -167,6 +173,9 @@ class Post extends React.Component {
         });
       if (resp.ok) {
         this.setState({ liked: true, numLikes: numLikes + 1 });
+      } else if (await resp.text() === 'Token expired') {
+        window.sessionStorage.clear();
+        window.location.replace('/signin');
       }
     }
   }
@@ -189,6 +198,9 @@ class Post extends React.Component {
         });
       if (!resp.ok) {
         this.setState({ caption: post.caption });
+      } else if (await resp.text() === 'Token expired') {
+        window.sessionStorage.clear();
+        window.location.replace('/signin');
       }
     }
     document.getElementById(`post-save-${post.uid}`).style.display = 'none';
@@ -216,6 +228,9 @@ class Post extends React.Component {
       const { numComments, comments } = this.state;
       document.getElementById(`newComment-${post.uid}`).value = '';
       this.setState({ numComments: numComments + 1, comments: comments.concat([data]) });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
   }
 
@@ -247,6 +262,9 @@ class Post extends React.Component {
         );
         this.setState({ comments: updatedComments });
         return commentText;
+      } else if (await resp.text() === 'Token expired') {
+        window.sessionStorage.clear();
+        window.location.replace('/signin');
       }
     }
     return curCommentText;
@@ -269,6 +287,9 @@ class Post extends React.Component {
       const { comments, numComments } = this.state;
       const updatedComments = comments.filter((comment) => comment.uid !== commentID);
       this.setState({ comments: updatedComments, numComments: numComments - 1 });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
   }
 

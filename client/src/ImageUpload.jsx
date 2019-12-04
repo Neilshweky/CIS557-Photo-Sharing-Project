@@ -72,6 +72,9 @@ class ImageUpload extends React.Component {
         document.getElementById('status').innerHTML = 'Uploaded Successfully';
         updateState('numPosts', numPosts + 1);
       });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     } else {
       document.getElementById('status').innerHTML = 'Error Uploading. Please try again.';
     }
@@ -80,11 +83,11 @@ class ImageUpload extends React.Component {
   render() {
     const { picture, caption } = this.state;
     const {
-      classes, username, profilePic, updateState,
+      classes, username, profilePic, updateState, history,
     } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
+        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} history={history} />
         <Box p={3}>
           <h1 id="welcome">
             Welcome.

@@ -53,6 +53,9 @@ class Comment extends React.Component {
       this.setState({
         profilePic: data.profilePicture,
       });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
   }
 

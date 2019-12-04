@@ -127,6 +127,9 @@ class SimpleProfile extends React.Component {
         await this.getFolloweesData();
         this.setState({ dataLoaded: true, index: 0 });
       });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
   }
 
@@ -144,6 +147,9 @@ class SimpleProfile extends React.Component {
       if (resp.ok) {
         const data = await resp.json();
         followeeData.push({ username: followee, profilePicture: data.profilePicture });
+      } else if (await resp.text() === 'Token expired') {
+        window.sessionStorage.clear();
+        window.location.replace('/signin');
       }
     };
     for (let index = 0; index < followees.length; index += 1) {
@@ -180,7 +186,10 @@ class SimpleProfile extends React.Component {
             mode: 'cors',
             body: JSON.stringify({ username, email: newEmail }),
           });
-        if (!respEmail.ok) {
+        if (await respEmail.text() === 'Token expired') {
+          window.sessionStorage.clear();
+          window.location.replace('/signin');
+        } else if (!respEmail.ok) {
           emailStatus.innerHTML = respEmail.text();
         } else {
           updateState('email', newEmail);
@@ -202,7 +211,10 @@ class SimpleProfile extends React.Component {
             mode: 'cors',
             body: JSON.stringify({ username, oldPassword: currentPassword, newPassword }),
           });
-        if (!respPass.ok) {
+        if (await respPass.text() === 'Token expired') {
+          window.sessionStorage.clear();
+          window.location.replace('/signin');
+        } else if (!respPass.ok) {
           passwordStatus.innerHTML = await respPass.text();
         } else {
           passwordStatus.innerHTML = 'Password update Successful';
@@ -242,7 +254,10 @@ class SimpleProfile extends React.Component {
               mode: 'cors',
               body: JSON.stringify({ username, profilePicture: newProfilePicture }),
             });
-          if (!respPic.ok) {
+          if (await respPic.text() === 'Token expired') {
+            window.sessionStorage.clear();
+            window.location.replace('/signin');
+          } else if (!respPic.ok) {
             photoStatus.innerHTML = respPic.text();
           } else {
             updateState('profilePic', newProfilePicture);
@@ -263,7 +278,7 @@ class SimpleProfile extends React.Component {
 
   render() {
     const {
-      classes, profilePic, username, updateState,
+      classes, profilePic, username, updateState, history,
     } = this.props;
     const {
       profUsername, email, password, curPassword, passwordCheck,
@@ -298,7 +313,7 @@ class SimpleProfile extends React.Component {
     }
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
+        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} history={history} />
         <Tabs
           value={index}
           onChange={this.handleTabChange}

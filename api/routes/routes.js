@@ -26,7 +26,7 @@ const signup = (req, res) => {
               .then((data) => {
                 jwt.sign(
                   { username },
-                  'secretkey',
+                  'secretkey', { expiresIn: '1h' },
                   (err, token) => {
                     res.status(201).send({ message: `${username} is now logged in.`, token, data });
                   },
@@ -55,7 +55,7 @@ const login = (req, res) => {
         .then(() => {
           jwt.sign(
             { username },
-            'secretkey',
+            'secretkey', { expiresIn: '1h' },
             (err, token) => {
               res.status(200).send({ message: `${username} is now logged in.`, token });
             },

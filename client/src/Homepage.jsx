@@ -6,10 +6,10 @@ import PostBox from './PostBox';
 
 class Homepage extends React.PureComponent {
   render() {
-    const { username, profilePic, updateState } = this.props;
+    const { username, profilePic, updateState, history } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
+        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} hisotry={history} />
         <Container>
           <h1 id="welcome">
             Welcome.

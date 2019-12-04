@@ -50,10 +50,15 @@ function validateToken(req, res, next) {
     const bearerToken = bearer[1];
     return jwt.verify(bearerToken, 'secretkey', (err, result) => {
       if (err) {
-        res.sendStatus(403);
+        if (err instanceof jwt.TokenExpiredError) {
+          res.status(403).send('Token expired');
+        } else {
+          res.sendStatus(403);
+        }
+      } else {
+        req.decoded = result;
+        next();
       }
-      req.decoded = result;
-      next();
     });
   }
   return res.sendStatus(403);
