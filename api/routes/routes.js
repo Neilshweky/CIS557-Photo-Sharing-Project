@@ -315,7 +315,8 @@ const addTag = (req, res) => {
     } else if (user.username !== username && user.followees.indexOf(username) === -1) {
       res.status(400).send(`${username} does not follow original poster.`);
     } else {
-      postDB.addTag(username, postid).then(() => { res.status(200).send('Post tagged'); }).catch((err) => res.status(500).send(err));
+      postDB.addTag(username, postid).then(() => res.status(200).send('Post untagged'))
+        .catch((err) => res.status(500).send(err));
     }
   });
 };

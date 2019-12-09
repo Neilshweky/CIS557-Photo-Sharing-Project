@@ -165,7 +165,7 @@ function deletePost(postID) {
   ]);
 }
 
-async function addTag(uid, username) {
+async function addTag(username, uid) {
   console.log('tagging post: ', username, ', ', uid);
   return Schemas.Post.updateOne(
     { uid },
@@ -173,8 +173,8 @@ async function addTag(uid, username) {
   );
 }
 
-async function removeTag(uid, username) {
-  console.log('tagging post: ', username, ', ', uid);
+async function removeTag(username, uid) {
+  console.log('untagging post: ', username, ', ', uid);
   return Schemas.Post.updateOne(
     { uid },
     { $pull: { tagged: username } },
