@@ -96,6 +96,7 @@ app.post('/unlike/:postid/:username', routes.unlikePost);
 app.post('/addtag/:postid/:username', routes.addTag);
 app.post('/removetag/:postid/:username', routes.removeTag);
 app.post('/follow/:username/:friend', routes.follow);
+app.post('/accept/:username/:follower', routes.acceptRequest);
 app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
 app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
