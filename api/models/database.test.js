@@ -131,6 +131,14 @@ describe('friend tests', () => {
     expect(Array.from(user1Followees)).toEqual(['user3']);
     expect(Array.from(user2followers)).toEqual([]);
   });
+
+  test('send follow request', async () => {
+    const user = await userDB.getUser('user1');
+    expect(Array.from(user.requests)).toEqual([]);
+    await userDB.addFollowRequest('user1', 'user2');
+    const user1 = await userDB.getUser('user1');
+    expect(Array.from(user1.requests)).toEqual(['user2']);
+  });
 });
 
 describe('post tests', () => {

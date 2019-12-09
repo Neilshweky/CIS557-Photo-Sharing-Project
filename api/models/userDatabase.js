@@ -71,6 +71,14 @@ async function switchPrivacy(username) {
   return user.save();
 }
 
+// Add a follow request to a user
+async function addFollowRequest(username, requester) {
+  return Schemas.User.updateOne(
+    { username },
+    { $push: { requests: requester } },
+  );
+}
+
 // Checks correct user login
 async function checkLogin(username, password) {
   const user = await getUser(username);
@@ -177,6 +185,7 @@ module.exports = {
   updateProfilePic,
   updatePassword,
   switchPrivacy,
+  addFollowRequest,
   followUser,
   unfollowUser,
   getFollowersForUsername,

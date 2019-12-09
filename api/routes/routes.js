@@ -208,9 +208,28 @@ const follow = (req, res) => {
       res.status(404).send(`There is no such user ${username}.`);
     } else if (user.followees.indexOf(friend) !== -1) {
       res.status(409).send(`${username} already follows ${friend}.`);
+    } else if (user.private) {
+      userDB.addFollowRequest(username, friend)
+        .then(() => res.status(200).send(`${friend} requested to follow ${username}`))
+        .catch((err) => res.status(500).send(err));
     } else {
       userDB.followUser(username, friend)
         .then(() => { res.status(200).send(`${username} followed ${friend}`); })
+        .catch((err) => res.status(500).send(err));
+    }
+  });
+};
+
+const acceptRequest = (req, res) => {
+  const { username, follower } = req.params;
+  userDB.getUser(follower).then((user) => {
+    if (user == null) {
+      res.status(404).send(`There is no such user ${follower}.`);
+    } else if (user.followees.indexOf(username) !== -1) {
+      res.status(409).send(`${follower} already follows ${username}.`);
+    } else {
+      userDB.followUser(follower, username)
+        .then(() => { res.status(200).send(`${follower} followed ${username}`); })
         .catch((err) => res.status(500).send(err));
     }
   });
@@ -383,6 +402,7 @@ module.exports = {
   likePost,
   unlikePost,
   follow,
+  acceptRequest,
   unfollow,
   searchUsers,
   updatePost,
