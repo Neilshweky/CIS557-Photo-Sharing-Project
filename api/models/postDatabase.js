@@ -165,6 +165,22 @@ function deletePost(postID) {
   ]);
 }
 
+async function addTag(uid, username) {
+  console.log('tagging post: ', username, ', ', uid);
+  return Schemas.Post.updateOne(
+    { uid },
+    { $push: { tagged: username } },
+  );
+}
+
+async function removeTag(uid, username) {
+  console.log('tagging post: ', username, ', ', uid);
+  return Schemas.Post.updateOne(
+    { uid },
+    { $pull: { tagged: username } },
+  );
+}
+
 module.exports = {
   createPost,
   getPost,
@@ -178,5 +194,7 @@ module.exports = {
   deleteComment,
   updatePost,
   deletePost,
+  addTag,
+  removeTag,
   QUERY_SIZE,
 };

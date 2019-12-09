@@ -72,6 +72,8 @@ app.post('/postpicture', [check('caption').isLength({ max: 200 })], routes.postP
 app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes.updatePost);
 app.post('/like/:postid/:username', routes.likePost);
 app.post('/unlike/:postid/:username', routes.unlikePost);
+app.post('/addtag/:postid/:username', routes.addTag);
+app.post('/removetag/:postid/:username', routes.removeTag);
 app.post('/follow/:username/:friend', routes.follow);
 app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);

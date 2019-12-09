@@ -37,6 +37,7 @@ const Post = new Schema({
     uid: String, username: String, comment: String, timestamp: Number,
   }],
   timestamp: Number,
+  tagged: Array,
 });
 
 Post.pre('validate', function setUID(next) {
