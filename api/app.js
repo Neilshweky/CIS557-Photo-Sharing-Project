@@ -1,6 +1,7 @@
 const express = require('express');
 const { check } = require('express-validator');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const cookieParser = require('cookie-parser');
@@ -10,6 +11,9 @@ const mongoSanitize = require('express-mongo-sanitize');
 require('./models/userDatabase.js');
 require('./models/postDatabase.js');
 
+// Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+// see https://expressjs.com/en/guide/behind-proxies.html
+app.set('trust proxy', 1);
 app.use(bodyParser.urlencoded({ extended: true, limit: '8mb' }));
 app.use(bodyParser.json({ limit: '8mb' }));
 
@@ -30,6 +34,11 @@ app.use(mongoSanitize({
   replaceWith: '_',
 }));
 
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minutes
+  max: 10, // limit each IP to 10 requests per windowMs
+});
+
 function validateToken(req, res, next) {
   const excluded = ['/login', '/signup'];
   if (excluded.indexOf(req.url) > -1) {
@@ -41,10 +50,15 @@ function validateToken(req, res, next) {
     const bearerToken = bearer[1];
     return jwt.verify(bearerToken, 'secretkey', (err, result) => {
       if (err) {
-        res.sendStatus(403);
+        if (err instanceof jwt.TokenExpiredError) {
+          res.status(403).send('Token expired');
+        } else {
+          res.sendStatus(403);
+        }
+      } else {
+        req.decoded = result;
+        next();
       }
-      req.decoded = result;
-      next();
     });
   }
   return res.sendStatus(403);
@@ -53,6 +67,7 @@ function validateToken(req, res, next) {
 // validation on all routes except /login and /signup
 
 app.use(validateToken);
+// app.use(limiter);
 
 // Used to link js and css files
 // app.use(express.static('views/css'));
@@ -68,7 +83,7 @@ app.post('/signup', [
   check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
     .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')], routes.signup);
 app.post('/login', [check('username').isLength({ max: 50 }), check('password').isLength({ max: 50 })], routes.login);
-app.post('/postpicture', [check('caption').isLength({ max: 200 })], routes.postPicture);
+app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], routes.postPicture);
 app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes.updatePost);
 app.post('/like/:postid/:username', routes.likePost);
 app.post('/unlike/:postid/:username', routes.unlikePost);
@@ -79,14 +94,17 @@ app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
 app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
 
+
 app.get('/user/:username?', routes.getUser);
 app.get('/posts/:username/:num', routes.getPosts);
 app.get('/searchusers/:username/:term', routes.searchUsers);
+
 
 app.put('/user', [check('email').isEmail().withMessage('Email address must be valid').trim()
   .normalizeEmail(),
 check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
   .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')], routes.updateProfile);
+
 app.delete('/user/:username', routes.deleteUser);
 app.delete('/post/:postID', routes.deletePost);
 app.delete('/comment/:postID/:commentID', routes.deleteComment);

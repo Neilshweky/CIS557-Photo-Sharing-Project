@@ -39,6 +39,9 @@ export default class PostBox extends React.Component {
         return bHome ? compList.push(comp) : (post.username === username && compList.push(comp));
       });
       this.setState({ reactPosts: compList });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
     this.render();
   }

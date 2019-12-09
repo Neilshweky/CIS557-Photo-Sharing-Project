@@ -70,6 +70,9 @@ class SimpleTable extends React.Component {
         data[toUnfollowIndex].following = false;
       }
       this.setState({ data });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
   }
 
@@ -91,6 +94,9 @@ class SimpleTable extends React.Component {
     if (resp.ok) {
       data[toFollowIndex].following = true;
       this.setState({ data });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
   }
 

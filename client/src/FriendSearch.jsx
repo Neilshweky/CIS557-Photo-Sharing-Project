@@ -15,7 +15,7 @@ export default class FriendSearch extends React.Component {
     const { match, username } = this.props;
     const searchValue = match.params.searchTerm;
     const token = window.sessionStorage.getItem('token');
-    const resp = await fetch(`${API_URL}/searchusers/${username}/${searchValue}`, 
+    const resp = await fetch(`${API_URL}/searchusers/${username}/${searchValue}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -23,16 +23,19 @@ export default class FriendSearch extends React.Component {
       });
     if (resp.ok) {
       this.setState({ data: await resp.json(), bLoaded: true });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
     document.getElementById('search-field').value = searchValue;
   }
 
   render() {
     const { data, bLoaded } = this.state;
-    const { username, profilePic, updateState } = this.props;
+    const { username, profilePic, updateState, history } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} />
+        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} history={history} />
         <div>
           <Box p={3}>
             {bLoaded && (
