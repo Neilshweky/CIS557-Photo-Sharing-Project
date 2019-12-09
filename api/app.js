@@ -104,6 +104,7 @@ app.put('/user', [check('email').isEmail().withMessage('Email address must be va
   .normalizeEmail(),
 check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
   .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')], routes.updateProfile);
+app.put('/privacy/:username', routes.switchPrivacy);
 
 app.delete('/user/:username', routes.deleteUser);
 app.delete('/post/:postID', routes.deletePost);

@@ -61,6 +61,16 @@ async function updatePassword(username, oldPassword, newPassword) {
   return user.save();
 }
 
+// Switch the user's privacy setting
+async function switchPrivacy(username) {
+  const user = await getUser(username);
+  if (user == null) {
+    return Promise.reject(new Error('no user found'));
+  }
+  user.private = !user.private;
+  return user.save();
+}
+
 // Checks correct user login
 async function checkLogin(username, password) {
   const user = await getUser(username);
@@ -166,6 +176,7 @@ module.exports = {
   updateEmail,
   updateProfilePic,
   updatePassword,
+  switchPrivacy,
   followUser,
   unfollowUser,
   getFollowersForUsername,
