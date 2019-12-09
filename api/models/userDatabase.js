@@ -7,8 +7,12 @@ function getUser(username) {
   return Schemas.User.findOne({ username }).exec();
 }
 
+function getUsers() {
+  return Schemas.User.find({}, { _id: 0, username: 1 });
+}
+
 // Adds user to database after signup, and returns it as a Promise
-async function createUser(username, email, password, profilePicture) {
+async function createUser(username, email, password) {
   const existingUser = await getUser(username);
   if (existingUser != null) {
     return undefined;
@@ -18,7 +22,6 @@ async function createUser(username, email, password, profilePicture) {
     username,
     email,
     password: encryptedPassword,
-    profilePicture,
   };
   const user = new Schemas.User(profile);
   return user.save();
@@ -195,13 +198,13 @@ async function getFollowerSuggestions(username) {
     for (let j = 0; j < secondDegree.length; j++) {
       const followFollowee = secondDegree[j];
       if (!followees.has(followFollowee)) {
-        result.push(followFollowee);
+        const newFollowee = await getUser(followFollowee);
+        result.push({ username: followFollowee, profilePicture: newFollowee.profilePicture });
         if (result.length >= 5) {
           return result;
         }
       }
     }
-
   }
   return result;
 }
@@ -209,6 +212,7 @@ async function getFollowerSuggestions(username) {
 
 module.exports = {
   getUser,
+  getUsers,
   deleteUser,
   createUser,
   checkLogin,

@@ -37,7 +37,6 @@ const signup = (req, res) => {
         })
         .catch((err) => res.status(500).send(err));
     }
-
   }
 };
 
@@ -124,7 +123,7 @@ const switchPrivacy = (req, res) => {
       if (err.message === 'no user found') res.status(400).send(err.message);
       else res.status(500).send(err);
     });
-}
+};
 
 const postPicture = (req, res) => {
   if (!req.body.pic) {
@@ -151,7 +150,16 @@ const getUser = (req, res) => {
   userDB.getUser(username).then((data) => {
     console.log("Follow requests: " + data.requests);
     if (data === undefined || data === null) res.status(404).send('User not found');
-    else res.status(200).send(data);
+    else {
+      res.status(200).send(data);
+    }
+  }).catch((err) => res.status(500).send(err));
+};
+
+const getUsers = (req, res) => {
+  userDB.getUsers().then((data) => {
+    const names = data.map((user) => user.username);
+    res.status(200).send(names);
   }).catch((err) => res.status(500).send(err));
 };
 
@@ -338,7 +346,6 @@ const addComment = (req, res) => {
           }
         });
     }
-
   }
 };
 
@@ -416,6 +423,7 @@ module.exports = {
   switchPrivacy,
   postPicture,
   getUser,
+  getUsers,
   deleteUser,
   getPosts,
   likePost,

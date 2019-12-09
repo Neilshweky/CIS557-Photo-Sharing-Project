@@ -13,6 +13,8 @@ import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import './SimpleProfile.css';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import AppToolbar from './AppToolbar';
 import FriendTable from './FriendTable';
 import PostBox from './PostBox';
@@ -82,12 +84,14 @@ class SimpleProfile extends React.Component {
     super(props);
     this.getProfile = this.getProfile.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
-    // this.generatePosts = this.generatePosts.bind(this);
+    this.getFolloweeSuggestions = this.getFolloweeSuggestions.bind(this);
     this.getRequesterData = this.getRequesterData.bind(this);
     this.getFolloweesData = this.getFolloweesData.bind(this);
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
+    this.togglePrivacy = this.togglePrivacy.bind(this);
     this.state = {
+      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0, bPrivate: false, followeeSuggestion: [],
       profUsername: '', email: '', password: '', curPassword: '',
       passwordCheck: '', requests: [], followees: [], followers: [],
       profilePicture: '', newProfilePicture: '', index: 0,
@@ -129,9 +133,11 @@ class SimpleProfile extends React.Component {
         profilePicture: data.profilePicture,
         bLoggedInUser: profUsername === username,
         numMyPosts: data.numMyPosts,
+        bPrivate: data.private,
       }, async () => {
         await this.getRequesterData();
         await this.getFolloweesData();
+        await this.getFolloweeSuggestions();
         this.setState({ dataLoaded: true, index: 0 });
       });
     } else if (await resp.text() === 'Token expired') {
@@ -139,6 +145,19 @@ class SimpleProfile extends React.Component {
       window.location.replace('/signin');
     }
   }
+
+  async getFolloweeSuggestions() {
+    const token = window.sessionStorage.getItem('token');
+    const { username } = this.props;
+    const resp = await fetch(`${API_URL}/followersuggestions/${username}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (resp.ok) {
+      // console.log(await resp.json());
+      this.setState({ followeeSuggestion: await resp.json() });
+    }
 
   async getRequesterData() {
     const { requests } = this.state;
@@ -208,7 +227,7 @@ class SimpleProfile extends React.Component {
     const token = window.sessionStorage.getItem('token');
     if (newPassword === newPassConfirm) {
       if (email !== newEmail) {
-        const respEmail = await fetch('${API_URL}/user',
+        const respEmail = await fetch(`${API_URL}/user`,
           {
             method: 'PUT',
             headers: {
@@ -233,7 +252,7 @@ class SimpleProfile extends React.Component {
       }
       if (newPassword !== '') {
         this.setState({ password: '', curPassword: '', passwordCheck: '' });
-        const respPass = await fetch('${API_URL}/user',
+        const respPass = await fetch(`${API_URL}/user`,
           {
             method: 'PUT',
             headers: {
@@ -276,7 +295,7 @@ class SimpleProfile extends React.Component {
       }, async () => {
         const { newProfilePicture } = this.state;
         if (profilePicture !== newProfilePicture) {
-          const respPic = await fetch('${API_URL}/user',
+          const respPic = await fetch(`${API_URL}/user`,
             {
               method: 'PUT',
               headers: {
@@ -305,6 +324,22 @@ class SimpleProfile extends React.Component {
     reader.readAsBinaryString(newImage);
   }
 
+  async togglePrivacy() {
+    const { bPrivate } = this.state;
+    const { username } = this.props;
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/privacy/${username}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    if (resp.ok) {
+      this.setState({ bPrivate: !bPrivate });
+    }
+  }
+
   handleTabChange(e, newValue) {
     this.setState({ index: newValue });
   }
@@ -316,7 +351,7 @@ class SimpleProfile extends React.Component {
     const {
       profUsername, email, password, curPassword, passwordCheck,
       profilePicture, followers, followees, index,
-      requesterData, followeeData, dataLoaded, bLoggedInUser, numMyPosts
+      requesterData, followeeData, dataLoaded, bLoggedInUser, numMyPosts, bPrivate, followeeSuggestion,
     } = this.state;
     let avatar = null;
     try {
@@ -346,7 +381,12 @@ class SimpleProfile extends React.Component {
     }
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} history={history} />
+        <AppToolbar
+          profilePic={profilePic}
+          username={username}
+          updateState={updateState}
+          history={history}
+        />
         <Tabs
           value={index}
           onChange={this.handleTabChange}
@@ -355,9 +395,9 @@ class SimpleProfile extends React.Component {
           centered
         >
           <Tab label="Profile Information" />
-          <Tab label="My Posts" />
-          <Tab label="Follow Requests" />
-          <Tab label="Who Do I Follow?" />
+          {(bLoggedInUser || !bPrivate) && <Tab label="My Posts" />}
+          {(bLoggedInUser || !bPrivate) && <Tab label="Who Do I Follow?" />}
+          {bLoggedInUser && <Tab label="Follow Requests" />}
           {bLoggedInUser && <Tab label="Account Settings" />}
         </Tabs>
         <TabPanel value={index} index={0}>
@@ -419,14 +459,36 @@ class SimpleProfile extends React.Component {
           )}
         </TabPanel>
         <TabPanel value={index} index={3}>
-          {dataLoaded && (
-            <FriendTable
-              bProfilePage
-              bRequest={false}
-              data={followeeData}
-              bLoggedInUser={bLoggedInUser}
-              username={username}
-            />
+          <Grid container spacing={2}>
+              <Grid item xs={bLoggedInUser ? 6 : 12}>
+                {bLoggedInUser && (
+                  <Typography variant="h6" style={{ textAlign: 'center' }}>
+                    Who do I follow?
+                  </Typography>
+                )}
+                <FriendTable
+                  bMinuses
+                  bProfilePage
+                  data={followeeData}
+                  bLoggedInUser={bLoggedInUser}
+                  username={username}
+                />
+              </Grid>
+              {bLoggedInUser && (
+                <Grid item xs={6}>
+                  <Typography variant="h6" style={{ textAlign: 'center' }}>
+                    You may know
+                  </Typography>
+                  <FriendTable
+                    bMinuses={false}
+                    bProfilePage
+                    data={followeeSuggestion}
+                    bLoggedInUser={bLoggedInUser}
+                    username={username}
+                  />
+                </Grid>
+              )}
+            </Grid>
           )}
         </TabPanel>
         <TabPanel value={index} index={4}>
@@ -450,6 +512,21 @@ class SimpleProfile extends React.Component {
               <form className={classes.form} noValidate onSubmit={this.updateProfile}>
                 {dataLoaded && (
                   <Grid container justify="center" aligntems="center" spacing={2}>
+                    <Grid item xs={4} />
+                    <Grid item xs={4}>
+                      <FormControlLabel
+                        control={(
+                          <Checkbox
+                            checked={bPrivate}
+                            onChange={this.togglePrivacy}
+                            value="checkedB"
+                            color="primary"
+                          />
+                        )}
+                        label="Keep my account private"
+                      />
+                    </Grid>
+                    <Grid item xs={4} />
                     <Grid item xs={3} />
                     <Grid item xs={6}>
                       <TextField
@@ -563,7 +640,6 @@ SimpleProfile.propTypes = {
   username: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
   profilePic: PropTypes.string.isRequired,
-  numMyPosts: PropTypes.number.isRequired,
 };
 
 export default withStyles(styles)(SimpleProfile);
