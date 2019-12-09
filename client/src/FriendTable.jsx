@@ -21,9 +21,6 @@ const styles = (theme) => ({
     width: '100%',
     overflowX: 'auto',
   },
-  table: {
-    minWidth: 650,
-  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
@@ -102,7 +99,7 @@ class SimpleTable extends React.Component {
 
   render() {
     const {
-      classes, data, bProfilePage, bLoggedInUser,
+      classes, data, bMinuses, bLoggedInUser,
     } = this.props;
     function getAvatar(username, profilePicture) {
       let avatar = null;
@@ -135,7 +132,7 @@ class SimpleTable extends React.Component {
 
     return (
       <Paper className={classes.root}>
-        <Table className={classes.table} aria-label="simple table">
+        <Table aria-label="simple table">
           <TableBody>
             {data.map((row, i) => (
               <TableRow key={row.username}>
@@ -153,7 +150,7 @@ class SimpleTable extends React.Component {
                 </TableCell>
                 {bLoggedInUser && (
                   <TableCell align="right">
-                    {(bProfilePage || row.following) ? (
+                    {(bMinuses || row.following) ? (
                       <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(i)}>
                         <DeleteOutlinedIcon />
                       </IconButton>
@@ -174,6 +171,11 @@ class SimpleTable extends React.Component {
   }
 }
 
+SimpleTable.defaultProps = {
+  bMinuses: false,
+  bProfilePage: false,
+};
+
 SimpleTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
@@ -182,13 +184,13 @@ SimpleTable.propTypes = {
       curFollowing: PropTypes.string,
     }),
   ).isRequired,
-  bProfilePage: PropTypes.bool.isRequired,
+  bMinuses: PropTypes.bool,
+  bProfilePage: PropTypes.bool,
   bLoggedInUser: PropTypes.bool.isRequired,
   classes: PropTypes.shape({
     root: PropTypes.string.isRequired,
     avatar: PropTypes.string.isRequired,
     avatarCell: PropTypes.string.isRequired,
-    table: PropTypes.string.isRequired,
   }).isRequired,
   username: PropTypes.string.isRequired,
 };

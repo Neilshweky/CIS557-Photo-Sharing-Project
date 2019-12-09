@@ -143,6 +143,13 @@ const getUser = (req, res) => {
   }).catch((err) => res.status(500).send(err));
 };
 
+const getUsers = (req, res) => {
+  userDB.getUsers().then(data => {
+    const names = data.map((user) => user.username);
+    res.status(200).send(names);
+  }).catch((err) => res.status(500).send(err));
+};
+
 const deleteUser = (req, res) => {
   const { username } = req.params;
   userDB.deleteUser(username).then((data) => {
@@ -347,6 +354,7 @@ module.exports = {
   updateProfile,
   postPicture,
   getUser,
+  getUsers,
   deleteUser,
   getPosts,
   likePost,

@@ -375,12 +375,33 @@ class SimpleProfile extends React.Component {
         </TabPanel>
         <TabPanel value={index} index={2}>
           {dataLoaded && (
-            <FriendTable
-              bProfilePage
-              data={followeeData}
-              bLoggedInUser={bLoggedInUser}
-              username={username}
-            />
+            <Grid container spacing={2}>
+              <Grid item xs={bLoggedInUser ? 6 : 12}>
+                {bLoggedInUser && <Typography variant="h6" style={{ textAlign: "center" }}>
+                  Who do I follow?
+                </Typography>}
+                <FriendTable
+                  bMinuses
+                  bProfilePage
+                  data={followeeData}
+                  bLoggedInUser={bLoggedInUser}
+                  username={username}
+                />
+              </Grid>
+              {bLoggedInUser && <Grid item xs={6}>
+                <Typography variant="h6" style={{ textAlign: "center" }}>
+                  You may know
+                </Typography>
+                <FriendTable
+                  bMinuses={false}
+                  bProfilePage
+                  data={[]}
+                  bLoggedInUser={bLoggedInUser}
+                  username={username}
+                />
+              </Grid>}
+            </Grid>
+
           )}
         </TabPanel>
         <TabPanel value={index} index={3}>

@@ -40,7 +40,6 @@ export default class FriendSearch extends React.Component {
           <Box p={3}>
             {bLoaded && (
               <FriendTable
-                bProfilePage={false}
                 data={data}
                 bLoggedInUser
                 username={username}

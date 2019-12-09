@@ -11,6 +11,7 @@ import moment from 'moment';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import SaveIcon from '@material-ui/icons/Save';
 import PropTypes from 'prop-types';
+import InputTrigger from 'react-input-trigger';
 import EditMenu from './EditMenu';
 import { API_URL } from './Utilities';
 

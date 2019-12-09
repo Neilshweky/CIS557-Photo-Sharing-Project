@@ -18,6 +18,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
+import Chips from 'react-chips'
 import CommentBar from './CommentBar';
 import EditMenu from './EditMenu';
 import { API_URL } from './Utilities';
@@ -68,6 +69,8 @@ class Post extends React.Component {
       PostEditAnchorEl: null,
       isCommentsOpen: false,
       caption: props.post.caption,
+      chips: [],
+      users: [],
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
@@ -82,10 +85,29 @@ class Post extends React.Component {
     this.handlePostComment = this.handlePostComment.bind(this);
     this.handleEditComment = this.handleEditComment.bind(this);
     this.handleDeleteComment = this.handleDeleteComment.bind(this);
+    this.onChipChange = this.onChipChange.bind(this);
   }
 
   componentDidMount() {
     this.getProfilePic();
+    this.getUsers();
+  }
+
+  onChipChange(chips) {
+    this.setState({ chips });
+  }
+
+  async getUsers() {
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (resp.ok) {
+      const users = await resp.json();
+      this.setState({ users });
+    }
   }
 
   async getProfilePic() {
@@ -406,7 +428,7 @@ class Post extends React.Component {
           image={`data:image/jpeg;base64,${post.picture}`}
         />
         <CardContent>
-          <Grid container>
+          <Grid container style={{ marginBottom: '10px' }}>
             <Grid item xs={11}>
               <InputBase
                 id={`post-caption-${post.uid}`}
@@ -425,6 +447,13 @@ class Post extends React.Component {
               />
             </Grid>
           </Grid>
+          <Chips
+            value={this.state.chips}
+            onChange={this.onChipChange}
+            suggestions={this.state.users}
+            placeholder={this.state.chips.length === 0 ? 'Tag post here' : ''}
+            fromSuggestionsOnly
+          />
         </CardContent>
         <CardActions disableSpacing>
           <IconButton

@@ -6,6 +6,10 @@ function getUser(username) {
   return Schemas.User.findOne({ username }).exec();
 }
 
+function getUsers() {
+  return Schemas.User.find({}, { _id: 0, username: 1 });
+}
+
 // Adds user to database after signup, and returns it as a Promise
 async function createUser(username, email, password, profilePicture) {
   const existingUser = await getUser(username);
@@ -157,10 +161,9 @@ function getSearchSuggestions(username, term) {
   });
 }
 
-
-
 module.exports = {
   getUser,
+  getUsers,
   deleteUser,
   createUser,
   checkLogin,

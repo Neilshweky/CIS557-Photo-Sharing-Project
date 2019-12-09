@@ -94,6 +94,7 @@ app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200
 
 
 app.get('/user/:username?', routes.getUser);
+app.get('/users', routes.getUsers);
 app.get('/posts/:username/:num', routes.getPosts);
 app.get('/searchusers/:username/:term', routes.searchUsers);
 
