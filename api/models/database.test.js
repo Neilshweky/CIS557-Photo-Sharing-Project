@@ -50,10 +50,36 @@ describe('authentication tests', () => {
     expect(result.profilePicture).toEqual(user.profilePicture);
   });
 
-  test('checkLogin not successful', async () => {
+  test('checkLogin no such user', async () => {
     expect.assertions(1);
     await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'cis557', 'some_pic');
+    await userDB.checkLogin('neilshweky2', 'cis557').catch((err) => expect(err.message).toEqual('No user'));
+  });
+
+  test('checkLogin not successful', async () => {
+    expect.assertions(2);
+    await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'cis557', 'some_pic');
     await userDB.checkLogin('neilshweky', 'cis557-2').catch((err) => expect(err.message).toEqual('incorrect password'));
+    await userDB.getUser('neilshweky').then((data) => expect(data.loginAttempts).toBe(1));
+  });
+
+  test('checkLogin to locked account', async () => {
+    expect.assertions(10);
+    await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'cis557', 'some_pic');
+    await userDB.checkLogin('neilshweky', 'cis557-2').catch((err) => expect(err.message).toEqual('incorrect password'));
+    await userDB.checkLogin('neilshweky', 'cis557-2').catch((err) => expect(err.message).toEqual('incorrect password'));
+    await userDB.checkLogin('neilshweky', 'cis557-2').catch((err) => expect(err.message).toEqual('incorrect password'));
+    await userDB.checkLogin('neilshweky', 'cis557-2').catch((err) => expect(err.message).toEqual('incorrect password'));
+    await userDB.checkLogin('neilshweky', 'cis557-2').catch((err) => expect(err.message).toEqual('account locked'));
+    await userDB.getUser('neilshweky').then((data) => {
+      expect(data.loginAttempts).toBe(5);
+      expect(data.lockUntil).toBeGreaterThan(Math.round(new Date().getTime() / 1000));
+    });
+    await userDB.checkLogin('neilshweky', 'cis557-2').catch((err) => expect(err.message).toEqual('account locked'));
+    await userDB.getUser('neilshweky').then((data) => {
+      expect(data.loginAttempts).toBe(6);
+      expect(data.lockUntil).toBeGreaterThan(Math.round(new Date().getTime() / 1000));
+    });
   });
 });
 
@@ -85,6 +111,18 @@ describe('User tests', () => {
   test('deleteUser no such user', async () => {
     const nonExisting = await userDB.deleteUser('efouh');
     expect(nonExisting.deletedCount).toEqual(0);
+  });
+
+  test('getAllUsers', async () => {
+    const users = await userDB.getUsers();
+    expect(users.length).toBe(0);
+  });
+
+  test('getAllUsers with some users', async () => {
+    await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'cis557', 'some_pic');
+    await userDB.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'cis557', 'some_pic');
+    const users = await userDB.getUsers();
+    expect(users.length).toBe(2);
   });
 });
 
@@ -141,6 +179,34 @@ describe('friend tests', () => {
     await userDB.removeRequest('user1', 'user2');
     const user1final = await userDB.getUser('user1');
     expect(Array.from(user1final.requests)).toEqual([]);
+  });
+});
+
+describe('privacy tests', () => {
+  beforeEach(async () => {
+    await Schemas.User.deleteMany({});
+    await userDB.createUser('user1', 'user1@seas.upenn.edu', 'pw-1', 'pic1');
+    await userDB.createUser('user2', 'user2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('user3', 'user3@seas.upenn.edu', 'pw-3', 'pic3');
+  });
+
+  test('privacy no such user', async () => {
+    expect.assertions(1);
+    await userDB.switchPrivacy('sarah').catch((err) => expect(err.message).toBe('no user found'));
+  });
+
+  test('set privacy user', async () => {
+    await userDB.switchPrivacy('user1');
+    const updated = await userDB.getUser('user1');
+    expect(updated.private).toBe(true);
+  });
+
+
+  test('set privacy back to false user', async () => {
+    await userDB.switchPrivacy('user1');
+    await userDB.switchPrivacy('user1');
+    const updated = await userDB.getUser('user1');
+    expect(updated.private).toBe(false);
   });
 });
 
@@ -502,6 +568,103 @@ describe('edit and delete posts tests', () => {
     const post = await Schemas.Post.findOne();
     await postDB.deletePost(post.uid);
     expect(await Schemas.Post.count()).toBe(0);
+  });
+});
+
+describe('tagging posts tests', () => {
+  beforeEach(async () => {
+    await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await postDB.postPicture('picture', 'neilshweky', 'some caption');
+  });
+
+  test('add tag user post', async () => {
+    const post = await Schemas.Post.findOne();
+    expect(post.tagged.length).toEqual(0);
+    await postDB.addTag('sarah', post.uid);
+    const updatedPost = await Schemas.Post.findOne();
+    expect(updatedPost.tagged.length).toEqual(1);
+    expect(updatedPost.tagged[0]).toEqual('sarah');
+  });
+
+  test('add tag user already tagged post', async () => {
+    const post = await Schemas.Post.findOne();
+    expect(post.tagged.length).toEqual(0);
+    await postDB.addTag('sarah', post.uid);
+    await postDB.addTag('sarah', post.uid);
+    const updatedPost = await Schemas.Post.findOne();
+    expect(updatedPost.tagged.length).toEqual(1);
+  });
+
+  test('remove tag user no tags post', async () => {
+    const post = await Schemas.Post.findOne();
+    await postDB.removeTag('sarah', post.uid);
+    const updatedPost = await Schemas.Post.findOne();
+    expect(updatedPost.tagged.length).toEqual(0);
+  });
+
+  test('remove tag user not tagged post', async () => {
+    const post = await Schemas.Post.findOne();
+    await postDB.addTag('sarah', post.uid);
+    await postDB.removeTag('neilshweky', post.uid);
+    const updatedPost = await Schemas.Post.findOne();
+    expect(updatedPost.tagged.length).toEqual(1);
+    expect(updatedPost.tagged[0]).toEqual('sarah');
+  });
+
+  test('remove tag user post', async () => {
+    const post = await Schemas.Post.findOne();
+    await postDB.addTag('sarah', post.uid);
+    await postDB.addTag('carlos', post.uid);
+    await postDB.removeTag('sarah', post.uid);
+    const updatedPost = await Schemas.Post.findOne();
+    expect(updatedPost.tagged.length).toEqual(1);
+    expect(updatedPost.tagged[0]).toEqual('carlos');
+  });
+});
+
+describe('followeeSuggestions tests', () => {
+  beforeEach(async () => {
+    await userDB.createUser('neilshweky', 'nshweky@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('neilshweky2', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('neilshweky3', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('neilshweky4', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.followUser('neilshweky', 'neilshweky2');
+    await userDB.followUser('neilshweky2', 'neilshweky3');
+    await userDB.followUser('neilshweky', 'neilshweky4');
+    await userDB.followUser('neilshweky2', 'neilshweky4');
+  });
+
+  test('getFollowee suggestions no such user', async () => {
+    const suggestions = await userDB.getFollowerSuggestions('sarah');
+    expect(suggestions.length).toBe(0);
+  });
+
+  test('getFolloweeSuggestions valid', async () => {
+    const suggestions = await userDB.getFollowerSuggestions('neilshweky');
+    expect(suggestions.length).toBe(1);
+    expect(suggestions[0].username).toBe('neilshweky3');
+  });
+
+  test('followee suggestions none to make', async () => {
+    const suggestions = await userDB.getFollowerSuggestions('neilshweky2');
+    expect(suggestions.length).toBe(0);
+  });
+
+  test('followee suggestions too many to make', async () => {
+    await userDB.createUser('neilshweky5', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('neilshweky6', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('neilshweky7', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('neilshweky8', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.createUser('neilshweky9', 'nshweky2@seas.upenn.edu', 'pw-2', 'pic2');
+    await userDB.followUser('neilshweky2', 'neilshweky5');
+    await userDB.followUser('neilshweky2', 'neilshweky6');
+    await userDB.followUser('neilshweky2', 'neilshweky7');
+    await userDB.followUser('neilshweky2', 'neilshweky8');
+    await userDB.followUser('neilshweky2', 'neilshweky9');
+
+    const suggestions = await userDB.getFollowerSuggestions('neilshweky');
+    expect(suggestions.length).toBe(5);
   });
 });
 
