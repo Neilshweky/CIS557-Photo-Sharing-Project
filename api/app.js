@@ -2,6 +2,7 @@ const express = require('express');
 const { check } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const WebSocket = require('ws');
 
 const app = express();
 const cookieParser = require('cookie-parser');
@@ -64,6 +65,29 @@ function validateToken(req, res, next) {
   return res.sendStatus(403);
 }
 
+// WebSocket server token
+const serverToken = jwt.sign({
+  name: 'webserver',
+}, 'secretkey', { expiresIn: '1h' });
+
+// Set WebSocket connection
+const url = 'ws://localhost:8085/';
+const connection = new WebSocket(url, {
+  headers: { token: serverToken },
+});
+
+connection.onopen = () => {
+  console.log("Opening connection to notifications server...");
+  const notification = { type: "open" };
+  connection.send(JSON.stringify(notification));
+};
+connection.onerror = (error) => {
+  console.log(`WebSocket error: ${error}`);
+};
+connection.onmessage = (e) => {
+  console.log(e.data);
+};
+
 // validation on all routes except /login and /signup
 
 app.use(validateToken);
@@ -78,14 +102,22 @@ app.get('/', (req, res) => { res.send('Hello, World\n'); });
 app.post('/signup', [
   check('username').isAlphanumeric().withMessage('Username must be alphanumeric').isLength({ min: 1, max: 12 })
     .withMessage('Username cannot be empty and must be less than 12 characters'),
-  check('email').isEmail().withMessage('Email address must be valid').trim()
-    .normalizeEmail(),
-  check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
-    .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')], routes.signup);
-app.post('/login', [check('username').isLength({ max: 50 }), check('password').isLength({ max: 50 })], routes.login);
+  check('email').isEmail()
+    .withMessage('Email address must be valid').trim().normalizeEmail(),
+  check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^.*$/)
+    .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')
+], routes.signup);
+
+app.post('/login', [
+  check('username').isLength({ max: 50 }),
+  check('password').isLength({ max: 50 })
+], routes.login);
+
 app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], routes.postPicture);
 app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes.updatePost);
-app.post('/like/:postid/:username', routes.likePost);
+app.post('/like/:postid/:username', (req, res) => {
+  routes.likePost(connection, req, res);
+});
 app.post('/unlike/:postid/:username', routes.unlikePost);
 app.post('/addtag/:postid/:username', routes.addTag);
 app.post('/removetag/:postid/:username', routes.removeTag);
@@ -94,16 +126,18 @@ app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
 app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
 
-
 app.get('/user/:username?', routes.getUser);
 app.get('/posts/:username/:num', routes.getPosts);
 app.get('/searchusers/:username/:term', routes.searchUsers);
 
-
-app.put('/user', [check('email').isEmail().withMessage('Email address must be valid').trim()
-  .normalizeEmail(),
-check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
-  .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')], routes.updateProfile);
+app.put('/user', [
+  check('email').isEmail()
+    .withMessage('Email address must be valid').trim().normalizeEmail(),
+  check('password').isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters')
+  .matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
+    .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')
+], routes.updateProfile);
 app.put('/privacy/:username', routes.switchPrivacy);
 
 app.delete('/user/:username', routes.deleteUser);
