@@ -96,15 +96,6 @@ class Post extends React.Component {
     socket.addEventListener('message', this.eventHandler);
   }
 
-  eventHandler(event) {
-    let self = this;
-    const { numLikes } = this.state;
-    if (event.type === 'like' && event.data.postid === this.props.post.uid) {
-      console.log('Message from server ', event.data);
-      self.setState({ liked: true, numLikes: numLikes + 1 });
-    }
-  }
-
   async onChipChange(newChips) {
     const { chips } = this.state;
     const { post } = this.props;
@@ -186,6 +177,16 @@ class Post extends React.Component {
       );
     }
     return avatar;
+  }
+
+  eventHandler(event) {
+    const { numLikes } = this.state;
+    const { post } = this.props;
+    const data = JSON.parse(event.data);
+    if (data.type === 'like' && data.data.postid === post.uid) {
+      // console.log('Message from server ', event.data);
+      this.setState({ liked: true, numLikes: numLikes + 1 });
+    }
   }
 
   async handleLikeClick() {

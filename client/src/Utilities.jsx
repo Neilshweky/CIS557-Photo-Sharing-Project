@@ -10,9 +10,9 @@ function openWebSocketConnection(socket) {
   });
 
   // Listen for messages
-  socket.addEventListener('message', (event) => {
-    console.log('Message from server ', event.data);
-  });
+  // socket.addEventListener('message', (event) => {
+  //   console.log('Message from server ', event.data);
+  // });
 };
 
 export { openWebSocketConnection, API_URL, WEBSOCKET_URI };
