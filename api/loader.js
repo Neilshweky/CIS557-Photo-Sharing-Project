@@ -15,7 +15,7 @@ const user2 = new Schemas.User({
   username: 'neilshweky2',
   email: 'nshweky2@seas.upenn.edu',
   password: SHA256('cis557sucks'),
-  followers: ['neilshweky'],
+  followees: ['neilshweky'],
   profilePicture: './pictures/cut-4.jpg',
 });
 

@@ -93,7 +93,7 @@ app.post('/follow/:username/:friend', routes.follow);
 app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
 app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
-
+app.get('/followersuggestions/:username', routes.followerSuggestions);
 
 app.get('/user/:username?', routes.getUser);
 app.get('/users', routes.getUsers);
