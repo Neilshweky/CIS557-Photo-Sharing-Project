@@ -412,8 +412,6 @@ const addTag = (req, res) => {
   userDB.getUser(username).then((user) => {
     if (user == null) {
       res.status(400).send(`There is no such user ${username}.`);
-    } else if (user.username !== username && user.followees.indexOf(username) === -1) {
-      res.status(400).send(`${username} does not follow original poster.`);
     } else {
       postDB.addTag(username, postid).then(() => res.status(200).send('Post untagged'))
         .catch((err) => res.status(500).send(err));

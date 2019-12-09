@@ -80,7 +80,7 @@ async function switchPrivacy(username) {
 async function addFollowRequest(username, requester) {
   return Schemas.User.updateOne(
     { username },
-    { $push: { requests: requester } },
+    { $addToSet: { requests: requester } },
   );
 }
 
@@ -119,11 +119,11 @@ async function checkLogin(username, password) {
 function followUser(username, friend) { // follow a user
   const p1 = Schemas.User.updateOne(
     { username },
-    { $push: { followees: friend } },
+    { $addToSet: { followees: friend } },
   );
   const p2 = Schemas.User.updateOne(
     { username: friend },
-    { $push: { followers: username } },
+    { $addToSet: { followers: username } },
   );
   return Promise.all([p1, p2]);
 }

@@ -5,15 +5,10 @@ import AppToolbar from './AppToolbar';
 import PostBox from './PostBox';
 
 class Homepage extends React.PureComponent {
-  componentDidMount() {
-    console.log(this.props.socket);
-  }
-
   render() {
     const {
       username, profilePic, updateState, history, socket,
     } = this.props;
-    console.log(socket);
     return (
       <div>
         <AppToolbar

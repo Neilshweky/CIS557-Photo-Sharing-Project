@@ -80,7 +80,7 @@ async function likePost(username, uid) {
   }
   return Schemas.Post.updateOne(
     { uid },
-    { $push: { likes: username } },
+    { $addToSet: { likes: username } },
   );
 }
 
@@ -171,7 +171,7 @@ async function addTag(username, uid) {
   console.log('tagging post: ', username, ', ', uid);
   return Schemas.Post.updateOne(
     { uid },
-    { $push: { tagged: username } },
+    { $addToSet: { tagged: username } },
   );
 }
 

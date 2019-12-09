@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
 
 const wss = new WebSocket.Server({ port: process.env.PORT || 8085, clientTracking: true });
+console.log(process.env.port);
 const connectedUsers = new Map();
 
 wss.on('connection', (ws, req) => {

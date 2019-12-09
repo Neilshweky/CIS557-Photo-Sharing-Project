@@ -180,12 +180,15 @@ class Post extends React.Component {
   }
 
   eventHandler(event) {
-    const { numLikes } = this.state;
+    const { numLikes, numComments, comments } = this.state;
     const { post } = this.props;
     const data = JSON.parse(event.data);
     if (data.type === 'like' && data.data.postid === post.uid) {
-      // console.log('Message from server ', event.data);
       this.setState({ liked: true, numLikes: numLikes + 1 });
+    } else if (data.type === 'unlike' && data.data.postid === post.uid) {
+      this.setState({ liked: false, numLikes: numLikes - 1 });
+    } else if (data.type === 'addcomment' && data.data.postid === post.uid) {
+      this.setState({ numComments: numComments + 1, comments: comments.concat([data]) });
     }
   }
 
@@ -274,10 +277,7 @@ class Post extends React.Component {
         body: JSON.stringify({ comment: commentText }),
       });
     if (resp.ok) {
-      const data = await resp.json();
-      const { numComments, comments } = this.state;
       document.getElementById(`newComment-${post.uid}`).value = '';
-      this.setState({ numComments: numComments + 1, comments: comments.concat([data]) });
     } else if (await resp.text() === 'Token expired') {
       window.sessionStorage.clear();
       window.location.replace('/signin');
