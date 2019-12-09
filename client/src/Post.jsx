@@ -93,8 +93,15 @@ class Post extends React.Component {
     this.getUsers();
   }
 
-  onChipChange(chips) {
-    this.setState({ chips });
+  async onChipChange(newChips) {
+    const { chips } = this.state;
+    const { post } = this.props;
+    const added = newChips.length > chips.length;
+    const changedUser = added ? newChips.filter((x) => !chips.includes(x)) : chips.filter((x) => !newChips.includes(x));
+    const resp = await fetch(`${API_URL}/${added ? 'addTag' : 'removeTag'}/${post.uid}/${changedUser}`);
+    if (resp.ok) {
+      this.setState({ chips: newChips });
+    }
   }
 
   async getUsers() {

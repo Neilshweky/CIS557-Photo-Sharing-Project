@@ -1,3 +1,5 @@
+// https://medium.com/better-programming/infinite-scroll-with-react-hooks-and-context-api-b622b4f9c43f
+
 import React from 'react';
 import { Box } from '@material-ui/core';
 import PropTypes from 'prop-types';
@@ -18,7 +20,6 @@ export default class PostBox extends React.Component {
     // list has auto height
     window.addEventListener('scroll', () => {
       if ((list.clientHeight + list.offsetTop) - (window.scrollY + window.innerHeight) < 2) {
-        // this.setState({ loadMore: true });
         this.generatePosts();
       }
     });
