@@ -89,10 +89,8 @@ connection.onmessage = (e) => {
 };
 
 // validation on all routes except /login and /signup
-
 app.use(validateToken);
 // app.use(limiter);
-
 // Used to link js and css files
 // app.use(express.static('views/css'));
 // app.use(express.static('views/js'));

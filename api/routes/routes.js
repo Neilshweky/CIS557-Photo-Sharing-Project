@@ -171,7 +171,7 @@ const getPosts = (req, res) => {
   });
 };
 
-const likePost = (req, res) => {
+const likePost = (connection, req, res) => {
   const { username, postid } = req.params;
   userDB.getUser(username).then((user) => {
     if (user == null) {
@@ -179,8 +179,25 @@ const likePost = (req, res) => {
     } else if (user.username !== username && user.followees.indexOf(username) === -1) {
       res.status(409).send(`${username} does not follow original poster.`);
     } else {
-      postDB.likePost(username, postid)
-        .then(() => { res.status(200).send('Post liked'); })
+      postDB.getPost(postid)
+        .then((post) => {
+          if (post == null) {
+            res.status(404).send(`There is no post with id ${postid}.`);
+          } else {
+            postDB.likePost(username, postid)
+              .then(() => {
+                const notification = JSON.stringify({
+                  type: 'like',
+                  owner: 'username',
+                  recipients: [post.username],
+                  data: { postid }
+                });
+                connection.send(notification);
+                res.status(200).send('Post liked');
+              })
+              .catch((err) => res.status(500).send(err));
+          }
+        })
         .catch((err) => res.status(500).send(err));
     }
   });

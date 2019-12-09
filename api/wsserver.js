@@ -21,6 +21,7 @@ wss.on('connection', (ws, req) => {
       return;
     }
     client = decoded.name;
+    console.log(`${client} connected`);
     if (client !== 'webserver') {
       // Add client to map of clients
       connectedUsers.set(String(client), ws);
@@ -28,25 +29,25 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('message', (message) => {
-    console.log(`Received ${message} from ${client}`);
+    const msg = JSON.parse(message);
+    console.log(`Sending '${msg.type}' notification from ${msg.owner} to ${msg.recipients}`);
     if (client === 'webserver') {
-      // Parse notification
-      const notification = JSON.parse(message);
-      switch (notification.type) {
-        case "open": {
-          ws.send("Connected to notification server.");
-        }
-        default: {
-
-        }
+      if (msg.type === "open") {
+        ws.send("Connected to notification server.");
       }
-      // get list of recipients
-      //const recipients = new Array(JSON.parse(message));
-      //recipients.forEach((element) => {
-        //if (connectedUsers.get(String(element)) !== undefined) {
-          //connectedUsers.get(String(element)).send('update');
-        //}
-      //});
+      else {
+        const recipients = new Array(JSON.parse(msg.recipients));
+        recipients.forEach((element) => {
+          if (connectedUsers.get(String(element)) !== undefined) {
+            const notification = JSON.stringify({
+              type: msg.type,
+              owner: msg.owner,
+              data: msg.data
+            });
+            connectedUsers.get(String(element)).send(notification);
+          }
+        });
+      }
     }
   });
 });
