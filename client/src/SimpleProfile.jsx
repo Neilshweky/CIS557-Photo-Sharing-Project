@@ -175,7 +175,7 @@ class SimpleProfile extends React.Component {
     const token = window.sessionStorage.getItem('token');
     if (newPassword === newPassConfirm) {
       if (email !== newEmail) {
-        const respEmail = await fetch('${API_URL}/user',
+        const respEmail = await fetch(`${API_URL}/user`,
           {
             method: 'PUT',
             headers: {
@@ -200,7 +200,7 @@ class SimpleProfile extends React.Component {
       }
       if (newPassword !== '') {
         this.setState({ password: '', curPassword: '', passwordCheck: '' });
-        const respPass = await fetch('${API_URL}/user',
+        const respPass = await fetch(`${API_URL}/user`,
           {
             method: 'PUT',
             headers: {
@@ -243,7 +243,7 @@ class SimpleProfile extends React.Component {
       }, async () => {
         const { newProfilePicture } = this.state;
         if (profilePicture !== newProfilePicture) {
-          const respPic = await fetch('${API_URL}/user',
+          const respPic = await fetch(`${API_URL}/user`,
             {
               method: 'PUT',
               headers: {
@@ -283,7 +283,7 @@ class SimpleProfile extends React.Component {
     const {
       profUsername, email, password, curPassword, passwordCheck,
       profilePicture, followers, followees, index,
-      followeeData, dataLoaded, bLoggedInUser, numMyPosts
+      followeeData, dataLoaded, bLoggedInUser, numMyPosts,
     } = this.state;
     let avatar = null;
     try {
@@ -313,7 +313,12 @@ class SimpleProfile extends React.Component {
     }
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} history={history} />
+        <AppToolbar
+          profilePic={profilePic}
+          username={username}
+          updateState={updateState}
+          history={history}
+        />
         <Tabs
           value={index}
           onChange={this.handleTabChange}
@@ -377,9 +382,11 @@ class SimpleProfile extends React.Component {
           {dataLoaded && (
             <Grid container spacing={2}>
               <Grid item xs={bLoggedInUser ? 6 : 12}>
-                {bLoggedInUser && <Typography variant="h6" style={{ textAlign: "center" }}>
-                  Who do I follow?
-                </Typography>}
+                {bLoggedInUser && (
+                  <Typography variant="h6" style={{ textAlign: 'center' }}>
+                    Who do I follow?
+                  </Typography>
+                )}
                 <FriendTable
                   bMinuses
                   bProfilePage
@@ -388,18 +395,20 @@ class SimpleProfile extends React.Component {
                   username={username}
                 />
               </Grid>
-              {bLoggedInUser && <Grid item xs={6}>
-                <Typography variant="h6" style={{ textAlign: "center" }}>
-                  You may know
-                </Typography>
-                <FriendTable
-                  bMinuses={false}
-                  bProfilePage
-                  data={[]}
-                  bLoggedInUser={bLoggedInUser}
-                  username={username}
-                />
-              </Grid>}
+              {bLoggedInUser && (
+                <Grid item xs={6}>
+                  <Typography variant="h6" style={{ textAlign: 'center' }}>
+                    You may know
+                  </Typography>
+                  <FriendTable
+                    bMinuses={false}
+                    bProfilePage
+                    data={[]}
+                    bLoggedInUser={bLoggedInUser}
+                    username={username}
+                  />
+                </Grid>
+              )}
             </Grid>
 
           )}
@@ -538,7 +547,6 @@ SimpleProfile.propTypes = {
   username: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
   profilePic: PropTypes.string.isRequired,
-  numMyPosts: PropTypes.number.isRequired,
 };
 
 export default withStyles(styles)(SimpleProfile);
