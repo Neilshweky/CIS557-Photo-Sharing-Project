@@ -20,6 +20,7 @@ const User = new Schema({
   },
   password: { type: String, required: true },
   profilePicture: String,
+  private: Boolean,
   followers: Array, // IN adjacanecy list
   followees: Array, // OUT adjacency list
   posts: Array,
@@ -38,6 +39,7 @@ const Post = new Schema({
     uid: String, username: String, comment: String, timestamp: Number,
   }],
   timestamp: Number,
+  tagged: Array,
 });
 
 Post.pre('validate', function setUID(next) {

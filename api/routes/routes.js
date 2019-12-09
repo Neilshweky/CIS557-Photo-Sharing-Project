@@ -115,6 +115,17 @@ const updateProfile = (req, res) => {
   }
 };
 
+// Route to switch a user's privacy setting
+const switchPrivacy = (req, res) => {
+  const { username } = req.params;
+  userDB.switchPrivacy(username)
+    .then((data) => res.status(200).send(data))
+    .catch((err) => {
+      if (err.message === 'no user found') res.status(400).send(err.message);
+      else res.status(500).send(err);
+    });
+}
+
 const postPicture = (req, res) => {
   if (!req.body.pic) {
     res.status(400).send('Picture is required to create post.');
@@ -348,10 +359,30 @@ const deleteComment = (req, res) => {
   }
 };
 
+const addTag = (req, res) => {
+  const { username, postid } = req.params;
+  userDB.getUser(username).then((user) => {
+    if (user == null) {
+      res.status(400).send(`There is no such user ${username}.`);
+    } else if (user.username !== username && user.followees.indexOf(username) === -1) {
+      res.status(400).send(`${username} does not follow original poster.`);
+    } else {
+      postDB.addTag(username, postid).then(() => res.status(200).send('Post untagged'))
+        .catch((err) => res.status(500).send(err));
+    }
+  });
+};
+
+const removeTag = (req, res) => {
+  const { username, postid } = req.params;
+  postDB.removeTag(username, postid).then(() => { res.status(200).send('Post untagged'); }).catch((err) => res.status(500).send(err));
+};
+
 module.exports = {
   signup,
   login,
   updateProfile,
+  switchPrivacy,
   postPicture,
   getUser,
   getUsers,
@@ -367,4 +398,6 @@ module.exports = {
   addComment,
   editComment,
   deleteComment,
+  addTag,
+  removeTag,
 };

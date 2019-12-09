@@ -87,6 +87,8 @@ app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], rou
 app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes.updatePost);
 app.post('/like/:postid/:username', routes.likePost);
 app.post('/unlike/:postid/:username', routes.unlikePost);
+app.post('/addtag/:postid/:username', routes.addTag);
+app.post('/removetag/:postid/:username', routes.removeTag);
 app.post('/follow/:username/:friend', routes.follow);
 app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
@@ -103,6 +105,7 @@ app.put('/user', [check('email').isEmail().withMessage('Email address must be va
   .normalizeEmail(),
 check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
   .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')], routes.updateProfile);
+app.put('/privacy/:username', routes.switchPrivacy);
 
 app.delete('/user/:username', routes.deleteUser);
 app.delete('/post/:postID', routes.deletePost);
