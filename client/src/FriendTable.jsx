@@ -10,6 +10,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
+import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
@@ -36,6 +37,7 @@ class SimpleTable extends React.Component {
     this.state = { curUser: props.username, data: props.data, bRequest: props.bRequest };
     this.unfollow = this.unfollow.bind(this);
     this.follow = this.follow.bind(this);
+    this.getIcon = this.getIcon.bind(this);
   }
 
   async unfollow(toUnfollowIndex) {
@@ -113,19 +115,44 @@ class SimpleTable extends React.Component {
           },
           mode: 'cors',
         });
+      const text = await resp.text();
+      console.log(text);
+      console.log(text.indexOf('request'))
       if (resp.ok) {
-        data[toFollowIndex].following = true;
+        if (text.indexOf('request') > -1) {
+          data[toFollowIndex].following = 'wait';
+        } else {
+          data[toFollowIndex].following = true;
+        }
         this.setState({ data });
-      } else if (await resp.text() === 'Token expired') {
+      } else if (text === 'Token expired') {
         window.sessionStorage.clear();
         window.location.replace('/signin');
       }
     }
   }
 
+  getIcon(folStatus, index) {
+    const { bMinuses } = this.props;
+    if (folStatus === 'wait') {
+      return (<IconButton edge="end" aria-label="waiting">
+        <HourglassFullIcon />
+      </IconButton>)
+    } else if (bMinuses || folStatus) {
+      return (
+        <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(index)}>
+          <DeleteOutlinedIcon />
+        </IconButton>)
+    } else {
+      return (<IconButton edge="end" aria-label="add" onClick={() => this.follow(index)}>
+        <AddCircleOutlineOutlinedIcon />
+      </IconButton>)
+    }
+  }
+
   render() {
     const {
-      classes, data, bMinuses, bLoggedInUser,
+      classes, data, bLoggedInUser,
     } = this.props;
     function getAvatar(username, profilePicture) {
       let avatar = null;
@@ -176,16 +203,7 @@ class SimpleTable extends React.Component {
                 </TableCell>
                 {bLoggedInUser && (
                   <TableCell align="right">
-                    {(bMinuses || row.following) ? (
-                      <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(i)}>
-                        <DeleteOutlinedIcon />
-                      </IconButton>
-                    )
-                      : (
-                        <IconButton edge="end" aria-label="add" onClick={() => this.follow(i)}>
-                          <AddCircleOutlineOutlinedIcon />
-                        </IconButton>
-                      )}
+                    {this.getIcon(row.following, i)}
                   </TableCell>
                 )}
               </TableRow>
@@ -200,6 +218,7 @@ class SimpleTable extends React.Component {
 SimpleTable.defaultProps = {
   bMinuses: false,
   bProfilePage: false,
+  bRequest: false,
 };
 
 SimpleTable.propTypes = {
@@ -212,7 +231,7 @@ SimpleTable.propTypes = {
   ).isRequired,
   bMinuses: PropTypes.bool,
   bProfilePage: PropTypes.bool,
-  bRequest: PropTypes.bool.isRequired,
+  bRequest: PropTypes.bool,
   bLoggedInUser: PropTypes.bool.isRequired,
   classes: PropTypes.shape({
     root: PropTypes.string.isRequired,

@@ -91,12 +91,7 @@ class SimpleProfile extends React.Component {
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.togglePrivacy = this.togglePrivacy.bind(this);
     this.state = {
-      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0, bPrivate: false, followeeSuggestion: [],
-      profUsername: '', email: '', password: '', curPassword: '',
-      passwordCheck: '', requests: [], followees: [], followers: [],
-      profilePicture: '', newProfilePicture: '', index: 0,
-      requesterData: [], followeeData: [], dataLoaded: false,
-      bLoggedInUser: true, picUpdate: false, numMyPosts: 0,
+      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0, bPrivate: false, followeeSuggestion: [], requesterData: [],
     };
   }
 
@@ -155,9 +150,9 @@ class SimpleProfile extends React.Component {
       },
     });
     if (resp.ok) {
-      // console.log(await resp.json());
       this.setState({ followeeSuggestion: await resp.json() });
     }
+  }
 
   async getRequesterData() {
     const { requests } = this.state;
@@ -448,6 +443,38 @@ class SimpleProfile extends React.Component {
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
+          <Grid container spacing={2}>
+            <Grid item xs={bLoggedInUser ? 6 : 12}>
+              {bLoggedInUser && (
+                <Typography variant="h6" style={{ textAlign: 'center' }}>
+                  Who do I follow?
+                </Typography>
+              )}
+              <FriendTable
+                bMinuses
+                bProfilePage
+                data={followeeData}
+                bLoggedInUser={bLoggedInUser}
+                username={username}
+              />
+            </Grid>
+            {bLoggedInUser && (
+              <Grid item xs={6}>
+                <Typography variant="h6" style={{ textAlign: 'center' }}>
+                  You may know
+                </Typography>
+                <FriendTable
+                  bMinuses={false}
+                  bProfilePage
+                  data={followeeSuggestion}
+                  bLoggedInUser={bLoggedInUser}
+                  username={username}
+                />
+              </Grid>
+            )}
+          </Grid>
+        </TabPanel>
+        <TabPanel value={index} index={3}>
           {dataLoaded && (
             <FriendTable
               bProfilePage={false}
@@ -456,39 +483,6 @@ class SimpleProfile extends React.Component {
               bLoggedInUser={bLoggedInUser}
               username={username}
             />
-          )}
-        </TabPanel>
-        <TabPanel value={index} index={3}>
-          <Grid container spacing={2}>
-              <Grid item xs={bLoggedInUser ? 6 : 12}>
-                {bLoggedInUser && (
-                  <Typography variant="h6" style={{ textAlign: 'center' }}>
-                    Who do I follow?
-                  </Typography>
-                )}
-                <FriendTable
-                  bMinuses
-                  bProfilePage
-                  data={followeeData}
-                  bLoggedInUser={bLoggedInUser}
-                  username={username}
-                />
-              </Grid>
-              {bLoggedInUser && (
-                <Grid item xs={6}>
-                  <Typography variant="h6" style={{ textAlign: 'center' }}>
-                    You may know
-                  </Typography>
-                  <FriendTable
-                    bMinuses={false}
-                    bProfilePage
-                    data={followeeSuggestion}
-                    bLoggedInUser={bLoggedInUser}
-                    username={username}
-                  />
-                </Grid>
-              )}
-            </Grid>
           )}
         </TabPanel>
         <TabPanel value={index} index={4}>

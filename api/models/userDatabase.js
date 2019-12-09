@@ -12,7 +12,7 @@ function getUsers() {
 }
 
 // Adds user to database after signup, and returns it as a Promise
-async function createUser(username, email, password) {
+async function createUser(username, email, password, profilePicture) {
   const existingUser = await getUser(username);
   if (existingUser != null) {
     return undefined;
@@ -22,6 +22,7 @@ async function createUser(username, email, password) {
     username,
     email,
     password: encryptedPassword,
+    profilePicture,
   };
   const user = new Schemas.User(profile);
   return user.save();

@@ -19,7 +19,7 @@ const User = new Schema({
     type: String, required: true, unique: true, set: trim,
   },
   password: { type: String, required: true },
-  profilePicture: { type: String, default: '' },
+  profilePicture: { type: String },
   private: { default: false, type: Boolean },
   requests: Array, // Follow requests, if private
 
