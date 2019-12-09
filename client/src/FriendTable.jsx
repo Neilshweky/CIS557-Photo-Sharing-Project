@@ -36,7 +36,7 @@ const styles = (theme) => ({
 class SimpleTable extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { curUser: props.username, data: props.data };
+    this.state = { curUser: props.username, data: props.data, bRequest: props.bRequest };
     this.unfollow = this.unfollow.bind(this);
     this.follow = this.follow.bind(this);
   }
@@ -76,12 +76,10 @@ class SimpleTable extends React.Component {
     }
   }
 
-  async follow(toFollowIndex) {
+  async acceptRequest(requesterIndex) {
     const { curUser, data } = this.state;
-    data[toFollowIndex].following = true;
-    this.setState({ data });
     const token = window.sessionStorage.getItem('token');
-    const resp = await fetch(`${API_URL}/follow/${curUser}/${data[toFollowIndex].username}`,
+    const resp = await fetch(`${API_URL}/accept/${curUser}/${data[requesterIndex].username}`,
       {
         method: 'POST',
         headers: {
@@ -92,11 +90,39 @@ class SimpleTable extends React.Component {
         mode: 'cors',
       });
     if (resp.ok) {
-      data[toFollowIndex].following = true;
+      data.splice(requesterIndex, 1);
       this.setState({ data });
     } else if (await resp.text() === 'Token expired') {
       window.sessionStorage.clear();
       window.location.replace('/signin');
+    }
+  }
+
+  async follow(toFollowIndex) {
+    const { curUser, data, bRequest } = this.state;
+    if (bRequest) {
+      this.acceptRequest(toFollowIndex);
+    } else {
+      data[toFollowIndex].following = true;
+      this.setState({ data });
+      const token = window.sessionStorage.getItem('token');
+      const resp = await fetch(`${API_URL}/follow/${curUser}/${data[toFollowIndex].username}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
+          },
+          mode: 'cors',
+        });
+      if (resp.ok) {
+        data[toFollowIndex].following = true;
+        this.setState({ data });
+      } else if (await resp.text() === 'Token expired') {
+        window.sessionStorage.clear();
+        window.location.replace('/signin');
+      }
     }
   }
 
@@ -183,6 +209,7 @@ SimpleTable.propTypes = {
     }),
   ).isRequired,
   bProfilePage: PropTypes.bool.isRequired,
+  bRequest: PropTypes.bool.isRequired,
   bLoggedInUser: PropTypes.bool.isRequired,
   classes: PropTypes.shape({
     root: PropTypes.string.isRequired,

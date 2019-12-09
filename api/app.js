@@ -80,8 +80,9 @@ app.post('/signup', [
     .withMessage('Username cannot be empty and must be less than 12 characters'),
   check('email').isEmail().withMessage('Email address must be valid').trim()
     .normalizeEmail(),
-  check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
-    .withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')], routes.signup);
+  //check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters').matches(/^ (?=.* [a - z])(?=.* [A - Z])(?=.*\d)(?=.* [@$!%*?&])[A - Za - z\d@$!%*?&].{8,}$/)
+    //.withMessage('Password must contain at least 1 uppercase, 1 number, 1 special character')
+  ], routes.signup);
 app.post('/login', [check('username').isLength({ max: 50 }), check('password').isLength({ max: 50 })], routes.login);
 app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], routes.postPicture);
 app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes.updatePost);
@@ -90,6 +91,7 @@ app.post('/unlike/:postid/:username', routes.unlikePost);
 app.post('/addtag/:postid/:username', routes.addTag);
 app.post('/removetag/:postid/:username', routes.removeTag);
 app.post('/follow/:username/:friend', routes.follow);
+app.post('/accept/:username/:follower', routes.acceptRequest);
 app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
 app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);

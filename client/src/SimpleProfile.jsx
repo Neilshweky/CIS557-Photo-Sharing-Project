@@ -83,11 +83,16 @@ class SimpleProfile extends React.Component {
     this.getProfile = this.getProfile.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
     // this.generatePosts = this.generatePosts.bind(this);
+    this.getRequesterData = this.getRequesterData.bind(this);
     this.getFolloweesData = this.getFolloweesData.bind(this);
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.state = {
-      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0,
+      profUsername: '', email: '', password: '', curPassword: '',
+      passwordCheck: '', requests: [], followees: [], followers: [],
+      profilePicture: '', newProfilePicture: '', index: 0,
+      requesterData: [], followeeData: [], dataLoaded: false,
+      bLoggedInUser: true, picUpdate: false, numMyPosts: 0,
     };
   }
 
@@ -118,12 +123,14 @@ class SimpleProfile extends React.Component {
       this.setState({
         profUsername,
         email: data.email,
+        requests: data.requests,
         followers: data.followers,
         followees: data.followees,
         profilePicture: data.profilePicture,
         bLoggedInUser: profUsername === username,
         numMyPosts: data.numMyPosts,
       }, async () => {
+        await this.getRequesterData();
         await this.getFolloweesData();
         this.setState({ dataLoaded: true, index: 0 });
       });
@@ -131,6 +138,32 @@ class SimpleProfile extends React.Component {
       window.sessionStorage.clear();
       window.location.replace('/signin');
     }
+  }
+
+  async getRequesterData() {
+    const { requests } = this.state;
+    const requesterData = [];
+    const promises = [];
+    const token = window.sessionStorage.getItem('token');
+    const callbackFn = async (requester) => {
+      const resp = await fetch(`${API_URL}/user/${requester}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        requesterData.push({ username: requester, profilePicture: data.profilePicture });
+      } else if (await resp.text() === 'Token expired') {
+        window.sessionStorage.clear();
+        window.location.replace('/signin');
+      }
+    };
+    for (let index = 0; index < requests.length; index += 1) {
+      promises.push(callbackFn(requests[index], index, requests));
+    }
+    await Promise.all(promises);
+    this.setState({ requesterData });
   }
 
   async getFolloweesData() {
@@ -283,7 +316,7 @@ class SimpleProfile extends React.Component {
     const {
       profUsername, email, password, curPassword, passwordCheck,
       profilePicture, followers, followees, index,
-      followeeData, dataLoaded, bLoggedInUser, numMyPosts
+      requesterData, followeeData, dataLoaded, bLoggedInUser, numMyPosts
     } = this.state;
     let avatar = null;
     try {
@@ -323,6 +356,7 @@ class SimpleProfile extends React.Component {
         >
           <Tab label="Profile Information" />
           <Tab label="My Posts" />
+          <Tab label="Follow Requests" />
           <Tab label="Who Do I Follow?" />
           {bLoggedInUser && <Tab label="Account Settings" />}
         </Tabs>
@@ -376,14 +410,26 @@ class SimpleProfile extends React.Component {
         <TabPanel value={index} index={2}>
           {dataLoaded && (
             <FriendTable
-              bProfilePage
-              data={followeeData}
+              bProfilePage={false}
+              bRequest
+              data={requesterData}
               bLoggedInUser={bLoggedInUser}
               username={username}
             />
           )}
         </TabPanel>
         <TabPanel value={index} index={3}>
+          {dataLoaded && (
+            <FriendTable
+              bProfilePage
+              bRequest={false}
+              data={followeeData}
+              bLoggedInUser={bLoggedInUser}
+              username={username}
+            />
+          )}
+        </TabPanel>
+        <TabPanel value={index} index={4}>
           <Container>
             <div className={classes.paper}>
               <div id="photo-status" />
