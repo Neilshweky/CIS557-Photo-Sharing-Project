@@ -41,6 +41,7 @@ export default class FriendSearch extends React.Component {
             {bLoaded && (
               <FriendTable
                 bProfilePage={false}
+                bRequest={false}
                 data={data}
                 bLoggedInUser
                 username={username}
