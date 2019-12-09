@@ -69,7 +69,7 @@ class Post extends React.Component {
       PostEditAnchorEl: null,
       isCommentsOpen: false,
       caption: props.post.caption,
-      chips: [],
+      chips: props.post.tagged,
       users: [],
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
@@ -96,9 +96,15 @@ class Post extends React.Component {
   async onChipChange(newChips) {
     const { chips } = this.state;
     const { post } = this.props;
+    const token = window.sessionStorage.getItem('token');
     const added = newChips.length > chips.length;
     const changedUser = added ? newChips.filter((x) => !chips.includes(x)) : chips.filter((x) => !newChips.includes(x));
-    const resp = await fetch(`${API_URL}/${added ? 'addTag' : 'removeTag'}/${post.uid}/${changedUser}`);
+    const resp = await fetch(`${API_URL}/${added ? 'addTag' : 'removeTag'}/${post.uid}/${changedUser}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
       this.setState({ chips: newChips });
     }
