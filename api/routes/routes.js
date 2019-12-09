@@ -150,7 +150,10 @@ const getUser = (req, res) => {
   }
   userDB.getUser(username).then((data) => {
     if (data === undefined || data === null) res.status(404).send('User not found');
-    else res.status(200).send(data);
+    else {
+      console.log(data);
+      res.status(200).send(data);
+    }
   }).catch((err) => res.status(500).send(err));
 };
 

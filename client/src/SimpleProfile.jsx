@@ -13,6 +13,8 @@ import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import './SimpleProfile.css';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import AppToolbar from './AppToolbar';
 import FriendTable from './FriendTable';
 import PostBox from './PostBox';
@@ -86,14 +88,16 @@ class SimpleProfile extends React.Component {
     this.getFolloweesData = this.getFolloweesData.bind(this);
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
+    this.togglePrivacy = this.togglePrivacy.bind(this);
     this.state = {
-      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0,
+      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0, bPrivate: false,
     };
   }
 
   componentDidMount() {
     const { match } = this.props;
     this.getProfile(match.params.username);
+    this.getFolloweeSuggestions();
   }
 
   componentDidUpdate(prevProps) {
@@ -123,6 +127,7 @@ class SimpleProfile extends React.Component {
         profilePicture: data.profilePicture,
         bLoggedInUser: profUsername === username,
         numMyPosts: data.numMyPosts,
+        bPrivate: data.private,
       }, async () => {
         await this.getFolloweesData();
         this.setState({ dataLoaded: true, index: 0 });
@@ -134,9 +139,15 @@ class SimpleProfile extends React.Component {
   }
 
   async getFolloweeSuggestions() {
+    const token = window.sessionStorage.getItem('token');
     const { username } = this.props;
-    const resp = await fetch(`${API_URL}/followersuggestions/${username}`);
+    const resp = await fetch(`${API_URL}/followersuggestions/${username}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (resp.ok) {
+      console.log(resp.json());
       return resp.json();
     }
   }
@@ -280,6 +291,22 @@ class SimpleProfile extends React.Component {
     reader.readAsBinaryString(newImage);
   }
 
+  async togglePrivacy() {
+    const { bPrivate } = this.state;
+    const { username } = this.props;
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/privacy/${username}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    if (resp.ok) {
+      this.setState({ bPrivate: !bPrivate });
+    }
+  }
+
   handleTabChange(e, newValue) {
     this.setState({ index: newValue });
   }
@@ -291,7 +318,7 @@ class SimpleProfile extends React.Component {
     const {
       profUsername, email, password, curPassword, passwordCheck,
       profilePicture, followers, followees, index,
-      followeeData, dataLoaded, bLoggedInUser, numMyPosts,
+      followeeData, dataLoaded, bLoggedInUser, numMyPosts, bPrivate,
     } = this.state;
     let avatar = null;
     try {
@@ -335,8 +362,8 @@ class SimpleProfile extends React.Component {
           centered
         >
           <Tab label="Profile Information" />
-          <Tab label="My Posts" />
-          <Tab label="Who Do I Follow?" />
+          {(bLoggedInUser || !bPrivate) && <Tab label="My Posts" />}
+          {(bLoggedInUser || !bPrivate) && <Tab label="Who Do I Follow?" />}
           {bLoggedInUser && <Tab label="Account Settings" />}
         </Tabs>
         <TabPanel value={index} index={0}>
@@ -411,7 +438,7 @@ class SimpleProfile extends React.Component {
                   <FriendTable
                     bMinuses={false}
                     bProfilePage
-                    data={() => this.getFolloweeSuggestions()}
+                    data={[]}
                     bLoggedInUser={bLoggedInUser}
                     username={username}
                   />
@@ -442,6 +469,21 @@ class SimpleProfile extends React.Component {
               <form className={classes.form} noValidate onSubmit={this.updateProfile}>
                 {dataLoaded && (
                   <Grid container justify="center" aligntems="center" spacing={2}>
+                    <Grid item xs={4} />
+                    <Grid item xs={4} >
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={bPrivate}
+                            onChange={this.togglePrivacy}
+                            value="checkedB"
+                            color="primary"
+                          />
+                        }
+                        label="Keep my account private"
+                      />
+                    </Grid>
+                    <Grid item xs={4} />
                     <Grid item xs={3} />
                     <Grid item xs={6}>
                       <TextField
