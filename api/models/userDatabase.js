@@ -7,6 +7,10 @@ function getUser(username) {
   return Schemas.User.findOne({ username }).exec();
 }
 
+function getUsers() {
+  return Schemas.User.find({}, { _id: 0, username: 1 });
+}
+
 // Adds user to database after signup, and returns it as a Promise
 async function createUser(username, email, password, profilePicture) {
   const existingUser = await getUser(username);
@@ -60,6 +64,32 @@ async function updatePassword(username, oldPassword, newPassword) {
   const encryptedPassword = SHA256(newPassword);
   user.password = encryptedPassword;
   return user.save();
+}
+
+// Switch the user's privacy setting
+async function switchPrivacy(username) {
+  const user = await getUser(username);
+  if (user == null) {
+    return Promise.reject(new Error('no user found'));
+  }
+  user.private = !user.private;
+  return user.save();
+}
+
+// Add a follow request to a user
+async function addFollowRequest(username, requester) {
+  return Schemas.User.updateOne(
+    { username },
+    { $push: { requests: requester } },
+  );
+}
+
+// Remove a follow request to a user (once accepted)
+async function removeRequest(username, requester) {
+  return Schemas.User.updateOne(
+    { username },
+    { $pull: { requests: requester } },
+  );
 }
 
 // Checks correct user login
@@ -176,7 +206,6 @@ async function getFollowerSuggestions(username) {
         }
       }
     }
-
   }
   return result;
 }
@@ -188,12 +217,16 @@ async function getUserPP(username) {
 
 module.exports = {
   getUser,
+  getUsers,
   deleteUser,
   createUser,
   checkLogin,
   updateEmail,
   updateProfilePic,
   updatePassword,
+  switchPrivacy,
+  addFollowRequest,
+  removeRequest,
   followUser,
   unfollowUser,
   getFollowersForUsername,

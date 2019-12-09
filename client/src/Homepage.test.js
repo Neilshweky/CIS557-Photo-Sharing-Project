@@ -15,19 +15,20 @@ beforeEach(async () => {
   await driver.get('http://localhost:3000/signin');
 });
 
-async function signUpUsers() {
-  await fetch('localhost:8080/user/user1', { method: 'DELETE' });
-  await fetch('localhost:8080/signup', {
-    method: 'POST',
-    body: JSON.stringify({ username: 'user1', password: 'user1pw', email: 'user1@seas.upenn.edu' }),
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
+// async function signUpUsers() {
+//   await fetch('localhost:8080/user/user1', { method: 'DELETE' });
+//   await fetch('localhost:8080/signup', {
+//     method: 'POST',
+//     body: JSON.stringify({ username: 'user1', password: 'user1pw',
+//      email: 'user1@seas.upenn.edu' }),
+//     headers: { 'Content-Type': 'application/json' },
+//   });
+// }
 
-async function follow(user, followee) {
-  return fetch(`localhost:8080/follow/${user}/${followee}`, { method: 'POST' })
-    .then((res) => console.log(res));
-}
+// async function follow(user, followee) {
+//   return fetch(`localhost:8080/follow/${user}/${followee}`, { method: 'POST' })
+//     .then((res) => console.log(res));
+// }
 
 async function postPicture() {
   return fetch('localhost:8080/postpicture', {

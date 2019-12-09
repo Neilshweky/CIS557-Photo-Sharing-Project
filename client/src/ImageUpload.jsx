@@ -87,7 +87,12 @@ class ImageUpload extends React.Component {
     } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} history={history} />
+        <AppToolbar
+          profilePic={profilePic}
+          username={username}
+          updateState={updateState}
+          history={history}
+        />
         <Box p={3}>
           <h1 id="welcome">
             Welcome.
@@ -148,5 +153,6 @@ ImageUpload.propTypes = {
   username: PropTypes.string.isRequired,
   profilePic: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
+  numPosts: PropTypes.number.isRequired,
 };
 export default withStyles(styles)(ImageUpload);

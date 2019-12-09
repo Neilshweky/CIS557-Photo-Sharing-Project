@@ -18,6 +18,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
+import Chips from 'react-chips';
 import CommentBar from './CommentBar';
 import EditMenu from './EditMenu';
 import { API_URL } from './Utilities';
@@ -68,6 +69,8 @@ class Post extends React.Component {
       PostEditAnchorEl: null,
       isCommentsOpen: false,
       caption: props.post.caption,
+      chips: props.post.tagged,
+      users: [],
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
     this.getProfilePic = this.getProfilePic.bind(this);
@@ -82,10 +85,44 @@ class Post extends React.Component {
     this.handlePostComment = this.handlePostComment.bind(this);
     this.handleEditComment = this.handleEditComment.bind(this);
     this.handleDeleteComment = this.handleDeleteComment.bind(this);
+    this.onChipChange = this.onChipChange.bind(this);
   }
 
   componentDidMount() {
     this.getProfilePic();
+    this.getUsers();
+  }
+
+  async onChipChange(newChips) {
+    const { chips } = this.state;
+    const { post } = this.props;
+    const token = window.sessionStorage.getItem('token');
+    const added = newChips.length > chips.length;
+    const changedUser = added ? newChips.filter(
+      (x) => !chips.includes(x),
+    ) : chips.filter((x) => !newChips.includes(x));
+    const resp = await fetch(`${API_URL}/${added ? 'addTag' : 'removeTag'}/${post.uid}/${changedUser}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (resp.ok) {
+      this.setState({ chips: newChips });
+    }
+  }
+
+  async getUsers() {
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (resp.ok) {
+      const users = await resp.json();
+      this.setState({ users });
+    }
   }
 
   async getProfilePic() {
@@ -262,7 +299,7 @@ class Post extends React.Component {
         );
         this.setState({ comments: updatedComments });
         return commentText;
-      } else if (await resp.text() === 'Token expired') {
+      } if (await resp.text() === 'Token expired') {
         window.sessionStorage.clear();
         window.location.replace('/signin');
       }
@@ -339,7 +376,7 @@ class Post extends React.Component {
 
   render() {
     const {
-      liked, numLikes, numComments, comments,
+      liked, numLikes, numComments, comments, chips, users,
     } = this.state;
     const { classes, post, username } = this.props;
     const {
@@ -406,7 +443,7 @@ class Post extends React.Component {
           image={`data:image/jpeg;base64,${post.picture}`}
         />
         <CardContent>
-          <Grid container>
+          <Grid container style={{ marginBottom: '10px' }}>
             <Grid item xs={11}>
               <InputBase
                 id={`post-caption-${post.uid}`}
@@ -425,6 +462,13 @@ class Post extends React.Component {
               />
             </Grid>
           </Grid>
+          <Chips
+            value={chips}
+            onChange={this.onChipChange}
+            suggestions={users}
+            placeholder={chips.length === 0 ? 'Tag post here' : ''}
+            fromSuggestionsOnly
+          />
         </CardContent>
         <CardActions disableSpacing>
           <IconButton
@@ -485,6 +529,7 @@ Post.propTypes = {
     picture: PropTypes.string.isRequired,
     caption: PropTypes.string.isRequired,
     comments: PropTypes.array.isRequired,
+    tagged: PropTypes.array.isRequired,
   }),
   username: PropTypes.string.isRequired,
   deletePost: PropTypes.func.isRequired,

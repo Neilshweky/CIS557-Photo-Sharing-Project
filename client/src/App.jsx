@@ -29,7 +29,6 @@ class App extends React.Component {
 
   async populateState() {
     const token = window.sessionStorage.getItem('token');
-    const { history } = this.props;
     if (token !== null) {
       const resp = await fetch(`${API_URL}/user/`,
         {

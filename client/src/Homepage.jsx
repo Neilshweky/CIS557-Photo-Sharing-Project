@@ -6,10 +6,17 @@ import PostBox from './PostBox';
 
 class Homepage extends React.PureComponent {
   render() {
-    const { username, profilePic, updateState, history } = this.props;
+    const {
+      username, profilePic, updateState, history,
+    } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} hisotry={history} />
+        <AppToolbar
+          profilePic={profilePic}
+          username={username}
+          updateState={updateState}
+          history={history}
+        />
         <Container>
           <h1 id="welcome">
             Welcome.
@@ -22,10 +29,14 @@ class Homepage extends React.PureComponent {
   }
 }
 
+Homepage.defaultProps = {
+  profilePic: '',
+}
+
 Homepage.propTypes = {
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,
   username: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
-  profilePic: PropTypes.string.isRequired,
+  profilePic: PropTypes.string,
 };
 export default Homepage;

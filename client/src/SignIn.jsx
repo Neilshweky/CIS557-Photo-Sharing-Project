@@ -17,7 +17,7 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { dateDiff, API_URL } from './Utilities';
+import { API_URL } from './Utilities';
 
 
 const styles = (theme) => ({
@@ -193,8 +193,6 @@ SignIn.propTypes = {
     form: PropTypes.string.isRequired,
     submit: PropTypes.string.isRequired,
   }).isRequired,
-  username: PropTypes.string.isRequired,
-  loginTime: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
 };
 
