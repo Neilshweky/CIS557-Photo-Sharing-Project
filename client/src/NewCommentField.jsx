@@ -45,7 +45,8 @@ export default class NewCommentField extends React.Component {
       this.setState({
         showSuggestor: true,
         left: cursor.left,
-        top: cursor.top + 19, // we need to add the cursor height so that the dropdown doesn't overlap with the `@`.
+        // we need to add the cursor height so that the dropdown doesn't overlap with the `@`.
+        top: cursor.top + 19,
         startPosition: cursor.selectionStart,
       });
     }
@@ -70,13 +71,22 @@ export default class NewCommentField extends React.Component {
 
   handleKeyDown(event) {
     const { which } = event;
-    const { currentSelection, users } = this.state;
-    if (this.state.showSuggestor) {
+    const { currentSelection, users, showSuggestor } = this.state;
+    if (showSuggestor) {
+      const dropDownLength = document.getElementById('dropdown').childElementCount;
       if (which === 40) { // 40 is the character code of the down arrow
         event.preventDefault();
 
         this.setState({
-          currentSelection: (currentSelection + 1) % users.length,
+          currentSelection: (currentSelection + 1) % dropDownLength,
+        });
+      }
+
+      if (which === 38) { // 40 is the character code of the up arrow
+        event.preventDefault();
+
+        this.setState({
+          currentSelection: ((currentSelection - 1) + dropDownLength) % dropDownLength,
         });
       }
 
@@ -125,10 +135,13 @@ export default class NewCommentField extends React.Component {
 
   render() {
     const { postID } = this.props;
+    const {
+      commentText, showSuggestor, top, left, users, text, currentSelection,
+    } = this.state;
     return (
       <Grid container alignItems="center">
         <Grid item xs={11}>
-          <div onKeyDown={this.handleKeyDown} style={{ position: 'relative' }}>
+          <div role="button" tabIndex={0} onKeyDown={this.handleKeyDown} style={{ position: 'relative' }}>
             <InputTrigger
               trigger={{
                 keyCode: 50,
@@ -140,35 +153,37 @@ export default class NewCommentField extends React.Component {
               endTrigger={(endHandler) => { this.endHandler = endHandler; }}
             >
               <textarea
-                style={{ width: '87%', marginTop: 5, padding: '18.5px 14px', fontSize: 16, resize: 'none', height: 55, borderRadius: 5, boxSizing: 'border-box' }}
+                style={{
+                  width: '87%', marginTop: 5, padding: '18.5px 14px', fontSize: 16, resize: 'none', height: 55, borderRadius: 5, boxSizing: 'border-box',
+                }}
                 placeholder="Write a comment..."
                 onChange={this.handleTextareaInput}
                 id={`newComment-${postID}`}
-                value={this.state.commentText}
+                value={commentText}
               />
             </InputTrigger>
             <div
               id="dropdown"
               style={{
-                position: "absolute",
-                width: "150px",
-                borderRadius: "6px",
-                background: "white",
-                boxShadow: "rgba(0, 0, 0, 0.4) 0px 1px 4px",
+                position: 'absolute',
+                width: '150px',
+                borderRadius: '6px',
+                background: 'white',
+                boxShadow: 'rgba(0, 0, 0, 0.4) 0px 1px 4px',
 
-                display: this.state.showSuggestor ? "block" : "none",
-                top: this.state.top,
-                left: this.state.left,
+                display: showSuggestor ? 'block' : 'none',
+                top,
+                left,
               }}
             >
               {
-                this.state.users
-                  .filter(user => user.indexOf(this.state.text) !== -1)
+                users
+                  .filter((user) => user.indexOf(text) !== -1)
                   .map((user, index) => (
                     <div
                       style={{
                         padding: '10px 20px',
-                        background: index === this.state.currentSelection ? '#eee' : ''
+                        background: index === currentSelection ? '#eee' : '',
                       }}
                       key={`${postID}-${user}`}
                     >
@@ -185,7 +200,7 @@ export default class NewCommentField extends React.Component {
             onClick={this.submitComment}
           />
         </Grid>
-      </Grid >
+      </Grid>
     );
   }
 }

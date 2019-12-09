@@ -18,7 +18,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
-import Chips from 'react-chips'
+import Chips from 'react-chips';
 import CommentBar from './CommentBar';
 import EditMenu from './EditMenu';
 import { API_URL } from './Utilities';
@@ -98,7 +98,9 @@ class Post extends React.Component {
     const { post } = this.props;
     const token = window.sessionStorage.getItem('token');
     const added = newChips.length > chips.length;
-    const changedUser = added ? newChips.filter((x) => !chips.includes(x)) : chips.filter((x) => !newChips.includes(x));
+    const changedUser = added ? newChips.filter(
+      (x) => !chips.includes(x),
+    ) : chips.filter((x) => !newChips.includes(x));
     const resp = await fetch(`${API_URL}/${added ? 'addTag' : 'removeTag'}/${post.uid}/${changedUser}`, {
       method: 'POST',
       headers: {
@@ -297,7 +299,7 @@ class Post extends React.Component {
         );
         this.setState({ comments: updatedComments });
         return commentText;
-      } else if (await resp.text() === 'Token expired') {
+      } if (await resp.text() === 'Token expired') {
         window.sessionStorage.clear();
         window.location.replace('/signin');
       }
@@ -374,7 +376,7 @@ class Post extends React.Component {
 
   render() {
     const {
-      liked, numLikes, numComments, comments,
+      liked, numLikes, numComments, comments, chips, users,
     } = this.state;
     const { classes, post, username } = this.props;
     const {
@@ -461,10 +463,10 @@ class Post extends React.Component {
             </Grid>
           </Grid>
           <Chips
-            value={this.state.chips}
+            value={chips}
             onChange={this.onChipChange}
-            suggestions={this.state.users}
-            placeholder={this.state.chips.length === 0 ? 'Tag post here' : ''}
+            suggestions={users}
+            placeholder={chips.length === 0 ? 'Tag post here' : ''}
             fromSuggestionsOnly
           />
         </CardContent>
@@ -527,6 +529,7 @@ Post.propTypes = {
     picture: PropTypes.string.isRequired,
     caption: PropTypes.string.isRequired,
     comments: PropTypes.array.isRequired,
+    tagged: PropTypes.array.isRequired,
   }),
   username: PropTypes.string.isRequired,
   deletePost: PropTypes.func.isRequired,

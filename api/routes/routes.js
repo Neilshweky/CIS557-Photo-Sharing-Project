@@ -37,7 +37,6 @@ const signup = (req, res) => {
         })
         .catch((err) => res.status(500).send(err));
     }
-
   }
 };
 
@@ -124,7 +123,7 @@ const switchPrivacy = (req, res) => {
       if (err.message === 'no user found') res.status(400).send(err.message);
       else res.status(500).send(err);
     });
-}
+};
 
 const postPicture = (req, res) => {
   if (!req.body.pic) {
@@ -157,7 +156,7 @@ const getUser = (req, res) => {
 };
 
 const getUsers = (req, res) => {
-  userDB.getUsers().then(data => {
+  userDB.getUsers().then((data) => {
     const names = data.map((user) => user.username);
     res.status(200).send(names);
   }).catch((err) => res.status(500).send(err));
@@ -315,7 +314,6 @@ const addComment = (req, res) => {
           }
         });
     }
-
   }
 };
 
@@ -382,7 +380,7 @@ const removeTag = (req, res) => {
 
 const followerSuggestions = (req, res) => {
   const { username } = req.params;
-  userDB.getFollowerSuggestions(username).then((data) => { console.log(data); res.status(200).send(data) })
+  userDB.getFollowerSuggestions(username).then((data) => res.status(200).send(data))
     .catch((err) => res.status(500).send(err));
 };
 

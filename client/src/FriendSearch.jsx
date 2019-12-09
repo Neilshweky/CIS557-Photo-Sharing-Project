@@ -32,10 +32,17 @@ export default class FriendSearch extends React.Component {
 
   render() {
     const { data, bLoaded } = this.state;
-    const { username, profilePic, updateState, history } = this.props;
+    const {
+      username, profilePic, updateState, history,
+    } = this.props;
     return (
       <div>
-        <AppToolbar profilePic={profilePic} username={username} updateState={updateState} history={history} />
+        <AppToolbar
+          profilePic={profilePic}
+          username={username}
+          updateState={updateState}
+          history={history}
+        />
         <div>
           <Box p={3}>
             {bLoaded && (

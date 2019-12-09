@@ -68,7 +68,7 @@ export default class PostBox extends React.Component {
   render() {
     const { reactPosts } = this.state;
     return (
-      <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id='post-box'>
+      <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="post-box">
         {reactPosts.map((comp) => comp)}
       </Box>
     );
@@ -78,4 +78,5 @@ export default class PostBox extends React.Component {
 PostBox.propTypes = {
   username: PropTypes.string.isRequired,
   bHome: PropTypes.bool.isRequired,
+  loggedIn: PropTypes.string.isRequired,
 };

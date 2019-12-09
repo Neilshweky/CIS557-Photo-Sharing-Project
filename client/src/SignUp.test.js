@@ -1,3 +1,5 @@
+import { API_URL } from './Utilities';
+
 const {
   Builder, By, Key, until,
 } = require('selenium-webdriver');
@@ -16,7 +18,7 @@ beforeEach(async () => {
 
 
 async function signupSuccess() {
-  await fetch('${API_URL}/user/neilshweky', { method: 'DELETE' })
+  await fetch(`${API_URL}/user/neilshweky`, { method: 'DELETE' })
     .then((res) => res.json())
     .then((json) => console.log(json))
     .then(async () => {

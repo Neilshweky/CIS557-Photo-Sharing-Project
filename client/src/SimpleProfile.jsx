@@ -470,16 +470,16 @@ class SimpleProfile extends React.Component {
                 {dataLoaded && (
                   <Grid container justify="center" aligntems="center" spacing={2}>
                     <Grid item xs={4} />
-                    <Grid item xs={4} >
+                    <Grid item xs={4}>
                       <FormControlLabel
-                        control={
+                        control={(
                           <Checkbox
                             checked={bPrivate}
                             onChange={this.togglePrivacy}
                             value="checkedB"
                             color="primary"
                           />
-                        }
+                        )}
                         label="Keep my account private"
                       />
                     </Grid>

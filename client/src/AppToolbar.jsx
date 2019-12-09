@@ -312,5 +312,9 @@ AppToolbar.propTypes = {
   username: PropTypes.string.isRequired,
   profilePic: PropTypes.string.isRequired,
   updateState: PropTypes.func.isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
+
 };
 export default withStyles(styles)(AppToolbar);
