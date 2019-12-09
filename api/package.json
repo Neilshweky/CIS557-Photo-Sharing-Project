@@ -35,7 +35,8 @@
     "mongo-sanitize": "^1.0.1",
     "mongoose": "^5.7.7",
     "react": "^16.11.0",
-    "uuid": "^3.3.3"
+    "uuid": "^3.3.3",
+    "ws": "^7.2.0"
   },
   "devDependencies": {
     "eslint": "^6.6.0",

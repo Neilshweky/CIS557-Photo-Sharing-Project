@@ -29,7 +29,7 @@ export default class PostBox extends React.Component {
   }
 
   async generatePosts() {
-    const { loggedIn, username, bHome } = this.props;
+    const { loggedIn, username, bHome, socket } = this.props;
     const { numSeen, reactPosts } = this.state;
     const compList = [];
     const token = window.sessionStorage.getItem('token');
@@ -47,6 +47,7 @@ export default class PostBox extends React.Component {
             key={post.uid}
             username={loggedIn}
             deletePost={this.deletePost}
+            socket={socket}
           />
         );
         return bHome ? compList.push(comp) : (post.username === username && compList.push(comp));

@@ -11,13 +11,13 @@ import ImageUpload from './ImageUpload';
 import Homepage from './Homepage';
 import FriendSearch from './FriendSearch';
 import PrivateRoute from './PrivateRoute';
-import { API_URL } from './Utilities';
+import { API_URL, openWebSocketConnection, WEBSOCKET_URI } from './Utilities';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: '', profilePic: '', numFollowees: 0, numFollowers: 0, numMyPosts: 0, dataLoaded: false,
+      username: '', profilePic: '', numFollowees: 0, numFollowers: 0, numMyPosts: 0, dataLoaded: false, socket: null,
     };
     this.updateState = this.updateState.bind(this);
     this.populateState = this.populateState.bind(this);
@@ -25,6 +25,9 @@ class App extends React.Component {
 
   async componentDidMount() {
     this.populateState();
+    const newSocket = new WebSocket(`${WEBSOCKET_URI}`, window.sessionStorage.getItem('token'));
+    openWebSocketConnection(newSocket);
+    this.setState({ socket: newSocket });
   }
 
   async populateState() {
@@ -45,7 +48,6 @@ class App extends React.Component {
         });
       }
     }
-    this.setState({ dataLoaded: true });
   }
 
   updateState(key, value) {
@@ -57,14 +59,14 @@ class App extends React.Component {
 
   render() {
     const {
-      dataLoaded, username, profilePic, numFollowees, numFollowers, numMyPosts,
+      username, profilePic, numFollowees, numFollowers, numMyPosts, socket,
     } = this.state;
     return (
-      dataLoaded && (
+      socket !== null && (
         <Router>
           <Switch>
-            <PrivateRoute component={(props) => <Homepage {...props} username={username} profilePic={profilePic} updateState={this.updateState} numMyPosts={numMyPosts} />} exact path="/home" />
-            <PrivateRoute component={(props) => <Homepage {...props} username={username} profilePic={profilePic} updateState={this.updateState} />} exact path="/" />
+            <PrivateRoute component={(props) => <Homepage {...props} username={username} profilePic={profilePic} updateState={this.updateState} numMyPosts={numMyPosts} socket={socket} />} exact path="/home" />
+            <PrivateRoute component={(props) => <Homepage {...props} username={username} profilePic={profilePic} updateState={this.updateState} socket={socket} />} exact path="/" />
             <PrivateRoute component={(props) => <ImageUpload {...props} username={username} profilePic={profilePic} updateState={this.updateState} numMyPosts={numMyPosts} />} exact path="/imageupload" />
             <Route render={(props) => <SignIn {...props} username={username} updateState={this.updateState} />} exact path="/signin" />
             <Route render={(props) => <SignUp {...props} username={username} updateState={this.updateState} />} exact path="/signup" />

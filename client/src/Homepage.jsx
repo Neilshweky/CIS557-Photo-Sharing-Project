@@ -5,10 +5,15 @@ import AppToolbar from './AppToolbar';
 import PostBox from './PostBox';
 
 class Homepage extends React.PureComponent {
+  componentDidMount() {
+    console.log(this.props.socket);
+  }
+
   render() {
     const {
-      username, profilePic, updateState, history,
+      username, profilePic, updateState, history, socket,
     } = this.props;
+    console.log(socket);
     return (
       <div>
         <AppToolbar
@@ -22,7 +27,7 @@ class Homepage extends React.PureComponent {
             Welcome.
             {username}
           </h1>
-          <PostBox username={username} loggedIn={username} bHome />
+          <PostBox username={username} loggedIn={username} bHome socket={socket} />
         </Container>
       </div>
     );
@@ -31,7 +36,7 @@ class Homepage extends React.PureComponent {
 
 Homepage.defaultProps = {
   profilePic: '',
-}
+};
 
 Homepage.propTypes = {
   history: PropTypes.shape({ push: PropTypes.func.isRequired }).isRequired,

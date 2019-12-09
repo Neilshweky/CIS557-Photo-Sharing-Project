@@ -20,7 +20,7 @@ wss.on('connection', (ws, req) => {
       console.log(`Error: ${err}`);
       return;
     }
-    client = decoded.name;
+    client = decoded.username;
     console.log(`${client} connected`);
     if (client !== 'webserver') {
       // Add client to map of clients
@@ -34,15 +34,14 @@ wss.on('connection', (ws, req) => {
     if (client === 'webserver') {
       if (msg.type === "open") {
         ws.send("Connected to notification server.");
-      }
-      else {
-        const recipients = new Array(JSON.parse(msg.recipients));
-        recipients.forEach((element) => {
+      } else {
+        const receivers = msg.recipients;
+        receivers.forEach((element) => {
           if (connectedUsers.get(String(element)) !== undefined) {
             const notification = JSON.stringify({
               type: msg.type,
               owner: msg.owner,
-              data: msg.data
+              data: msg.data,
             });
             connectedUsers.get(String(element)).send(notification);
           }

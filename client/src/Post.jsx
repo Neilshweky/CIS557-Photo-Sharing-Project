@@ -86,11 +86,23 @@ class Post extends React.Component {
     this.handleEditComment = this.handleEditComment.bind(this);
     this.handleDeleteComment = this.handleDeleteComment.bind(this);
     this.onChipChange = this.onChipChange.bind(this);
+    this.eventHandler = this.eventHandler.bind(this);
   }
 
   componentDidMount() {
     this.getProfilePic();
     this.getUsers();
+    const { socket } = this.props;
+    socket.addEventListener('message', this.eventHandler);
+  }
+
+  eventHandler(event) {
+    let self = this;
+    const { numLikes } = this.state;
+    if (event.type === 'like' && event.data.postid === this.props.post.uid) {
+      console.log('Message from server ', event.data);
+      self.setState({ liked: true, numLikes: numLikes + 1 });
+    }
   }
 
   async onChipChange(newChips) {
@@ -209,7 +221,7 @@ class Post extends React.Component {
           mode: 'cors',
         });
       if (resp.ok) {
-        this.setState({ liked: true, numLikes: numLikes + 1 });
+        // this.setState({ liked: true, numLikes: numLikes + 1 });
       } else if (await resp.text() === 'Token expired') {
         window.sessionStorage.clear();
         window.location.replace('/signin');

@@ -148,7 +148,6 @@ const getUser = (req, res) => {
     username = req.decoded.username;
   }
   userDB.getUser(username).then((data) => {
-    console.log("Follow requests: " + data.requests);
     if (data === undefined || data === null) res.status(404).send('User not found');
     else {
       res.status(200).send(data);
@@ -197,9 +196,9 @@ const likePost = (connection, req, res) => {
               .then(() => {
                 const notification = JSON.stringify({
                   type: 'like',
-                  owner: 'username',
+                  owner: username,
                   recipients: [post.username],
-                  data: { postid }
+                  data: { postid },
                 });
                 connection.send(notification);
                 res.status(200).send('Post liked');

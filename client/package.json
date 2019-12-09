@@ -4,6 +4,7 @@
   "private": true,
   "proxy": "http://localhost:8080",
   "dependencies": {
+    "@babel/runtime": "^7.7.6",
     "@material-ui/core": "^4.5.1",
     "@material-ui/icons": "^4.5.1",
     "clsx": "^1.0.4",
@@ -63,6 +64,7 @@
     "eslint-plugin-react": "^7.16.0",
     "eslint-plugin-react-hooks": "^1.7.0",
     "jest": "^24.9.0",
+    "react-dev-utils": "^10.0.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
   }
 }

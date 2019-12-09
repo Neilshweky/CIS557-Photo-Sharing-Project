@@ -67,18 +67,16 @@ function validateToken(req, res, next) {
 
 // WebSocket server token
 const serverToken = jwt.sign({
-  name: 'webserver',
+  username: 'webserver',
 }, 'secretkey', { expiresIn: '1h' });
 
 // Set WebSocket connection
-const url = 'ws://localhost:8085/';
-const connection = new WebSocket(url, {
-  headers: { token: serverToken },
-});
+const url = process.env.SOCKET_URI || 'ws://localhost:8085';
+const connection = new WebSocket(url, serverToken);
 
 connection.onopen = () => {
-  console.log("Opening connection to notifications server...");
-  const notification = { type: "open" };
+  console.log('Opening connection to notifications server...');
+  const notification = { type: 'open' };
   connection.send(JSON.stringify(notification));
 };
 connection.onerror = (error) => {
