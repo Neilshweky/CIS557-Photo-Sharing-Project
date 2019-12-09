@@ -169,7 +169,8 @@ async function getFollowerSuggestions(username) {
     for (let j = 0; j < secondDegree.length; j++) {
       const followFollowee = secondDegree[j];
       if (!followees.has(followFollowee)) {
-        result.push(followFollowee);
+        const pp = await getUserPP(followFollowee);
+        result.push({ username: followFollowee, profilePicture: pp });
         if (result.length >= 5) {
           return result;
         }
@@ -178,6 +179,10 @@ async function getFollowerSuggestions(username) {
 
   }
   return result;
+}
+
+async function getUserPP(username) {
+  return Schemas.User.findOne({ username }, { _id : 0, profilePicture: 1}).then(data => data.profilePicture)
 }
 
 
