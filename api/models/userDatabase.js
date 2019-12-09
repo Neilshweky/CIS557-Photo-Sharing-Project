@@ -182,13 +182,13 @@ async function getFollowerSuggestions(username) {
     for (let j = 0; j < secondDegree.length; j++) {
       const followFollowee = secondDegree[j];
       if (!followees.has(followFollowee)) {
-        result.push(followFollowee);
+        const newFollowee = await getUser(followFollowee);
+        result.push({ username: followFollowee, profilePicture: newFollowee.profilePicture });
         if (result.length >= 5) {
           return result;
         }
       }
     }
-
   }
   return result;
 }

@@ -90,14 +90,13 @@ class SimpleProfile extends React.Component {
     this.updateProfilePic = this.updateProfilePic.bind(this);
     this.togglePrivacy = this.togglePrivacy.bind(this);
     this.state = {
-      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0, bPrivate: false,
+      profUsername: '', email: '', password: '', curPassword: '', passwordCheck: '', followees: [], followers: [], profilePicture: '', newProfilePicture: '', index: 0, followeeData: [], dataLoaded: false, bLoggedInUser: true, picUpdate: false, numMyPosts: 0, bPrivate: false, followeeSuggestion: [],
     };
   }
 
   componentDidMount() {
     const { match } = this.props;
     this.getProfile(match.params.username);
-    this.getFolloweeSuggestions();
   }
 
   componentDidUpdate(prevProps) {
@@ -130,6 +129,7 @@ class SimpleProfile extends React.Component {
         bPrivate: data.private,
       }, async () => {
         await this.getFolloweesData();
+        await this.getFolloweeSuggestions();
         this.setState({ dataLoaded: true, index: 0 });
       });
     } else if (await resp.text() === 'Token expired') {
@@ -147,8 +147,8 @@ class SimpleProfile extends React.Component {
       },
     });
     if (resp.ok) {
-      console.log(resp.json());
-      return resp.json();
+      // console.log(await resp.json());
+      this.setState({ followeeSuggestion: await resp.json() });
     }
   }
 
@@ -318,7 +318,7 @@ class SimpleProfile extends React.Component {
     const {
       profUsername, email, password, curPassword, passwordCheck,
       profilePicture, followers, followees, index,
-      followeeData, dataLoaded, bLoggedInUser, numMyPosts, bPrivate,
+      followeeData, dataLoaded, bLoggedInUser, numMyPosts, bPrivate, followeeSuggestion,
     } = this.state;
     let avatar = null;
     try {
@@ -438,7 +438,7 @@ class SimpleProfile extends React.Component {
                   <FriendTable
                     bMinuses={false}
                     bProfilePage
-                    data={[]}
+                    data={followeeSuggestion}
                     bLoggedInUser={bLoggedInUser}
                     username={username}
                   />
