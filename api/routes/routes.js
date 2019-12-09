@@ -115,6 +115,17 @@ const updateProfile = (req, res) => {
   }
 };
 
+// Route to switch a user's privacy setting
+const switchPrivacy = (req, res) => {
+  const { username } = req.params;
+  userDB.switchPrivacy(username)
+    .then((data) => res.status(200).send(data))
+    .catch((err) => {
+      if (err.message === 'no user found') res.status(400).send(err.message);
+      else res.status(500).send(err);
+    });
+}
+
 const postPicture = (req, res) => {
   if (!req.body.pic) {
     res.status(400).send('Picture is required to create post.');
@@ -345,6 +356,7 @@ module.exports = {
   signup,
   login,
   updateProfile,
+  switchPrivacy,
   postPicture,
   getUser,
   deleteUser,
