@@ -159,6 +159,8 @@ describe('post tests', () => {
     expect(friend.posts[0]).toEqual(post.uid);
     const self = await userDB.getUser('neilshweky');
     expect(self.posts[0]).toEqual(post.uid);
+    const allUsersWithPost = Array.from(await userDB.getUsersForPost(post.uid));
+    expect(allUsersWithPost).toEqual(['cbros', 'neilshweky']);
   });
 
   test('getPost test', async () => {

@@ -186,10 +186,11 @@ const likePost = (connection, req, res) => {
           } else {
             postDB.likePost(username, postid)
               .then(() => {
+                const recipients = await userDB.getUsersForPost(postid);
                 const notification = JSON.stringify({
                   type: 'like',
                   owner: username,
-                  recipients: [post.username],
+                  recipients,
                   data: { postid }
                 });
                 connection.send(notification);
@@ -203,7 +204,7 @@ const likePost = (connection, req, res) => {
   });
 };
 
-const unlikePost = (req, res) => {
+const unlikePost = async (connction, req, res) => {
   const { username, postid } = req.params;
   userDB.getUser(username).then((user) => {
     if (user == null) {
@@ -211,8 +212,26 @@ const unlikePost = (req, res) => {
     } else if (user.username !== username && user.followees.indexOf(username) === -1) {
       res.status(409).send(`${username} does not follow original poster.`);
     } else {
-      postDB.unlikePost(username, postid)
-        .then(() => { res.status(200).send('Post unliked'); })
+      postDB.getPost(postid)
+        .then((post) => {
+          if (post == null) {
+            res.status(404).send(`There is no post with id ${postid}.`);
+          } else {
+            postDB.unlikePost(username, postid)
+              .then(() => {
+                const recipients = await userDB.getUsersForPost(postid);
+                const notification = JSON.stringify({
+                  type: 'unlike',
+                  owner: username,
+                  recipients,
+                  data: { postid }
+                });
+                connection.send(notification);
+                res.status(200).send('Post unliked');
+              })
+              .catch((err) => res.status(500).send(err));
+          }
+        })
         .catch((err) => res.status(500).send(err));
     }
   });
@@ -302,7 +321,7 @@ const deletePost = (req, res) => {
 
 // COMMENT EDIT ROUTES
 
-const addComment = (req, res) => {
+const addComment = (connection, req, res) => {
   const { postID, username } = req.params;
   const { comment } = req.body;
   if (!comment || !postID || !username) {
@@ -314,7 +333,17 @@ const addComment = (req, res) => {
       res.status(422).send(errorString);
     } else {
       postDB.addComment(postID, username, comment)
-        .then((data) => res.status(200).send(data))
+        .then((data) => {
+          const recipients = await userDB.getUsersForPost(postid);
+          const notification = JSON.stringify({
+            type: 'addComment',
+            owner: username,
+            recipients,
+            data: { postid }
+          });
+          connection.send(notification);
+          res.status(200).send(data);
+        })
         .catch((err) => {
           if (err === 'No post found to add comment') {
             res.status(404).send(err);

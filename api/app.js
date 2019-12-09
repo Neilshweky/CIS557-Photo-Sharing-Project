@@ -78,7 +78,7 @@ const connection = new WebSocket(url, {
 
 connection.onopen = () => {
   console.log("Opening connection to notifications server...");
-  const notification = { type: "open" };
+  const notification = { type: "open", owner: "webserver" };
   connection.send(JSON.stringify(notification));
 };
 connection.onerror = (error) => {
@@ -116,12 +116,16 @@ app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes
 app.post('/like/:postid/:username', (req, res) => {
   routes.likePost(connection, req, res);
 });
-app.post('/unlike/:postid/:username', routes.unlikePost);
+app.post('/unlike/:postid/:username', (req, res) => {
+  routes.unlikePost(connection, req, res);
+});
 app.post('/addtag/:postid/:username', routes.addTag);
 app.post('/removetag/:postid/:username', routes.removeTag);
 app.post('/follow/:username/:friend', routes.follow);
 app.post('/unfollow/:username/:friend', routes.unfollow);
-app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
+app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], (req, res) => {
+  routes.addComment(connection, req, res);
+});
 app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
 
 app.get('/user/:username?', routes.getUser);
