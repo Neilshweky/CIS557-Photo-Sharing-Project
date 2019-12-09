@@ -79,6 +79,14 @@ async function addFollowRequest(username, requester) {
   );
 }
 
+// Remove a follow request to a user (once accepted)
+async function removeRequest(username, requester) {
+  return Schemas.User.updateOne(
+    { username },
+    { $pull: { requests: requester } },
+  );
+}
+
 // Checks correct user login
 async function checkLogin(username, password) {
   const user = await getUser(username);
@@ -186,6 +194,7 @@ module.exports = {
   updatePassword,
   switchPrivacy,
   addFollowRequest,
+  removeRequest,
   followUser,
   unfollowUser,
   getFollowersForUsername,

@@ -138,6 +138,9 @@ describe('friend tests', () => {
     await userDB.addFollowRequest('user1', 'user2');
     const user1 = await userDB.getUser('user1');
     expect(Array.from(user1.requests)).toEqual(['user2']);
+    await userDB.removeRequest('user1', 'user2');
+    const user1final = await userDB.getUser('user1');
+    expect(Array.from(user1final.requests)).toEqual([]);
   });
 });
 

@@ -149,6 +149,7 @@ const getUser = (req, res) => {
     username = req.decoded.username;
   }
   userDB.getUser(username).then((data) => {
+    console.log("Follow requests: " + data.requests);
     if (data === undefined || data === null) res.status(404).send('User not found');
     else res.status(200).send(data);
   }).catch((err) => res.status(500).send(err));
@@ -201,16 +202,21 @@ const unlikePost = (req, res) => {
   });
 };
 
-const follow = (req, res) => {
+const follow = async (req, res) => {
   const { username, friend } = req.params;
+  const friendUser = await userDB.getUser(friend);
+  if (friendUser == null) {
+    res.status(404).send(`There is no such user ${friend}`);
+  }
   userDB.getUser(username).then((user) => {
     if (user == null) {
       res.status(404).send(`There is no such user ${username}.`);
     } else if (user.followees.indexOf(friend) !== -1) {
       res.status(409).send(`${username} already follows ${friend}.`);
-    } else if (user.private) {
-      userDB.addFollowRequest(username, friend)
-        .then(() => res.status(200).send(`${friend} requested to follow ${username}`))
+    } else if (friendUser.private) {
+      console.log("Adding follow request...");
+      userDB.addFollowRequest(friend, username)
+        .then(() => res.status(200).send(`${username} requested to follow ${friend}`))
         .catch((err) => res.status(500).send(err));
     } else {
       userDB.followUser(username, friend)
@@ -221,6 +227,7 @@ const follow = (req, res) => {
 };
 
 const acceptRequest = (req, res) => {
+  console.log("Accepting request");
   const { username, follower } = req.params;
   userDB.getUser(follower).then((user) => {
     if (user == null) {
@@ -229,7 +236,13 @@ const acceptRequest = (req, res) => {
       res.status(409).send(`${follower} already follows ${username}.`);
     } else {
       userDB.followUser(follower, username)
-        .then(() => { res.status(200).send(`${follower} followed ${username}`); })
+        .then(() => {
+          userDB.removeRequest(username, follower)
+            .then(() => {
+              res.status(200).send(`${follower} followed ${username}`);
+            })
+            .catch((err) => res.status(500).send(err));
+        })
         .catch((err) => res.status(500).send(err));
     }
   });
