@@ -82,7 +82,7 @@ class SimpleProfile extends React.Component {
     super(props);
     this.getProfile = this.getProfile.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
-    // this.generatePosts = this.generatePosts.bind(this);
+    this.getFolloweeSuggestions = this.getFolloweeSuggestions.bind(this);
     this.getFolloweesData = this.getFolloweesData.bind(this);
     this.updateProfile = this.updateProfile.bind(this);
     this.updateProfilePic = this.updateProfilePic.bind(this);
@@ -130,6 +130,14 @@ class SimpleProfile extends React.Component {
     } else if (await resp.text() === 'Token expired') {
       window.sessionStorage.clear();
       window.location.replace('/signin');
+    }
+  }
+
+  async getFolloweeSuggestions() {
+    const { username } = this.props;
+    const resp = await fetch(`${API_URL}/followersuggestions/${username}`);
+    if (resp.ok) {
+      return resp.json();
     }
   }
 
@@ -403,7 +411,7 @@ class SimpleProfile extends React.Component {
                   <FriendTable
                     bMinuses={false}
                     bProfilePage
-                    data={[]}
+                    data={() => this.getFolloweeSuggestions()}
                     bLoggedInUser={bLoggedInUser}
                     username={username}
                   />

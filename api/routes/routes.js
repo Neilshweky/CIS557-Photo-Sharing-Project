@@ -380,7 +380,7 @@ const removeTag = (req, res) => {
 
 const followerSuggestions = (req, res) => {
   const { username } = req.params;
-  userDB.getFollowerSuggestions(username).then((data) => res.status(200).send(data))
+  userDB.getFollowerSuggestions(username).then((data) => { console.log(data); res.status(200).send(data) })
     .catch((err) => res.status(500).send(err));
 };
 

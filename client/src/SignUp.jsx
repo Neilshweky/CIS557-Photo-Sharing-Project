@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import PropTypes from 'prop-types';
-import { dateDiff, API_URL } from './Utilities';
+import { API_URL } from './Utilities';
 
 const styles = (theme) => ({
   '@global': {
@@ -89,12 +89,9 @@ class SignUp extends React.Component {
     const { username } = this.state;
     const { history, updateState } = this.props;
     if (resp.ok) {
-      localStorage.setItem('user',
-        username);
-      localStorage.setItem('login',
-        new Date());
+      const data = await resp.json();
+      window.sessionStorage.setItem('token', data.token);
       updateState('username', username);
-      updateState('loginTime', new Date().toString());
       history.push('/home');
     } else {
       document.getElementById('signup-status').innerHTML = await resp.text();
