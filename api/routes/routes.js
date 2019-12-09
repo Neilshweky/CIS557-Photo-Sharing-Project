@@ -188,7 +188,7 @@ const likePost = (connection, req, res) => {
               .then(() => {
                 const notification = JSON.stringify({
                   type: 'like',
-                  owner: 'username',
+                  owner: username,
                   recipients: [post.username],
                   data: { postid }
                 });
