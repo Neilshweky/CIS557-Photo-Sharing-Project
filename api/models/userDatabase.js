@@ -1,3 +1,4 @@
+/* eslint-disable */
 const SHA256 = require('crypto-js/sha256');
 const Schemas = require('./schemas.js');
 
@@ -167,6 +168,28 @@ function getSearchSuggestions(username, term) {
   });
 }
 
+async function getFollowerSuggestions(username) {
+  const firstDegree = await getFolloweesForUsername(username);
+  firstDegree.push(username);
+  const followees = new Set(firstDegree);
+  const result = [];
+  for (let i = 0; i < followees.size; i++) {
+    let followee = firstDegree[i];
+    let secondDegree = await getFolloweesForUsername(followee);
+    for (let j = 0; j < secondDegree.length; j++) {
+      const followFollowee = secondDegree[j];
+      if (!followees.has(followFollowee)) {
+        result.push(followFollowee);
+        if (result.length >= 5) {
+          return result;
+        }
+      }
+    }
+
+  }
+  return result;
+}
+
 
 module.exports = {
   getUser,
@@ -183,4 +206,5 @@ module.exports = {
   getFolloweesForUsername,
   getUsersForTerm,
   getSearchSuggestions,
+  getFollowerSuggestions,
 };

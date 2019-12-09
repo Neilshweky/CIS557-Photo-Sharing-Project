@@ -371,6 +371,12 @@ const removeTag = (req, res) => {
   postDB.removeTag(username, postid).then(() => { res.status(200).send('Post untagged'); }).catch((err) => res.status(500).send(err));
 };
 
+const followerSuggestions = (req, res) => {
+  const { username } = req.params;
+  userDB.getFollowerSuggestions(username).then((data) => res.status(200).send(data))
+    .catch((err) => res.status(500).send(err));
+};
+
 module.exports = {
   signup,
   login,
@@ -392,4 +398,5 @@ module.exports = {
   deleteComment,
   addTag,
   removeTag,
+  followerSuggestions,
 };
