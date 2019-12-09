@@ -1,0 +1,1 @@
+web: echo "starting wss deploy" && cd wss && npm install && npm start
