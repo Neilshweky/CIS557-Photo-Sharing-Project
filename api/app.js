@@ -2,6 +2,7 @@ const express = require('express');
 const { check } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const WebSocket = require('ws');
 
 const app = express();
 const cookieParser = require('cookie-parser');
@@ -64,11 +65,32 @@ function validateToken(req, res, next) {
   return res.sendStatus(403);
 }
 
-// validation on all routes except /login and /signup
+// WebSocket server token
+const serverToken = jwt.sign({
+  name: 'webserver',
+}, 'secretkey', { expiresIn: '1h' });
 
+// Set WebSocket connection
+const url = 'ws://localhost:8085/';
+const connection = new WebSocket(url, {
+  headers: { token: serverToken },
+});
+
+connection.onopen = () => {
+  console.log("Opening connection to notifications server...");
+  const notification = { type: "open" };
+  connection.send(JSON.stringify(notification));
+};
+connection.onerror = (error) => {
+  console.log(`WebSocket error: ${error}`);
+};
+connection.onmessage = (e) => {
+  console.log(e.data);
+};
+
+// validation on all routes except /login and /signup
 app.use(validateToken);
 // app.use(limiter);
-
 // Used to link js and css files
 // app.use(express.static('views/css'));
 // app.use(express.static('views/js'));
@@ -91,7 +113,9 @@ app.post('/signup', [
 app.post('/login', [check('username').isLength({ max: 50 }), check('password').isLength({ max: 50 })], routes.login);
 app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], routes.postPicture);
 app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes.updatePost);
-app.post('/like/:postid/:username', routes.likePost);
+app.post('/like/:postid/:username', (req, res) => {
+  routes.likePost(connection, req, res);
+});
 app.post('/unlike/:postid/:username', routes.unlikePost);
 app.post('/addtag/:postid/:username', routes.addTag);
 app.post('/removetag/:postid/:username', routes.removeTag);
@@ -100,7 +124,6 @@ app.post('/accept/:username/:follower', routes.acceptRequest);
 app.post('/unfollow/:username/:friend', routes.unfollow);
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
 app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
-
 
 app.get('/user/:username?', routes.getUser);
 app.get('/users', routes.getUsers);
