@@ -127,6 +127,9 @@ app.post('/unlike/:postid/:username', (req, res) => {
 app.post('/follow/:username/:friend', (req, res) => {
   routes.follow(connection, req, res);
 });
+app.post('/accept/:username/:follower', (req, res) => {
+  routes.acceptRequest(connection, req, res);
+});
 app.post('/unfollow/:username/:friend', (req, res) => {
   routes.unfollow(connection, req, res);
 });
