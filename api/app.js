@@ -87,6 +87,7 @@ connection.onmessage = (e) => {
 };
 
 setInterval(() => {
+  console.log('pinging');
   connection.send(JSON.stringify(new Date().getTime()));
 }, 1000);
 
