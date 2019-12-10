@@ -71,7 +71,7 @@ const serverToken = jwt.sign({
 }, 'secretkey', { expiresIn: '1h' });
 
 // Set WebSocket connection
-const url = process.env.SOCKET_URI || 'ws://localhost:8085';
+const url = process.env.NODE_ENV === 'production' ? 'wss://cis557-404-wss.herokuapp.com' : 'ws://localhost:8085';
 const connection = new WebSocket(url, serverToken);
 
 connection.onopen = () => {
