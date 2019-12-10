@@ -1,6 +1,6 @@
 const API_URL = process.env.NODE_ENV === 'production' ? 'https://cis557-404-api.herokuapp.com' : 'http://localhost:8080';
 
-const WEBSOCKET_URI = process.env.NODE_ENV === 'production' ? 'ws://cis557-404-wss.herokuapp.com' : 'ws://localhost:8085';
+const WEBSOCKET_URI = process.env.NODE_ENV === 'production' ? 'wss://cis557-404-wss.herokuapp.com' : 'ws://localhost:8085';
 
 function openWebSocketConnection(socket) {
   console.log("opening;'");
