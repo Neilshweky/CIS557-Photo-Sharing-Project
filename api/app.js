@@ -111,22 +111,32 @@ app.post('/login', [
   check('password').isLength({ max: 50 })
 ], routes.login);
 
-app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], routes.postPicture);
-app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes.updatePost);
+app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], (req, res) => {
+  routes.postPicture(connection, req, res);
+});
+app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], (req, res) => {
+  routes.updatePost(connection, req, res);
+});
 app.post('/like/:postid/:username', (req, res) => {
   routes.likePost(connection, req, res);
 });
 app.post('/unlike/:postid/:username', (req, res) => {
   routes.unlikePost(connection, req, res);
 });
-app.post('/addtag/:postid/:username', routes.addTag);
-app.post('/removetag/:postid/:username', routes.removeTag);
-app.post('/follow/:username/:friend', routes.follow);
-app.post('/unfollow/:username/:friend', routes.unfollow);
+app.post('/follow/:username/:friend', (req, res) => {
+  routes.follow(connection, req, res);
+});
+app.post('/unfollow/:username/:friend', (req, res) => {
+  routes.unfollow(connection, req, res);
+});
 app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], (req, res) => {
   routes.addComment(connection, req, res);
 });
-app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
+app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], (req, res) => {
+  routes.editComment(connection, req, res);
+});
+app.post('/addtag/:postid/:username', routes.addTag);
+app.post('/removetag/:postid/:username', routes.removeTag);
 
 app.get('/user/:username?', routes.getUser);
 app.get('/posts/:username/:num', routes.getPosts);

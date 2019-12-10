@@ -126,7 +126,7 @@ const switchPrivacy = (req, res) => {
     });
 }
 
-const postPicture = (req, res) => {
+const postPicture = (connection, req, res) => {
   if (!req.body.pic) {
     res.status(400).send('Picture is required to create post.');
   } else {
@@ -137,7 +137,11 @@ const postPicture = (req, res) => {
     } else {
       const { pic, username, caption } = req.body;
       postDB.postPicture(pic, username, caption)
-        .then((data) => res.status(201).send(data))
+        .then((data) => {
+          const notifData = { postid: data.uid };
+          sendPostNotification(connection, 'createPost', username, notifData);
+          res.status(201).send(data);
+        })
         .catch((err) => res.status(500).send(err));
     }
   }
@@ -186,14 +190,8 @@ const likePost = (connection, req, res) => {
           } else {
             postDB.likePost(username, postid)
               .then(() => {
-                const recipients = await userDB.getUsersForPost(postid);
-                const notification = JSON.stringify({
-                  type: 'like',
-                  owner: username,
-                  recipients,
-                  data: { postid }
-                });
-                connection.send(notification);
+                const notifData = { postid: postID };
+                sendPostNotification(connection, 'like', username, notifData);
                 res.status(200).send('Post liked');
               })
               .catch((err) => res.status(500).send(err));
@@ -219,14 +217,8 @@ const unlikePost = async (connction, req, res) => {
           } else {
             postDB.unlikePost(username, postid)
               .then(() => {
-                const recipients = await userDB.getUsersForPost(postid);
-                const notification = JSON.stringify({
-                  type: 'unlike',
-                  owner: username,
-                  recipients,
-                  data: { postid }
-                });
-                connection.send(notification);
+                const notifData = { postid: postID };
+                sendPostNotification(connection, 'unlike', username, notifData);
                 res.status(200).send('Post unliked');
               })
               .catch((err) => res.status(500).send(err));
@@ -237,7 +229,7 @@ const unlikePost = async (connction, req, res) => {
   });
 };
 
-const follow = (req, res) => {
+const follow = (connection, req, res) => {
   const { username, friend } = req.params;
   userDB.getUser(username).then((user) => {
     if (user == null) {
@@ -246,13 +238,21 @@ const follow = (req, res) => {
       res.status(409).send(`${username} already follows ${friend}.`);
     } else {
       userDB.followUser(username, friend)
-        .then(() => { res.status(200).send(`${username} followed ${friend}`); })
+        .then(() => {
+          const notification = JSON.stringify({
+            type: 'follow',
+            owner: username,
+            recipients: [username, friend]
+          });
+          connection.send(notification);
+          res.status(200).send(`${username} followed ${friend}`);
+        })
         .catch((err) => res.status(500).send(err));
     }
   });
 };
 
-const unfollow = (req, res) => {
+const unfollow = (connection, req, res) => {
   const { username, friend } = req.params;
   userDB.getUser(username).then((user) => {
     if (user == null) {
@@ -261,7 +261,15 @@ const unfollow = (req, res) => {
       res.status(409).send(`${username} does not follow ${friend}.`);
     } else {
       userDB.unfollowUser(username, friend)
-        .then(() => { res.status(200).send(`${username} unfollowed ${friend}`); })
+        .then(() => {
+          const notification = JSON.stringify({
+            type: 'unfollow',
+            owner: username,
+            recipients: [username, friend]
+          });
+          connection.send(notification);
+          res.status(200).send(`${username} unfollowed ${friend}`);
+        })
         .catch((err) => res.status(500).send(err));
     }
   });
@@ -278,7 +286,7 @@ const searchUsers = (req, res) => {
 
 // POST EDIT ROUTES
 
-const updatePost = (req, res) => {
+const updatePost = (connection, req, res) => {
   const { postID } = req.params;
   const { caption } = req.body;
   if (!caption) {
@@ -290,7 +298,11 @@ const updatePost = (req, res) => {
       res.status(422).send(errorString);
     } else {
       postDB.updatePost(postID, caption)
-        .then((data) => res.status(200).send(data))
+        .then((data) => {
+          const notifData = { postid: postID, caption };
+          sendPostNotification(connection, 'updatePost', postID, notifData);
+          res.status(200).send(data);
+        })
         .catch((err) => {
           if (err.message === 'No post found to edit') {
             res.status(404).send(err);
@@ -302,7 +314,7 @@ const updatePost = (req, res) => {
   }
 };
 
-const deletePost = (req, res) => {
+const deletePost = (connection, req, res) => {
   const { postID } = req.params;
   if (!postID) {
     res.status(400).send('PostID is required to delete post');
@@ -312,6 +324,8 @@ const deletePost = (req, res) => {
         if (data === undefined || data === null) {
           res.status(404).send({});
         } else {
+          const notifData = { postid: postID };
+          sendNotification(connection, 'deletePost', postID, notifData);
           res.status(200).send(data);
         }
       })
@@ -334,14 +348,8 @@ const addComment = (connection, req, res) => {
     } else {
       postDB.addComment(postID, username, comment)
         .then((data) => {
-          const recipients = await userDB.getUsersForPost(postid);
-          const notification = JSON.stringify({
-            type: 'addComment',
-            owner: username,
-            recipients,
-            data: { postid }
-          });
-          connection.send(notification);
+          const notifData = { postid: postID, commentid: commentID, text: comment };
+          sendNotification(connection, 'addComment', username, notifData);
           res.status(200).send(data);
         })
         .catch((err) => {
@@ -356,7 +364,7 @@ const addComment = (connection, req, res) => {
   }
 };
 
-const editComment = (req, res) => {
+const editComment = (connection, req, res) => {
   const { postID, commentID } = req.params;
   const { comment } = req.body;
   if (!comment || !postID || !commentID) {
@@ -368,7 +376,11 @@ const editComment = (req, res) => {
       res.status(422).send(errorString);
     } else {
       postDB.editComment(postID, commentID, comment)
-        .then((data) => res.status(200).send(data))
+        .then((data) => {
+          const notifData = { postid: postID, commentid: commentID, text: comment };
+          sendPostNotification(connection, 'editComment', postID, notifData);
+          res.status(200).send(data);
+        })
         .catch((err) => {
           if (err.message === 'No post found to edit comment'
             || err.message === 'No comment found to edit') {
@@ -381,7 +393,7 @@ const editComment = (req, res) => {
   }
 };
 
-const deleteComment = (req, res) => {
+const deleteComment = (connection, req, res) => {
   const { postID, commentID } = req.params;
   if (!postID || !commentID) {
     res.status(400).send('A postID and commentID are required');
@@ -391,6 +403,8 @@ const deleteComment = (req, res) => {
         if (data === undefined || data === null) {
           res.status(404).send('post not found');
         } else {
+          const notifData = { postid: postID, commentid: commentID };
+          sendPostNotification(connection, 'deleteComment', postID, notifData);
           res.status(200).send(data);
         }
       })
@@ -416,6 +430,12 @@ const removeTag = (req, res) => {
   const { username, postid } = req.params;
   postDB.removeTag(username, postid).then(() => { res.status(200).send('Post untagged'); }).catch((err) => res.status(500).send(err));
 };
+
+const sendPostNotification = async (connection, type, owner, data) => {
+  const recipients = await userDB.getUsersForPost(postid);
+  const notification = JSON.stringify({ type, owner, recipients, data });
+  connection.send(notification);
+}
 
 module.exports = {
   signup,

@@ -36,7 +36,7 @@ wss.on('connection', (ws, req) => {
         ws.send("Connected to notification server.");
       }
       else {
-        const recipients = new Array(JSON.parse(msg.recipients));
+        const recipients = new Array(msg.recipients);
         recipients.forEach((element) => {
           if (connectedUsers.get(String(element)) !== undefined) {
             const notification = JSON.stringify({
