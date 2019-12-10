@@ -70,6 +70,8 @@ const serverToken = jwt.sign({
   username: 'webserver',
 }, 'secretkey', { expiresIn: '1h' });
 
+
+console.log(process.env.NODE_ENV === 'production');
 // Set WebSocket connection
 const url = process.env.NODE_ENV === 'production' ? 'wss://cis557-404-wss.herokuapp.com' : 'ws://localhost:8085';
 const connection = new WebSocket(url, serverToken);
@@ -87,9 +89,8 @@ connection.onmessage = (e) => {
 };
 
 setInterval(() => {
-  console.log('pinging');
   connection.send(JSON.stringify(new Date().getTime()));
-}, 1000);
+}, 5000);
 
 // validation on all routes except /login and /signup
 app.use(validateToken);
