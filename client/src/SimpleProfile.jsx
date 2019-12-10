@@ -463,13 +463,13 @@ class SimpleProfile extends React.Component {
                 <Typography variant="h6" style={{ textAlign: 'center' }}>
                   You may know
                 </Typography>
-                <FriendTable
+                {dataLoaded && <FriendTable
                   bMinuses={false}
                   bProfilePage
                   data={followeeSuggestion}
                   bLoggedInUser={bLoggedInUser}
                   username={username}
-                />
+                />}
               </Grid>
             )}
           </Grid>
