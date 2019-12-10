@@ -34,7 +34,6 @@ const styles = (theme) => ({
 class SimpleTable extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props.data);
     this.state = { curUser: props.username, data: props.data, bRequest: props.bRequest };
     this.unfollow = this.unfollow.bind(this);
     this.follow = this.follow.bind(this);
@@ -141,6 +140,8 @@ class SimpleTable extends React.Component {
       window.location.replace('/signin');
     }
   }
+
+  
 
   render() {
     const {

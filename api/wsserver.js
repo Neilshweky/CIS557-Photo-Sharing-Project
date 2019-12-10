@@ -35,9 +35,10 @@ wss.on('connection', (ws, req) => {
     if (client === 'webserver') {
       if (msg.type === "open") {
         ws.send("Connected to notification server.");
-      } else {
-        const receivers = msg.recipients;
-        receivers.forEach((element) => {
+      }
+      else {
+        const recipients = new Array(msg.recipients);
+        recipients.forEach((element) => {
           if (connectedUsers.get(String(element)) !== undefined) {
             const notification = JSON.stringify({
               type: msg.type,
