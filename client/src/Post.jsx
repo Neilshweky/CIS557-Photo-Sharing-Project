@@ -180,20 +180,22 @@ class Post extends React.Component {
   }
 
   eventHandler(event) {
-    const { numLikes, numComments, comments } = this.state;
+    const { numLikes, numComments } = this.state;
     const { post } = this.props;
     const data = JSON.parse(event.data);
     if (data.type === 'like' && data.data.postid === post.uid) {
       this.setState({ liked: true, numLikes: numLikes + 1 });
     } else if (data.type === 'unlike' && data.data.postid === post.uid) {
       this.setState({ liked: false, numLikes: numLikes - 1 });
-    } else if (data.type === 'addcomment' && data.data.postid === post.uid) {
-      this.setState({ numComments: numComments + 1, comments: comments.concat([data]) });
+    } else if (data.type === 'addComment' && data.data.postid === post.uid) {
+      this.setState({ numComments: numComments + 1 });
+    } else if (data.type === 'updatePost' && data.data.postid === post.uid) {
+      this.setState({ caption: data.data.caption });
     }
   }
 
   async handleLikeClick() {
-    const { liked, numLikes } = this.state;
+    const { liked } = this.state;
     const { post, username } = this.props;
     const token = window.sessionStorage.getItem('token');
     if (liked) {
@@ -208,7 +210,7 @@ class Post extends React.Component {
           mode: 'cors',
         });
       if (resp.ok) {
-        this.setState({ liked: false, numLikes: numLikes - 1 });
+        // this.setState({ liked: false, numLikes: numLikes - 1 });
       } else if (await resp.text() === 'Token expired') {
         window.sessionStorage.clear();
         window.location.replace('/signin');
