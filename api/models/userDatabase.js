@@ -33,6 +33,11 @@ function deleteUser(username) {
   return Schemas.User.deleteOne({ username }).exec();
 }
 
+async function getUsersForPost(postid) {
+  const users = await Schemas.User.find({ posts: postid }, { _id: 0, username: 1 }).exec();
+  return users.map((val) => val.username);
+}
+
 // Update user's email
 async function updateEmail(username, email) {
   const user = await getUser(username);
@@ -220,6 +225,7 @@ module.exports = {
   getUsers,
   deleteUser,
   createUser,
+  getUsersForPost,
   checkLogin,
   updateEmail,
   updateProfilePic,

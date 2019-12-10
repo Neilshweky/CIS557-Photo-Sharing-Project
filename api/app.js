@@ -2,6 +2,7 @@ const express = require('express');
 const { check } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const WebSocket = require('ws');
 
 const app = express();
 const cookieParser = require('cookie-parser');
@@ -64,11 +65,32 @@ function validateToken(req, res, next) {
   return res.sendStatus(403);
 }
 
-// validation on all routes except /login and /signup
+// WebSocket server token
+const serverToken = jwt.sign({
+  name: 'webserver',
+}, 'secretkey', { expiresIn: '1h' });
 
+// Set WebSocket connection
+const url = 'ws://localhost:8085/';
+const connection = new WebSocket(url, {
+  headers: { token: serverToken },
+});
+
+connection.onopen = () => {
+  console.log("Opening connection to notifications server...");
+  const notification = { type: "open", owner: "webserver" };
+  connection.send(JSON.stringify(notification));
+};
+connection.onerror = (error) => {
+  console.log(`WebSocket error: ${error}`);
+};
+connection.onmessage = (e) => {
+  console.log(e.data);
+};
+
+// validation on all routes except /login and /signup
 app.use(validateToken);
 // app.use(limiter);
-
 // Used to link js and css files
 // app.use(express.static('views/css'));
 // app.use(express.static('views/js'));
@@ -89,25 +111,39 @@ app.post('/signup', [
     .matches('[@$!%*?&]')
     .withMessage('Must contain special character')], routes.signup);
 app.post('/login', [check('username').isLength({ max: 50 }), check('password').isLength({ max: 50 })], routes.login);
-app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], routes.postPicture);
-app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], routes.updatePost);
-app.post('/like/:postid/:username', routes.likePost);
-app.post('/unlike/:postid/:username', routes.unlikePost);
+
+app.post('/postpicture', [limiter, check('caption').isLength({ max: 200 })], (req, res) => {
+  routes.postPicture(connection, req, res);
+});
+app.put('/updatePost/:postID', [check('caption').isLength({ max: 200 })], (req, res) => {
+  routes.updatePost(connection, req, res);
+});
+app.post('/like/:postid/:username', (req, res) => {
+  routes.likePost(connection, req, res);
+});
+app.post('/unlike/:postid/:username', (req, res) => {
+  routes.unlikePost(connection, req, res);
+});
+app.post('/follow/:username/:friend', (req, res) => {
+  routes.follow(connection, req, res);
+});
+app.post('/unfollow/:username/:friend', (req, res) => {
+  routes.unfollow(connection, req, res);
+});
+app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], (req, res) => {
+  routes.addComment(connection, req, res);
+});
+app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], (req, res) => {
+  routes.editComment(connection, req, res);
+});
 app.post('/addtag/:postid/:username', routes.addTag);
 app.post('/removetag/:postid/:username', routes.removeTag);
-app.post('/follow/:username/:friend', routes.follow);
-app.post('/accept/:username/:follower', routes.acceptRequest);
-app.post('/unfollow/:username/:friend', routes.unfollow);
-app.post('/addComment/:postID/:username', [check('comment').isLength({ max: 200 })], routes.addComment);
-app.put('/editComment/:postID/:commentID', [check('comment').isLength({ max: 200 })], routes.editComment);
-
 
 app.get('/user/:username?', routes.getUser);
 app.get('/users', routes.getUsers);
 app.get('/posts/:username/:num', routes.getPosts);
 app.get('/searchusers/:username/:term', routes.searchUsers);
 app.get('/followersuggestions/:username', routes.followerSuggestions);
-
 
 app.put('/user', [check('email').isEmail().withMessage('Email address must be valid').trim()
   .normalizeEmail(),
@@ -119,6 +155,7 @@ check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 
   .withMessage('Must contain uppercase')
   .matches('[@$!%*?&]')
   .withMessage('Must contain special character')], routes.updateProfile);
+
 app.put('/privacy/:username', routes.switchPrivacy);
 
 app.delete('/user/:username', routes.deleteUser);
