@@ -341,7 +341,7 @@ class SimpleProfile extends React.Component {
 
   render() {
     const {
-      classes, profilePic, username, updateState, history,
+      classes, profilePic, username, updateState, history, socket,
     } = this.props;
     const {
       profUsername, email, password, curPassword, passwordCheck,
@@ -439,7 +439,7 @@ class SimpleProfile extends React.Component {
         </TabPanel>
         <TabPanel value={index} index={1}>
           <Container>
-            {dataLoaded && <PostBox bHome={false} username={profUsername} loggedIn={username} />}
+            {dataLoaded && <PostBox bHome={false} username={profUsername} loggedIn={username} socket={socket} />}
           </Container>
         </TabPanel>
         <TabPanel value={index} index={2}>
@@ -450,13 +450,13 @@ class SimpleProfile extends React.Component {
                   Who do I follow?
                 </Typography>
               )}
-              <FriendTable
+              {dataLoaded && <FriendTable
                 bMinuses
                 bProfilePage
                 data={followeeData}
                 bLoggedInUser={bLoggedInUser}
                 username={username}
-              />
+              />}
             </Grid>
             {bLoggedInUser && (
               <Grid item xs={6}>

@@ -75,7 +75,7 @@ class App extends React.Component {
             <PrivateRoute component={(props) => <ImageUpload {...props} username={username} profilePic={profilePic} updateState={this.updateState} numMyPosts={numMyPosts} />} exact path="/imageupload" />
             <Route render={(props) => <SignIn {...props} username={username} updateState={this.updateState} />} exact path="/signin" />
             <Route render={(props) => <SignUp {...props} username={username} updateState={this.updateState} />} exact path="/signup" />
-            <PrivateRoute component={(props) => <SimpleProfile {...props} username={username} profilePic={profilePic} updateState={this.updateState} numFollowees={numFollowees} numFollowers={numFollowers} numMyPosts={numMyPosts} />} exact path="/profile/:username" />
+            <PrivateRoute component={(props) => <SimpleProfile {...props} username={username} profilePic={profilePic} updateState={this.updateState} numFollowees={numFollowees} numFollowers={numFollowers} numMyPosts={numMyPosts} socket={socket} />} exact path="/profile/:username" />
             <PrivateRoute component={(props) => <FriendSearch {...props} username={username} profilePic={profilePic} updateState={this.updateState} numFollowees={numFollowees} numFollowers={numFollowers} />} exact path="/search/:username/:searchTerm" />
           </Switch>
         </Router>

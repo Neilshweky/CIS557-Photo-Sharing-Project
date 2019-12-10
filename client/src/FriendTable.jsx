@@ -34,23 +34,35 @@ const styles = (theme) => ({
 class SimpleTable extends React.Component {
   constructor(props) {
     super(props);
+    console.log(props.data);
     this.state = { curUser: props.username, data: props.data, bRequest: props.bRequest };
     this.unfollow = this.unfollow.bind(this);
     this.follow = this.follow.bind(this);
     this.getIcon = this.getIcon.bind(this);
   }
 
+  getIcon(folStatus, index) {
+    const { bMinuses } = this.props;
+    if (folStatus === 'wait') {
+      return (<IconButton edge="end" aria-label="waiting">
+        <HourglassFullIcon />
+      </IconButton>)
+    } else if (bMinuses || folStatus) {
+      return (
+        <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(index)}>
+          <DeleteOutlinedIcon />
+        </IconButton>)
+    } else {
+      return (<IconButton edge="end" aria-label="add" onClick={() => this.follow(index)}>
+        <AddCircleOutlineOutlinedIcon />
+      </IconButton>)
+    }
+  }
+
   async unfollow(toUnfollowIndex) {
     const { curUser, data } = this.state;
     const { bProfilePage } = this.props;
     const unfollowed = data[toUnfollowIndex].username;
-    if (bProfilePage) {
-      data.splice(toUnfollowIndex, 1);
-    } else {
-      data[toUnfollowIndex].following = false;
-    }
-    this.setState({ data });
-
     const token = window.sessionStorage.getItem('token');
     const resp = await fetch(`${API_URL}/unfollow/${curUser}/${unfollowed}`,
       {
@@ -68,28 +80,6 @@ class SimpleTable extends React.Component {
       } else {
         data[toUnfollowIndex].following = false;
       }
-      this.setState({ data });
-    } else if (await resp.text() === 'Token expired') {
-      window.sessionStorage.clear();
-      window.location.replace('/signin');
-    }
-  }
-
-  async acceptRequest(requesterIndex) {
-    const { curUser, data } = this.state;
-    const token = window.sessionStorage.getItem('token');
-    const resp = await fetch(`${API_URL}/accept/${curUser}/${data[requesterIndex].username}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Origin': '*',
-          Authorization: `Bearer ${token}`,
-        },
-        mode: 'cors',
-      });
-    if (resp.ok) {
-      data.splice(requesterIndex, 1);
       this.setState({ data });
     } else if (await resp.text() === 'Token expired') {
       window.sessionStorage.clear();
@@ -116,8 +106,6 @@ class SimpleTable extends React.Component {
           mode: 'cors',
         });
       const text = await resp.text();
-      console.log(text);
-      console.log(text.indexOf('request'))
       if (resp.ok) {
         if (text.indexOf('request') > -1) {
           data[toFollowIndex].following = 'wait';
@@ -132,21 +120,25 @@ class SimpleTable extends React.Component {
     }
   }
 
-  getIcon(folStatus, index) {
-    const { bMinuses } = this.props;
-    if (folStatus === 'wait') {
-      return (<IconButton edge="end" aria-label="waiting">
-        <HourglassFullIcon />
-      </IconButton>)
-    } else if (bMinuses || folStatus) {
-      return (
-        <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(index)}>
-          <DeleteOutlinedIcon />
-        </IconButton>)
-    } else {
-      return (<IconButton edge="end" aria-label="add" onClick={() => this.follow(index)}>
-        <AddCircleOutlineOutlinedIcon />
-      </IconButton>)
+  async acceptRequest(requesterIndex) {
+    const { curUser, data } = this.state;
+    const token = window.sessionStorage.getItem('token');
+    const resp = await fetch(`${API_URL}/accept/${curUser}/${data[requesterIndex].username}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Origin': '*',
+          Authorization: `Bearer ${token}`,
+        },
+        mode: 'cors',
+      });
+    if (resp.ok) {
+      data.splice(requesterIndex, 1);
+      this.setState({ data });
+    } else if (await resp.text() === 'Token expired') {
+      window.sessionStorage.clear();
+      window.location.replace('/signin');
     }
   }
 
