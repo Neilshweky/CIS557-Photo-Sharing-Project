@@ -28,6 +28,11 @@ class App extends React.Component {
     const newSocket = new WebSocket(`${WEBSOCKET_URI}`, window.sessionStorage.getItem('token'));
     openWebSocketConnection(newSocket);
     this.setState({ socket: newSocket });
+    // sesrver connection is idle after 55 seconds on heroku
+    // pink every 50 seconds
+    setInterval(() => {
+      newSocket.send(JSON.stringify({ type: 'open' }));
+    }, 50000);
   }
 
   async populateState() {

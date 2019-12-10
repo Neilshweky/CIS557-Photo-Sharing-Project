@@ -88,9 +88,11 @@ connection.onmessage = (e) => {
   console.log(e.data);
 };
 
+// sesrver connection is idle after 55 seconds on heroku
+// pink every 50 seconds
 setInterval(() => {
   connection.send(JSON.stringify({ type: 'open' }));
-}, 5000);
+}, 50000);
 
 // validation on all routes except /login and /signup
 app.use(validateToken);
