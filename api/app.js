@@ -89,7 +89,7 @@ connection.onmessage = (e) => {
 };
 
 setInterval(() => {
-  connection.send(JSON.stringify(new Date().getTime()));
+  connection.send({ type: 'open' });
 }, 5000);
 
 // validation on all routes except /login and /signup
