@@ -87,7 +87,8 @@ connection.onmessage = (e) => {
 };
 
 setInterval(() => {
-  connection.send(new Date().getTime()), 1000);
+  connection.send(JSON.stringify(new Date().getTime()));
+}, 1000);
 
 // validation on all routes except /login and /signup
 app.use(validateToken);
