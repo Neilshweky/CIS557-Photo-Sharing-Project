@@ -124,7 +124,8 @@ async function editComment(postID, commentID, comment) {
 
   return Schemas.Post.updateOne(
     { uid: postID, 'comments.uid': commentID },
-    { $set: { 'comments.$.comment': comment } })
+    { $set: { 'comments.$.comment': comment } },
+  )
     .then((edit) => {
       if (edit.nModified === 0) {
         throw new Error('No comment found to edit');

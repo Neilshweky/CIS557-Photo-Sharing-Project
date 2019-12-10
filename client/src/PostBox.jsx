@@ -1,3 +1,5 @@
+// https://medium.com/better-programming/infinite-scroll-with-react-hooks-and-context-api-b622b4f9c43f
+
 import React from 'react';
 import { Box } from '@material-ui/core';
 import PropTypes from 'prop-types';
@@ -7,20 +9,31 @@ import { API_URL } from './Utilities';
 export default class PostBox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { reactPosts: [] };
+    this.state = { reactPosts: [], numSeen: 0 };
     this.deletePost = this.deletePost.bind(this);
     this.generatePosts = this.generatePosts.bind(this);
   }
 
   async componentDidMount() {
     this.generatePosts();
+    const list = document.getElementById('post-box');
+    // list has auto height
+    window.addEventListener('scroll', () => {
+      if ((list.clientHeight + list.offsetTop) - (window.scrollY + window.innerHeight) < 2) {
+        this.generatePosts();
+      }
+    });
+    if (list.clientHeight <= window.innerHeight && list.clientHeight) {
+      this.generatePosts();
+    }
   }
 
   async generatePosts() {
     const { loggedIn, username, bHome } = this.props;
+    const { numSeen, reactPosts } = this.state;
     const compList = [];
     const token = window.sessionStorage.getItem('token');
-    const resp = await fetch(`${API_URL}/posts/${username}/0`, {
+    const resp = await fetch(`${API_URL}/posts/${username}/${numSeen}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -38,7 +51,7 @@ export default class PostBox extends React.Component {
         );
         return bHome ? compList.push(comp) : (post.username === username && compList.push(comp));
       });
-      this.setState({ reactPosts: compList });
+      this.setState({ reactPosts: reactPosts.concat(compList), numSeen: numSeen + 10 });
     } else if (await resp.text() === 'Token expired') {
       window.sessionStorage.clear();
       window.location.replace('/signin');
@@ -55,7 +68,7 @@ export default class PostBox extends React.Component {
   render() {
     const { reactPosts } = this.state;
     return (
-      <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between">
+      <Box display="flex" flexDirection="row" flexWrap="wrap" justifyContent="space-between" id="post-box">
         {reactPosts.map((comp) => comp)}
       </Box>
     );
@@ -65,4 +78,5 @@ export default class PostBox extends React.Component {
 PostBox.propTypes = {
   username: PropTypes.string.isRequired,
   bHome: PropTypes.bool.isRequired,
+  loggedIn: PropTypes.string.isRequired,
 };

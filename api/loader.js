@@ -15,7 +15,7 @@ const user2 = new Schemas.User({
   username: 'neilshweky2',
   email: 'nshweky2@seas.upenn.edu',
   password: SHA256('cis557sucks'),
-  followers: ['neilshweky'],
+  followees: ['neilshweky'],
   profilePicture: './pictures/cut-4.jpg',
 });
 
@@ -27,6 +27,14 @@ const user3 = new Schemas.User({
   followers: ['neilshweky'],
 });
 
+const user4 = new Schemas.User({
+  username: 'carlos',
+  email: 'cbros@gmail.com',
+  password: SHA256('carlos'),
+  profilePicture: './pictures/cut-1.jpg',
+  private: true,
+  followers: [],
+});
 
 async function loadData() {
   await Schemas.User.deleteMany();
@@ -37,6 +45,8 @@ async function loadData() {
   await user2.save().then(() => console.log('User neilshweky2 saved'))
     .catch((err) => console.log('There was an error', err));
   await user3.save().then(() => console.log('User Sarah saved'))
+    .catch((err) => console.log('There was an error', err));
+  await user4.save().then(() => console.log('User carlos saved'))
     .catch((err) => console.log('There was an error', err));
   await Schemas.Post.deleteMany();
   // { }, async () => {

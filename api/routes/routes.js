@@ -37,7 +37,6 @@ const signup = (req, res) => {
         })
         .catch((err) => res.status(500).send(err));
     }
-
   }
 };
 
@@ -124,7 +123,7 @@ const switchPrivacy = (req, res) => {
       if (err.message === 'no user found') res.status(400).send(err.message);
       else res.status(500).send(err);
     });
-}
+};
 
 const postPicture = (connection, req, res) => {
   if (!req.body.pic) {
@@ -153,8 +152,18 @@ const getUser = (req, res) => {
     username = req.decoded.username;
   }
   userDB.getUser(username).then((data) => {
+    console.log("Follow requests: " + data.requests);
     if (data === undefined || data === null) res.status(404).send('User not found');
-    else res.status(200).send(data);
+    else {
+      res.status(200).send(data);
+    }
+  }).catch((err) => res.status(500).send(err));
+};
+
+const getUsers = (req, res) => {
+  userDB.getUsers().then((data) => {
+    const names = data.map((user) => user.username);
+    res.status(200).send(names);
   }).catch((err) => res.status(500).send(err));
 };
 
@@ -229,13 +238,30 @@ const unlikePost = async (connction, req, res) => {
   });
 };
 
-const follow = (connection, req, res) => {
+const follow = async (connection, req, res) => {
   const { username, friend } = req.params;
+  const friendUser = await userDB.getUser(friend);
+  if (friendUser == null) {
+    res.status(404).send(`There is no such user ${friend}`);
+  }
   userDB.getUser(username).then((user) => {
     if (user == null) {
       res.status(404).send(`There is no such user ${username}.`);
     } else if (user.followees.indexOf(friend) !== -1) {
       res.status(409).send(`${username} already follows ${friend}.`);
+    } else if (friendUser.private) {
+      console.log("Adding follow request...");
+      userDB.addFollowRequest(friend, username)
+        .then(() => {
+          const notification = JSON.stringify({
+            type: 'sendRequest',
+            owner: username,
+            recipients: [username, friend]
+          });
+          connection.send(notification);
+          res.status(200).send(`${username} requested to follow ${friend}`)
+        })
+        .catch((err) => res.status(500).send(err));
     } else {
       userDB.followUser(username, friend)
         .then(() => {
@@ -246,6 +272,34 @@ const follow = (connection, req, res) => {
           });
           connection.send(notification);
           res.status(200).send(`${username} followed ${friend}`);
+        })
+        .catch((err) => res.status(500).send(err));
+    }
+  });
+};
+
+const acceptRequest = (connection, req, res) => {
+  console.log("Accepting request");
+  const { username, follower } = req.params;
+  userDB.getUser(follower).then((user) => {
+    if (user == null) {
+      res.status(404).send(`There is no such user ${follower}.`);
+    } else if (user.followees.indexOf(username) !== -1) {
+      res.status(409).send(`${follower} already follows ${username}.`);
+    } else {
+      userDB.followUser(follower, username)
+        .then(() => {
+          userDB.removeRequest(username, follower)
+            .then(() => {
+              const notification = JSON.stringify({
+                type: 'acceptRequest',
+                owner: username,
+                recipients: [username, follower]
+              });
+              connection.send(notification);
+              res.status(200).send(`${follower} followed ${username}`);
+            })
+            .catch((err) => res.status(500).send(err));
         })
         .catch((err) => res.status(500).send(err));
     }
@@ -360,7 +414,6 @@ const addComment = (connection, req, res) => {
           }
         });
     }
-
   }
 };
 
@@ -437,6 +490,12 @@ const sendPostNotification = async (connection, type, owner, data) => {
   connection.send(notification);
 }
 
+const followerSuggestions = (req, res) => {
+  const { username } = req.params;
+  userDB.getFollowerSuggestions(username).then((data) => res.status(200).send(data))
+    .catch((err) => res.status(500).send(err));
+};
+
 module.exports = {
   signup,
   login,
@@ -444,11 +503,13 @@ module.exports = {
   switchPrivacy,
   postPicture,
   getUser,
+  getUsers,
   deleteUser,
   getPosts,
   likePost,
   unlikePost,
   follow,
+  acceptRequest,
   unfollow,
   searchUsers,
   updatePost,
@@ -458,4 +519,5 @@ module.exports = {
   deleteComment,
   addTag,
   removeTag,
+  followerSuggestions,
 };

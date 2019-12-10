@@ -1,9 +1,14 @@
+/* eslint-disable */
 const SHA256 = require('crypto-js/sha256');
 const Schemas = require('./schemas.js');
 
 // Returns a User from the database as a Promise, by username
 function getUser(username) {
   return Schemas.User.findOne({ username }).exec();
+}
+
+function getUsers() {
+  return Schemas.User.find({}, { _id: 0, username: 1 });
 }
 
 // Adds user to database after signup, and returns it as a Promise
@@ -74,6 +79,22 @@ async function switchPrivacy(username) {
   }
   user.private = !user.private;
   return user.save();
+}
+
+// Add a follow request to a user
+async function addFollowRequest(username, requester) {
+  return Schemas.User.updateOne(
+    { username },
+    { $push: { requests: requester } },
+  );
+}
+
+// Remove a follow request to a user (once accepted)
+async function removeRequest(username, requester) {
+  return Schemas.User.updateOne(
+    { username },
+    { $pull: { requests: requester } },
+  );
 }
 
 // Checks correct user login
@@ -172,9 +193,36 @@ function getSearchSuggestions(username, term) {
   });
 }
 
+async function getFollowerSuggestions(username) {
+  const firstDegree = await getFolloweesForUsername(username);
+  firstDegree.push(username);
+  const followees = new Set(firstDegree);
+  const result = [];
+  for (let i = 0; i < followees.size; i++) {
+    let followee = firstDegree[i];
+    let secondDegree = await getFolloweesForUsername(followee);
+    for (let j = 0; j < secondDegree.length; j++) {
+      const followFollowee = secondDegree[j];
+      if (!followees.has(followFollowee)) {
+        const pp = await getUserPP(followFollowee);
+        result.push({ username: followFollowee, profilePicture: pp });
+        if (result.length >= 5) {
+          return result;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+async function getUserPP(username) {
+  return Schemas.User.findOne({ username }, { _id : 0, profilePicture: 1}).then(data => data.profilePicture)
+}
+
 
 module.exports = {
   getUser,
+  getUsers,
   deleteUser,
   createUser,
   getUsersForPost,
@@ -183,10 +231,13 @@ module.exports = {
   updateProfilePic,
   updatePassword,
   switchPrivacy,
+  addFollowRequest,
+  removeRequest,
   followUser,
   unfollowUser,
   getFollowersForUsername,
   getFolloweesForUsername,
   getUsersForTerm,
   getSearchSuggestions,
+  getFollowerSuggestions,
 };

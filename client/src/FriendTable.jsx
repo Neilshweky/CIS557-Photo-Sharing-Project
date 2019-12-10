@@ -10,6 +10,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
+import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
@@ -20,9 +21,6 @@ const styles = (theme) => ({
   root: {
     width: '100%',
     overflowX: 'auto',
-  },
-  table: {
-    minWidth: 650,
   },
   avatar: {
     margin: theme.spacing(1),
@@ -36,9 +34,10 @@ const styles = (theme) => ({
 class SimpleTable extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { curUser: props.username, data: props.data };
+    this.state = { curUser: props.username, data: props.data, bRequest: props.bRequest };
     this.unfollow = this.unfollow.bind(this);
     this.follow = this.follow.bind(this);
+    this.getIcon = this.getIcon.bind(this);
   }
 
   async unfollow(toUnfollowIndex) {
@@ -76,12 +75,10 @@ class SimpleTable extends React.Component {
     }
   }
 
-  async follow(toFollowIndex) {
+  async acceptRequest(requesterIndex) {
     const { curUser, data } = this.state;
-    data[toFollowIndex].following = true;
-    this.setState({ data });
     const token = window.sessionStorage.getItem('token');
-    const resp = await fetch(`${API_URL}/follow/${curUser}/${data[toFollowIndex].username}`,
+    const resp = await fetch(`${API_URL}/accept/${curUser}/${data[requesterIndex].username}`,
       {
         method: 'POST',
         headers: {
@@ -92,7 +89,7 @@ class SimpleTable extends React.Component {
         mode: 'cors',
       });
     if (resp.ok) {
-      data[toFollowIndex].following = true;
+      data.splice(requesterIndex, 1);
       this.setState({ data });
     } else if (await resp.text() === 'Token expired') {
       window.sessionStorage.clear();
@@ -100,9 +97,62 @@ class SimpleTable extends React.Component {
     }
   }
 
+  async follow(toFollowIndex) {
+    const { curUser, data, bRequest } = this.state;
+    if (bRequest) {
+      this.acceptRequest(toFollowIndex);
+    } else {
+      data[toFollowIndex].following = true;
+      this.setState({ data });
+      const token = window.sessionStorage.getItem('token');
+      const resp = await fetch(`${API_URL}/follow/${curUser}/${data[toFollowIndex].username}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Origin': '*',
+            Authorization: `Bearer ${token}`,
+          },
+          mode: 'cors',
+        });
+      const text = await resp.text();
+      console.log(text);
+      console.log(text.indexOf('request'))
+      if (resp.ok) {
+        if (text.indexOf('request') > -1) {
+          data[toFollowIndex].following = 'wait';
+        } else {
+          data[toFollowIndex].following = true;
+        }
+        this.setState({ data });
+      } else if (text === 'Token expired') {
+        window.sessionStorage.clear();
+        window.location.replace('/signin');
+      }
+    }
+  }
+
+  getIcon(folStatus, index) {
+    const { bMinuses } = this.props;
+    if (folStatus === 'wait') {
+      return (<IconButton edge="end" aria-label="waiting">
+        <HourglassFullIcon />
+      </IconButton>)
+    } else if (bMinuses || folStatus) {
+      return (
+        <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(index)}>
+          <DeleteOutlinedIcon />
+        </IconButton>)
+    } else {
+      return (<IconButton edge="end" aria-label="add" onClick={() => this.follow(index)}>
+        <AddCircleOutlineOutlinedIcon />
+      </IconButton>)
+    }
+  }
+
   render() {
     const {
-      classes, data, bProfilePage, bLoggedInUser,
+      classes, data, bLoggedInUser,
     } = this.props;
     function getAvatar(username, profilePicture) {
       let avatar = null;
@@ -135,7 +185,7 @@ class SimpleTable extends React.Component {
 
     return (
       <Paper className={classes.root}>
-        <Table className={classes.table} aria-label="simple table">
+        <Table aria-label="simple table">
           <TableBody>
             {data.map((row, i) => (
               <TableRow key={row.username}>
@@ -153,16 +203,7 @@ class SimpleTable extends React.Component {
                 </TableCell>
                 {bLoggedInUser && (
                   <TableCell align="right">
-                    {(bProfilePage || row.following) ? (
-                      <IconButton edge="end" aria-label="delete" onClick={() => this.unfollow(i)}>
-                        <DeleteOutlinedIcon />
-                      </IconButton>
-                    )
-                      : (
-                        <IconButton edge="end" aria-label="add" onClick={() => this.follow(i)}>
-                          <AddCircleOutlineOutlinedIcon />
-                        </IconButton>
-                      )}
+                    {this.getIcon(row.following, i)}
                   </TableCell>
                 )}
               </TableRow>
@@ -174,6 +215,12 @@ class SimpleTable extends React.Component {
   }
 }
 
+SimpleTable.defaultProps = {
+  bMinuses: false,
+  bProfilePage: false,
+  bRequest: false,
+};
+
 SimpleTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
@@ -182,13 +229,14 @@ SimpleTable.propTypes = {
       curFollowing: PropTypes.string,
     }),
   ).isRequired,
-  bProfilePage: PropTypes.bool.isRequired,
+  bMinuses: PropTypes.bool,
+  bProfilePage: PropTypes.bool,
+  bRequest: PropTypes.bool,
   bLoggedInUser: PropTypes.bool.isRequired,
   classes: PropTypes.shape({
     root: PropTypes.string.isRequired,
     avatar: PropTypes.string.isRequired,
     avatarCell: PropTypes.string.isRequired,
-    table: PropTypes.string.isRequired,
   }).isRequired,
   username: PropTypes.string.isRequired,
 };

@@ -1,10 +1,10 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { API_URL } from './Utilities';
 
 class PrivateRoute extends React.Component {
-
   constructor(props, context) {
     super(props, context);
 
@@ -33,15 +33,20 @@ class PrivateRoute extends React.Component {
   }
 
   render() {
-    const { component, location, path } = this.props;
+    const { component, path } = this.props;
     const { isLoading, isLoggedIn } = this.state;
     if (isLoading) {
       return null;
     }
     return isLoggedIn
       ? <Route path={path} component={component} />
-      : <Redirect to={{ pathname: '/signin', state: { from: location } }} />;
+      : <Redirect to={{ pathname: '/signin' }} />;
   }
 }
+
+PrivateRoute.propTypes = {
+  component: PropTypes.elementType.isRequired,
+  path: PropTypes.string.isRequired,
+};
 
 export default PrivateRoute;

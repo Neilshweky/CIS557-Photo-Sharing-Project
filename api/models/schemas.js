@@ -19,8 +19,10 @@ const User = new Schema({
     type: String, required: true, unique: true, set: trim,
   },
   password: { type: String, required: true },
-  profilePicture: String,
-  private: Boolean,
+  profilePicture: { type: String },
+  private: { default: false, type: Boolean },
+  requests: Array, // Follow requests, if private
+
   followers: Array, // IN adjacanecy list
   followees: Array, // OUT adjacency list
   posts: Array,
