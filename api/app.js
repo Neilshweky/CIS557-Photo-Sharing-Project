@@ -86,6 +86,12 @@ connection.onmessage = (e) => {
   console.log(e.data);
 };
 
+setInterval(() => {
+  connection.clients.forEach((client) => {
+    client.send(new Date().toTimeString());
+  });
+}, 1000);
+
 // validation on all routes except /login and /signup
 app.use(validateToken);
 // app.use(limiter);
